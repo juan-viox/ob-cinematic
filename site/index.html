@@ -800,6 +800,184 @@ footer {
 .modal-details span { color: var(--gold); }
 
 /* ═══════════════════════════════════════════
+   SECTION 6: PRICING TIERS
+   ═══════════════════════════════════════════ */
+#pricing { padding: 120px 24px; background: var(--bg); }
+.pricing-header { text-align: center; margin-bottom: 56px; max-width: 600px; margin-left: auto; margin-right: auto; }
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 18px; max-width: 1100px; margin: 0 auto;
+}
+.pricing-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 18px; padding: 32px 24px; text-align: center;
+  position: relative; transition: all 0.3s ease;
+}
+.pricing-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(197,165,90,0.1);
+}
+.pricing-card.featured {
+  border-color: var(--gold);
+  box-shadow: 0 8px 32px rgba(197,165,90,0.12);
+  transform: scale(1.04);
+}
+.pricing-card.featured:hover { transform: scale(1.04) translateY(-6px); }
+.pricing-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--gold); color: #fff;
+  font-family: var(--sans); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 16px; border-radius: 100px; white-space: nowrap;
+}
+.pricing-tier {
+  font-family: var(--sans); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 10px; margin-top: 8px;
+}
+.pricing-price {
+  font-family: var(--serif); font-size: 42px; font-weight: 600;
+  color: var(--text); line-height: 1; margin-bottom: 4px;
+}
+.pricing-items {
+  font-size: 13px; color: var(--muted); margin-bottom: 20px;
+}
+.pricing-features { list-style: none; padding: 0; text-align: left; margin-bottom: 24px; }
+.pricing-features li {
+  font-size: 13px; color: var(--muted); padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.pricing-features li:last-child { border: none; }
+.pricing-features li::before { content: '✓ '; color: var(--gold); font-weight: 600; }
+.pricing-cta {
+  display: block; width: 100%; padding: 12px; border-radius: 10px;
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  border: 1px solid var(--gold); color: var(--gold);
+  background: transparent; cursor: pointer; transition: all 0.2s;
+  text-align: center; text-decoration: none;
+}
+.pricing-cta:hover, .pricing-card.featured .pricing-cta {
+  background: var(--gold); color: #fff; border-color: var(--gold);
+}
+.pricing-card.featured .pricing-cta:hover { background: var(--gold-dark); }
+.pricing-volume {
+  max-width: 1100px; margin: 40px auto 0;
+  display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
+}
+.pricing-volume-item {
+  text-align: center; padding: 16px 24px;
+  background: var(--bg-alt); border-radius: 10px;
+}
+.pricing-volume-item .qty {
+  font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--gold);
+}
+.pricing-volume-item .disc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════
+   SECTION 9: GIFTING CONCIERGE SUBSCRIPTION
+   ═══════════════════════════════════════════ */
+#concierge { padding: 120px 24px; background: var(--bg-alt); }
+.concierge-header { text-align: center; margin-bottom: 48px; max-width: 650px; margin-left: auto; margin-right: auto; }
+.concierge-toggle {
+  display: flex; justify-content: center; gap: 0; margin-bottom: 48px;
+}
+.concierge-toggle-btn {
+  padding: 10px 28px; font-family: var(--sans); font-size: 13px; font-weight: 500;
+  border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+  cursor: pointer; transition: all 0.2s;
+}
+.concierge-toggle-btn:first-child { border-radius: 100px 0 0 100px; }
+.concierge-toggle-btn:last-child { border-radius: 0 100px 100px 0; }
+.concierge-toggle-btn.active {
+  background: var(--gold); color: #fff; border-color: var(--gold);
+}
+.concierge-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 20px; max-width: 1100px; margin: 0 auto;
+}
+.concierge-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 18px; padding: 36px 28px; position: relative;
+  transition: all 0.3s ease;
+}
+.concierge-card:hover {
+  border-color: var(--gold);
+  box-shadow: 0 12px 40px rgba(197,165,90,0.08);
+}
+.concierge-card.featured {
+  border-color: var(--gold);
+  box-shadow: 0 8px 32px rgba(197,165,90,0.12);
+}
+.concierge-card.featured::before {
+  content: 'Most Popular'; display: block;
+  background: var(--gold); color: #fff;
+  font-family: var(--sans); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  text-align: center; padding: 6px; margin: -36px -28px 24px;
+  border-radius: 18px 18px 0 0;
+}
+.concierge-tier {
+  font-family: var(--sans); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 10px;
+}
+.concierge-price {
+  font-family: var(--serif); font-size: 44px; font-weight: 600;
+  color: var(--text); line-height: 1; margin-bottom: 2px;
+}
+.concierge-period { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+.concierge-annual { font-size: 12px; color: var(--gold); font-weight: 500; margin-bottom: 18px; }
+.concierge-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
+.concierge-features { list-style: none; padding: 0; margin-bottom: 24px; }
+.concierge-features li {
+  font-size: 12px; color: var(--muted); padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.concierge-features li:last-child { border: none; }
+.concierge-features li::before { content: '✓ '; color: var(--gold); font-weight: 600; }
+.concierge-cta {
+  display: block; width: 100%; padding: 12px; border-radius: 10px;
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  border: 1px solid var(--gold); color: var(--gold);
+  background: transparent; cursor: pointer; transition: all 0.2s;
+  text-align: center; text-decoration: none;
+}
+.concierge-cta:hover { background: var(--gold); color: #fff; }
+.concierge-card.featured .concierge-cta {
+  background: var(--gold); color: #fff;
+}
+.concierge-card.featured .concierge-cta:hover { background: var(--gold-dark); }
+
+.concierge-includes {
+  max-width: 1100px; margin: 56px auto 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+.concierge-include {
+  text-align: center; padding: 24px 16px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+}
+.concierge-include .icon { font-size: 24px; margin-bottom: 10px; }
+.concierge-include .title {
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  color: var(--text); margin-bottom: 4px;
+}
+.concierge-include .desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+@media (max-width: 768px) {
+  .pricing-grid { grid-template-columns: 1fr 1fr; }
+  .pricing-card.featured { transform: scale(1); }
+  .concierge-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .concierge-includes { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .pricing-grid { grid-template-columns: 1fr; max-width: 340px; margin: 0 auto; }
+  .concierge-includes { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════
    CRM LOGIN SECTION
    ═══════════════════════════════════════════ */
 #crm-login {
@@ -895,9 +1073,10 @@ footer {
   <div class="nav-links">
     <a href="#about">About</a>
     <a href="#products">Collections</a>
-    <a href="#how-it-works">How It Works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#concierge">Concierge</a>
     <a href="#contact">Contact</a>
-    <a href="#contact" class="nav-cta">Start Gifting</a>
+    <a href="#concierge" class="nav-cta">Subscribe</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMobile()" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -908,8 +1087,9 @@ footer {
 <div class="mobile-menu" id="mobileMenu">
   <a href="#about" onclick="toggleMobile()">About</a>
   <a href="#products" onclick="toggleMobile()">Collections</a>
+  <a href="#pricing" onclick="toggleMobile()">Pricing</a>
   <a href="#how-it-works" onclick="toggleMobile()">How It Works</a>
-  <a href="#testimonials" onclick="toggleMobile()">Testimonials</a>
+  <a href="#concierge" onclick="toggleMobile()">Concierge</a>
   <a href="#contact" onclick="toggleMobile()">Contact</a>
 </div>
 
@@ -1031,7 +1211,83 @@ footer {
   </div>
 </section>
 
-<!-- ═══ SECTION 5B: SHOP GRID ═══ -->
+<!-- ═══ SECTION 6: PRICING TIERS ═══ -->
+<section id="pricing">
+  <div class="pricing-header fade-up">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-title">Gift Boxes for Every Budget</h2>
+    <p class="section-body" style="margin:0 auto;text-align:center">Premium artisan products, signature packaging, and handwritten notes — included in every tier.</p>
+  </div>
+
+  <div class="pricing-grid">
+    <div class="pricing-card fade-up">
+      <div class="pricing-tier">Signature</div>
+      <div class="pricing-price">$175</div>
+      <div class="pricing-items">4–5 artisan items</div>
+      <ul class="pricing-features">
+        <li>Luxury soy candle</li>
+        <li>Gourmet treats or chocolate</li>
+        <li>Artisan home item</li>
+        <li>Handwritten note card</li>
+        <li>Signature gray box + ivory ribbon</li>
+      </ul>
+      <a href="#contact" class="pricing-cta">Order Now</a>
+    </div>
+
+    <div class="pricing-card featured fade-up">
+      <div class="pricing-badge">Best Seller</div>
+      <div class="pricing-tier">Prestige</div>
+      <div class="pricing-price">$225</div>
+      <div class="pricing-items">5–7 premium items</div>
+      <ul class="pricing-features">
+        <li>Everything in Signature +</li>
+        <li>Premium home goods</li>
+        <li>Artisan skincare or bath</li>
+        <li>Beverage item (tea, coffee)</li>
+        <li>Rigid keepsake box</li>
+        <li>Custom ribbon option</li>
+      </ul>
+      <a href="#contact" class="pricing-cta">Order Now</a>
+    </div>
+
+    <div class="pricing-card fade-up">
+      <div class="pricing-tier">Luxe</div>
+      <div class="pricing-price">$295</div>
+      <div class="pricing-items">6–8 luxury items</div>
+      <ul class="pricing-features">
+        <li>Everything in Prestige +</li>
+        <li>Personalized element</li>
+        <li>Cashmere or silk item</li>
+        <li>Premium wooden or leather box</li>
+        <li>Custom branding available</li>
+      </ul>
+      <a href="#contact" class="pricing-cta">Order Now</a>
+    </div>
+
+    <div class="pricing-card fade-up">
+      <div class="pricing-tier">Grand</div>
+      <div class="pricing-price">$395<span style="font-size:20px;color:var(--muted)">+</span></div>
+      <div class="pricing-items">8–10 luxury items</div>
+      <ul class="pricing-features">
+        <li>Everything in Luxe +</li>
+        <li>Bespoke curation</li>
+        <li>Premium artisan spirits accessories</li>
+        <li>Custom-designed packaging</li>
+        <li>White-glove delivery available</li>
+      </ul>
+      <a href="#contact" class="pricing-cta">Get a Quote</a>
+    </div>
+  </div>
+
+  <div class="pricing-volume fade-up">
+    <div class="pricing-volume-item"><div class="qty">10+</div><div class="disc">10% Off</div></div>
+    <div class="pricing-volume-item"><div class="qty">25+</div><div class="disc">15% Off</div></div>
+    <div class="pricing-volume-item"><div class="qty">50+</div><div class="disc">20% Off</div></div>
+    <div class="pricing-volume-item"><div class="qty">100+</div><div class="disc">Custom Quote</div></div>
+  </div>
+</section>
+
+<!-- ═══ SECTION 7: SHOP GRID ═══ -->
 <section id="shop">
   <div class="shop-header fade-up">
     <div class="section-label">Full Collection</div>
@@ -1212,7 +1468,116 @@ footer {
   </div>
 </section>
 
-<!-- ═══ SECTION 7: TESTIMONIALS — STICKY CARDS ═══ -->
+<!-- ═══ SECTION 9: GIFTING CONCIERGE SUBSCRIPTION ═══ -->
+<section id="concierge">
+  <div class="concierge-header fade-up">
+    <div class="section-label">Gifting Concierge</div>
+    <h2 class="section-title">Never Miss an Occasion</h2>
+    <p class="section-body" style="margin:0 auto;text-align:center">Let us manage all your gifting year-round. We remember the dates, curate the boxes, write the notes, and deliver the delight — so you never have to think about gifting again.</p>
+  </div>
+
+  <div class="concierge-toggle" id="billingToggle">
+    <button class="concierge-toggle-btn active" data-billing="monthly" onclick="toggleBilling('monthly')">Monthly</button>
+    <button class="concierge-toggle-btn" data-billing="annual" onclick="toggleBilling('annual')">Annual <span style="font-size:10px;color:var(--gold)">(Save 10%)</span></button>
+  </div>
+
+  <div class="concierge-grid">
+    <div class="concierge-card fade-up">
+      <div class="concierge-tier">Essential</div>
+      <div class="concierge-price" data-monthly="$199" data-annual="$179">$199</div>
+      <div class="concierge-period">per month</div>
+      <div class="concierge-annual" data-monthly="$2,388/year" data-annual="$2,148/year — save $240">$2,388/year</div>
+      <div class="concierge-desc">For professionals gifting 1–2 times per month. Perfect for real estate agents and small practices.</div>
+      <ul class="concierge-features">
+        <li>Up to 2 curated boxes/month</li>
+        <li>Prestige tier boxes ($225 value)</li>
+        <li>Dedicated gifting calendar</li>
+        <li>25 recipient profiles</li>
+        <li>Handwritten note cards</li>
+        <li>Free standard shipping</li>
+        <li>Quarterly review call</li>
+      </ul>
+      <a href="#contact" class="concierge-cta">Start Concierge</a>
+    </div>
+
+    <div class="concierge-card featured fade-up">
+      <div class="concierge-tier">Professional</div>
+      <div class="concierge-price" data-monthly="$449" data-annual="$404">$449</div>
+      <div class="concierge-period">per month</div>
+      <div class="concierge-annual" data-monthly="$5,388/year" data-annual="$4,848/year — save $540">$5,388/year</div>
+      <div class="concierge-desc">For active professionals gifting 3–5 times/month. Ideal for top agents, law firms, and corporate teams.</div>
+      <ul class="concierge-features">
+        <li>Up to 5 curated boxes/month</li>
+        <li>Prestige + Luxe tier boxes</li>
+        <li>Priority 48hr turnaround</li>
+        <li>75 recipient profiles</li>
+        <li>Custom branding on boxes</li>
+        <li>Free express shipping</li>
+        <li>Dedicated concierge contact</li>
+        <li>Monthly review calls</li>
+        <li>Unused boxes roll over</li>
+      </ul>
+      <a href="#contact" class="concierge-cta">Start Concierge</a>
+    </div>
+
+    <div class="concierge-card fade-up">
+      <div class="concierge-tier">Executive</div>
+      <div class="concierge-price" data-monthly="$899" data-annual="$809">$899</div>
+      <div class="concierge-period">per month</div>
+      <div class="concierge-annual" data-monthly="$10,788/year" data-annual="$9,708/year — save $1,080">$10,788/year</div>
+      <div class="concierge-desc">White-glove concierge for high-volume gifters. Built for firms, practices, and executives.</div>
+      <ul class="concierge-features">
+        <li>Up to 12 curated boxes/month</li>
+        <li>All tiers including Grand</li>
+        <li>Same-day rush available</li>
+        <li>Unlimited recipient profiles</li>
+        <li>Full custom branding suite</li>
+        <li>Named personal concierge</li>
+        <li>Proactive occasion reminders</li>
+        <li>Bulk event support</li>
+        <li>Annual strategy session</li>
+        <li>VIP packaging upgrades</li>
+        <li>Rollover + 10% bonus credits</li>
+      </ul>
+      <a href="#contact" class="concierge-cta">Start Concierge</a>
+    </div>
+  </div>
+
+  <div class="concierge-includes fade-up">
+    <div class="concierge-include">
+      <div class="icon">&#128197;</div>
+      <div class="title">Gifting Calendar</div>
+      <div class="desc">We map every birthday, holiday, and milestone for the whole year</div>
+    </div>
+    <div class="concierge-include">
+      <div class="icon">&#128100;</div>
+      <div class="title">Recipient Profiles</div>
+      <div class="desc">Preferences, allergies, style — every box feels deeply personal</div>
+    </div>
+    <div class="concierge-include">
+      <div class="icon">&#128064;</div>
+      <div class="title">Preview & Approve</div>
+      <div class="desc">See each box before it ships, or let us auto-send</div>
+    </div>
+    <div class="concierge-include">
+      <div class="icon">&#9997;</div>
+      <div class="title">Handwritten Notes</div>
+      <div class="desc">Personal touch on every single delivery</div>
+    </div>
+    <div class="concierge-include">
+      <div class="icon">&#128230;</div>
+      <div class="title">Signature Packaging</div>
+      <div class="desc">Charcoal gray box, gold emboss, ivory ribbon</div>
+    </div>
+    <div class="concierge-include">
+      <div class="icon">&#128222;</div>
+      <div class="title">Quarterly Reviews</div>
+      <div class="desc">We update your calendar and plan the next season together</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SECTION 10: TESTIMONIALS — STICKY CARDS ═══ -->
 <section class="testimonials-section" id="testimonials">
   <div class="testimonials-header">
     <div class="section-label">What People Say</div>
@@ -1340,23 +1705,24 @@ footer {
     </div>
     <div class="footer-col">
       <h4>Shop</h4>
-      <a href="#shop">All Collections</a>
+      <a href="#products">Collections</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#shop">All Gift Boxes</a>
       <a href="#contact">Custom Gifting</a>
-      <a href="#shop">Corporate</a>
-      <a href="#shop">Wedding</a>
     </div>
     <div class="footer-col">
-      <h4>Company</h4>
+      <h4>Services</h4>
+      <a href="#concierge">Gifting Concierge</a>
+      <a href="#how-it-works">How It Works</a>
       <a href="#about">About Us</a>
-      <a href="#newsletter">Journal</a>
       <a href="#contact">Contact</a>
-      <a href="#contact">Shipping & Returns</a>
     </div>
     <div class="footer-col">
       <h4>Connect</h4>
       <a href="https://instagram.com/occasionsbox" target="_blank" rel="noopener">Instagram</a>
       <a href="https://pinterest.com/occasionsbox" target="_blank" rel="noopener">Pinterest</a>
       <a href="mailto:Hello@occasionsbox.com">Email Us</a>
+      <a href="tel:+15512457492">(551) 245-7492</a>
     </div>
   </div>
   <div class="footer-bottom">
@@ -1912,6 +2278,22 @@ footer {
       }, 800);
     }
   });
+
+  /* ─── Concierge Billing Toggle ─── */
+  window.toggleBilling = function(mode) {
+    document.querySelectorAll('.concierge-toggle-btn').forEach(function(btn) {
+      btn.classList.toggle('active', btn.dataset.billing === mode);
+    });
+    document.querySelectorAll('.concierge-price').forEach(function(el) {
+      el.textContent = el.dataset[mode];
+    });
+    document.querySelectorAll('.concierge-annual').forEach(function(el) {
+      el.textContent = el.dataset[mode];
+    });
+    document.querySelectorAll('.concierge-period').forEach(function(el) {
+      el.textContent = mode === 'annual' ? 'per month (billed annually)' : 'per month';
+    });
+  };
 
   /* ─── CRM Login Form ─── */
   document.getElementById('crmLoginForm').addEventListener('submit', function(e) {
