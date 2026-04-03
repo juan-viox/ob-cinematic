@@ -66,8 +66,8 @@ a { color: inherit; text-decoration: none; }
   padding: 14px 40px;
   box-shadow: 0 1px 8px rgba(0,0,0,0.04);
 }
-.nav-logo img { height: 112px; transition: all 0.3s; }
-.nav.scrolled .nav-logo img { height: 64px; }
+.nav-logo img { height: 168px; transition: all 0.3s; }
+.nav.scrolled .nav-logo img { height: 72px; }
 .nav-links { display: flex; gap: 32px; align-items: center; }
 .nav-links a {
   font-family: var(--sans);
@@ -372,10 +372,10 @@ a { color: inherit; text-decoration: none; }
 .carousel-section { perspective: 1200px; overflow: hidden; }
 .carousel-track {
   display: flex; align-items: center; justify-content: center;
-  height: 420px; position: relative; transform-style: preserve-3d;
+  height: 560px; position: relative; transform-style: preserve-3d;
 }
 .carousel-item {
-  position: absolute; width: 300px; height: 380px;
+  position: absolute; width: 420px; height: 500px;
   border-radius: 20px; overflow: hidden;
   transition: all 0.6s cubic-bezier(.16,1,.3,1);
   cursor: pointer; background-size: cover;
@@ -731,7 +731,7 @@ footer {
   .contact-grid { grid-template-columns: 1fr; gap: 48px; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .newsletter-form { flex-direction: column; }
-  .carousel-item { width: 260px; height: 320px; }
+  .carousel-item { width: 320px; height: 400px; }
   .stack-card { padding: 32px 24px; min-height: 240px; }
 }
 @media (max-width: 480px) {
@@ -741,7 +741,7 @@ footer {
   .stack-section { padding: 80px 16px; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
-  .carousel-item { width: 220px; height: 280px; }
+  .carousel-item { width: 280px; height: 340px; }
 }
 
 /* ═══════════════════════════════════════════
@@ -1977,7 +1977,7 @@ footer {
     for (var i = 0; i < els.length; i++) {
       var off = i - carouselCurrent;
       var absOff = Math.abs(off);
-      var tx = off * 240;
+      var tx = off * 320;
       var ry = off < 0 ? 35 : off > 0 ? -35 : 0;
       var sc = absOff === 0 ? 1 : 0.82;
       var z = absOff === 0 ? 10 : 10 - absOff;
