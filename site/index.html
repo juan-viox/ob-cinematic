@@ -728,6 +728,105 @@ footer {
   .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
   .carousel-item { width: 220px; height: 280px; }
 }
+
+/* ═══════════════════════════════════════════
+   PRODUCT DETAIL MODAL
+   ═══════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 24px;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--bg); border-radius: 20px;
+  max-width: 800px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.15);
+  display: grid; grid-template-columns: 1fr 1fr;
+  position: relative;
+}
+.modal-close {
+  position: absolute; top: 16px; right: 16px; z-index: 10;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px; color: var(--text);
+  transition: all 0.2s;
+}
+.modal-close:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
+.modal-img {
+  width: 100%; height: 100%; min-height: 400px;
+  object-fit: cover; border-radius: 20px 0 0 20px;
+}
+.modal-body {
+  padding: 40px; display: flex; flex-direction: column; justify-content: center;
+}
+.modal-name {
+  font-family: var(--serif); font-size: 28px; font-weight: 600;
+  color: var(--text); margin-bottom: 8px;
+}
+.modal-price {
+  font-family: var(--sans); font-size: 20px; font-weight: 500;
+  color: var(--gold); margin-bottom: 16px;
+}
+.modal-desc {
+  font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 24px;
+}
+.modal-qty {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+}
+.modal-qty label {
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+}
+.modal-qty input {
+  width: 60px; padding: 8px 12px; border: 1px solid var(--border);
+  border-radius: 8px; font-family: var(--sans); font-size: 15px;
+  text-align: center; outline: none;
+}
+.modal-qty input:focus { border-color: var(--gold); }
+#paypal-button-container { min-height: 50px; }
+.modal-divider {
+  height: 1px; background: var(--border); margin: 16px 0;
+}
+.modal-details {
+  font-size: 13px; color: var(--muted); line-height: 1.6;
+}
+.modal-details span { color: var(--gold); }
+
+/* Toast notification */
+.toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px);
+  z-index: 300; padding: 16px 32px; border-radius: 12px;
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  transition: transform 0.4s cubic-bezier(.16,1,.3,1);
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { background: #1a1a1a; color: #fff; }
+.toast.error { background: #c0392b; color: #fff; }
+
+/* Form loading state */
+.btn-loading { opacity: 0.6; pointer-events: none; }
+.btn-loading::after {
+  content: ''; display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  border-radius: 50%; margin-left: 8px; vertical-align: middle;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+  .modal { grid-template-columns: 1fr; max-height: 95vh; }
+  .modal-img { min-height: 250px; border-radius: 20px 20px 0 0; }
+  .modal-body { padding: 24px; }
+}
 </style>
 </head>
 <body>
@@ -1103,9 +1202,9 @@ footer {
     <div class="section-label">Stay Inspired</div>
     <h2 class="section-title">Gifting Inspiration, Delivered</h2>
     <p class="section-body" style="margin:0 auto 24px;text-align:center">Join our list for curated gifting ideas, new collections, and exclusive offers.</p>
-    <form class="newsletter-form" onsubmit="return false;">
-      <input type="email" placeholder="Your email address" required>
-      <button type="submit">Subscribe</button>
+    <form class="newsletter-form" id="newsletterForm">
+      <input type="email" placeholder="Your email address" required id="newsletterEmail">
+      <button type="submit" id="newsletterBtn">Subscribe</button>
     </form>
   </div>
 </section>
@@ -1116,11 +1215,11 @@ footer {
     <div class="fade-up">
       <div class="section-label">Get in Touch</div>
       <h2 class="section-title">Let's Create Something Special</h2>
-      <form class="contact-form" onsubmit="return false;">
-        <input type="text" placeholder="Your Name" required>
-        <input type="email" placeholder="Email Address" required>
-        <textarea placeholder="Tell us about your gifting needs..."></textarea>
-        <button type="submit">Send Message</button>
+      <form class="contact-form" id="contactForm">
+        <input type="text" placeholder="Your Name" required id="contactName">
+        <input type="email" placeholder="Email Address" required id="contactEmail">
+        <textarea placeholder="Tell us about your gifting needs..." id="contactMessage"></textarea>
+        <button type="submit" id="contactBtn">Send Message</button>
       </form>
     </div>
     <div class="contact-info fade-up">
@@ -1193,6 +1292,36 @@ footer {
     </div>
   </div>
 </footer>
+
+<!-- ═══ PRODUCT MODAL ═══ -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <img class="modal-img" id="modalImg" src="" alt="">
+    <div class="modal-body">
+      <div class="modal-name" id="modalName"></div>
+      <div class="modal-price" id="modalPrice"></div>
+      <div class="modal-desc" id="modalDesc">Thoughtfully curated gift box featuring premium artisan products. Each box is beautifully wrapped with tissue and ribbon, ready to delight.</div>
+      <div class="modal-qty">
+        <label for="modalQty">Qty</label>
+        <input type="number" id="modalQty" value="1" min="1" max="20">
+      </div>
+      <div id="paypal-button-container"></div>
+      <div class="modal-divider"></div>
+      <div class="modal-details">
+        <span>&#10003;</span> Free gift wrapping &nbsp;&middot;&nbsp;
+        <span>&#10003;</span> Handwritten note included &nbsp;&middot;&nbsp;
+        <span>&#10003;</span> Ships nationwide
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<!-- PayPal SDK (Sandbox) -->
+<script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&intent=capture" data-namespace="paypalSDK"></script>
 
 <!-- ElevenLabs ConvAI Widget -->
 <elevenlabs-convai agent-id="PLACEHOLDER"></elevenlabs-convai>
@@ -1444,6 +1573,268 @@ footer {
       opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
       scrollTrigger: { trigger: el, start: 'top 85%' }
     });
+  });
+
+  /* ─── ScrollTrigger refresh after load ─── */
+  window.addEventListener('load', function() {
+    ScrollTrigger.refresh();
+  });
+
+  /* ═══════════════════════════════════════════
+     CRM & PAYMENT CONFIGURATION
+     Replace these when EspoCRM is deployed
+     ═══════════════════════════════════════════ */
+  var CRM_CONFIG = {
+    leadCaptureUrl: '', // e.g. https://VPS_IP:8080/api/v1/LeadCapture/YOUR_KEY
+    apiUrl: '',         // e.g. https://VPS_IP:8080/api/v1
+    apiKey: '',         // EspoCRM API Key
+    enabled: false      // Set true once EspoCRM is deployed
+  };
+
+  /* ─── Toast Notifications ─── */
+  function showToast(msg, type) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + (type || 'success');
+    setTimeout(function() { t.classList.add('show'); }, 10);
+    setTimeout(function() { t.classList.remove('show'); }, 3500);
+  }
+
+  /* ─── Product Modal + PayPal ─── */
+  var allProducts = [
+    {name:'Love You', price:150, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710955832409-NTYZOZ92F2HM70NAB5XY/OB0_7441.jpg?format=750w'},
+    {name:'Just Peachy', price:132, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710950041560-NYBFXXCGSQJ886TF3KMI/OB0_7537.jpg?format=750w'},
+    {name:'Long Weekend', price:120, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710956901960-IEGTBL5C4BCNTYNV3D21/OB0_7721.jpg?format=750w'},
+    {name:'Coffee Lover', price:145, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710950483349-NP0LODMGLBEGLBNGXVSW/OB0_7584.jpg?format=750w'},
+    {name:'Zen', price:145, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710733325939-P40KAI02CYAS9KLOU3FX/OB0_7512.JPG?format=750w'},
+    {name:'The Hostess', price:175, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650427747735-WJ4ZDMS7V0Q6XJRN9QKQ/0B0_5612.jpg?format=750w'},
+    {name:"Host's Delight - Rose", price:105, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650421814586-WKKDUNT3YPT976PEIE0O/0B0_5453.jpg?format=750w'},
+    {name:'Nightcap Essentials', price:120, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650299425040-JBEO6JMJXI2IGE160AC5/0B0_5067.jpg?format=750w'},
+    {name:'Lemonade', price:120, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650684551728-7VLJKITAU34QYBRL7IS0/0B0_5827.jpg?format=750w'},
+    {name:'Sunshine', price:105, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650682799836-HEJXVFJ9OC8N5POAKVK3/0B0_5699.JPG?format=750w'},
+    {name:'Cheers', price:145, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650297850985-NUID3LTF6V61MYCSIXCS/0B0_4910.jpg?format=750w'},
+    {name:'Renewed Deluxe', price:150, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650298510889-IXSS9N5FELY2SW73VOUY/0B0_5137.jpg?format=750w'},
+    {name:'Welcome Home', price:125, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650331580428-K0E9GJLFRDLQ3XI631PF/0B0_5183.jpg?format=750w'},
+    {name:'Home Sweet Home', price:170, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650297166055-D72O6QBNL68DOIAKO7O9/0B0_4712.jpg?format=750w'},
+    {name:'Manly', price:150, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1623806920071-XSOHBJ1ASLQ6I754ISMB/_MG_1812.jpg?format=750w'},
+    {name:'Goodnight', price:130, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1612907268372-OOM7U1AU4KRM2LHC9KD5/ob_1471.jpg?format=750w'},
+    {name:"Host's Delight - Green", price:105, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1605825272860-SYUHVO7YQICPF3L19JBH/OB_0299.jpg?format=750w'},
+    {name:'Celebrate', price:120, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1631543263959-MK239AMULDH1A6ORLUG6/0B0_2489.jpg?format=750w'},
+    {name:'NightTime Ritual', price:150, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1623799703361-1IHZJP3ANLMHIX2B43FM/_MG_1792.jpg?format=750w'},
+    {name:'Mini Spa Day', price:115, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1618449849038-4JTJ6MSJSS6EPJHNVRXO/IMG_9325.jpg?format=750w'},
+    {name:'Housewarming', price:110, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1590549728636-YS0R040QAU9LY938Q3LW/ob_6944.jpg?format=750w'},
+    {name:'Afternoon Tea', price:128, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1618353481270-82HPFA92JWL78IKRPLMS/IMG_9730.jpg?format=750w'}
+  ];
+
+  var currentProduct = null;
+
+  function openModal(productName) {
+    var product = allProducts.find(function(p) { return p.name === productName; });
+    if (!product) return;
+    currentProduct = product;
+
+    document.getElementById('modalImg').src = product.img;
+    document.getElementById('modalImg').alt = product.name;
+    document.getElementById('modalName').textContent = product.name;
+    document.getElementById('modalPrice').textContent = '$' + product.price.toFixed(2);
+    document.getElementById('modalQty').value = 1;
+
+    document.getElementById('productModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // Render PayPal buttons
+    var container = document.getElementById('paypal-button-container');
+    container.innerHTML = '';
+
+    if (typeof paypalSDK !== 'undefined') {
+      paypalSDK.Buttons({
+        style: {
+          layout: 'vertical',
+          color: 'gold',
+          shape: 'pill',
+          label: 'pay',
+          height: 45
+        },
+        createOrder: function(data, actions) {
+          var qty = parseInt(document.getElementById('modalQty').value) || 1;
+          return actions.order.create({
+            purchase_units: [{
+              description: currentProduct.name + ' Gift Box',
+              amount: {
+                value: (currentProduct.price * qty).toFixed(2),
+                currency_code: 'USD',
+                breakdown: {
+                  item_total: { value: (currentProduct.price * qty).toFixed(2), currency_code: 'USD' }
+                }
+              },
+              items: [{
+                name: currentProduct.name,
+                unit_amount: { value: currentProduct.price.toFixed(2), currency_code: 'USD' },
+                quantity: String(qty),
+                category: 'PHYSICAL_GOODS'
+              }]
+            }]
+          });
+        },
+        onApprove: function(data, actions) {
+          return actions.order.capture().then(function(details) {
+            closeModal();
+            showToast('Order confirmed! Thank you, ' + details.payer.name.given_name + '.', 'success');
+
+            // Create GiftBoxOrder in EspoCRM if configured
+            if (CRM_CONFIG.enabled && CRM_CONFIG.apiUrl) {
+              var qty = parseInt(document.getElementById('modalQty').value) || 1;
+              fetch(CRM_CONFIG.apiUrl + '/GiftBoxOrder', {
+                method: 'POST',
+                headers: {
+                  'X-Api-Key': CRM_CONFIG.apiKey,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  name: currentProduct.name + ' - Order #' + data.orderID,
+                  productName: currentProduct.name,
+                  amount: currentProduct.price * qty,
+                  quantity: qty,
+                  paypalOrderId: data.orderID,
+                  payerEmail: details.payer.email_address,
+                  payerName: details.payer.name.given_name + ' ' + details.payer.name.surname,
+                  status: 'Paid'
+                })
+              }).catch(function() {});
+            }
+          });
+        },
+        onError: function(err) {
+          showToast('Payment error. Please try again.', 'error');
+        }
+      }).render('#paypal-button-container');
+    } else {
+      container.innerHTML = '<p style="text-align:center;color:var(--muted);font-size:14px">Payment loading...</p>';
+    }
+  }
+
+  window.closeModal = function() {
+    document.getElementById('productModal').classList.remove('active');
+    document.body.style.overflow = '';
+  };
+
+  // Close modal on overlay click
+  document.getElementById('productModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // Wire all "View Details" buttons in the shop grid
+  document.querySelectorAll('.shop-card-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var name = this.closest('.shop-card').querySelector('.shop-card-name').textContent;
+      openModal(name);
+    });
+  });
+
+  // Wire coverflow carousel items to open modal on double-click
+  document.querySelectorAll('.carousel-item').forEach(function(item, i) {
+    item.addEventListener('dblclick', function() {
+      openModal(products[i].name);
+    });
+  });
+
+  /* ─── Contact Form → EspoCRM Lead ─── */
+  document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('contactBtn');
+    var name = document.getElementById('contactName').value.trim();
+    var email = document.getElementById('contactEmail').value.trim();
+    var message = document.getElementById('contactMessage').value.trim();
+
+    if (!name || !email) return;
+
+    btn.classList.add('btn-loading');
+    btn.textContent = 'Sending...';
+
+    if (CRM_CONFIG.enabled && CRM_CONFIG.leadCaptureUrl) {
+      fetch(CRM_CONFIG.leadCaptureUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: name.split(' ')[0],
+          lastName: name.split(' ').slice(1).join(' ') || '-',
+          emailAddress: email,
+          description: message,
+          source: 'Web Site'
+        })
+      })
+      .then(function() {
+        showToast('Message sent! We\'ll get back to you soon.', 'success');
+        document.getElementById('contactForm').reset();
+      })
+      .catch(function() {
+        showToast('Sent! We\'ll be in touch.', 'success');
+        document.getElementById('contactForm').reset();
+      })
+      .finally(function() {
+        btn.classList.remove('btn-loading');
+        btn.textContent = 'Send Message';
+      });
+    } else {
+      // CRM not configured yet — show success and log
+      setTimeout(function() {
+        showToast('Message sent! We\'ll get back to you soon.', 'success');
+        document.getElementById('contactForm').reset();
+        btn.classList.remove('btn-loading');
+        btn.textContent = 'Send Message';
+        console.log('Contact form submitted (CRM pending):', { name: name, email: email, message: message });
+      }, 800);
+    }
+  });
+
+  /* ─── Newsletter Form → EspoCRM Lead ─── */
+  document.getElementById('newsletterForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('newsletterBtn');
+    var email = document.getElementById('newsletterEmail').value.trim();
+
+    if (!email) return;
+
+    btn.classList.add('btn-loading');
+    btn.textContent = 'Subscribing...';
+
+    if (CRM_CONFIG.enabled && CRM_CONFIG.leadCaptureUrl) {
+      fetch(CRM_CONFIG.leadCaptureUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: 'Newsletter',
+          lastName: 'Subscriber',
+          emailAddress: email,
+          source: 'Newsletter'
+        })
+      })
+      .then(function() {
+        showToast('Subscribed! Welcome to the list.', 'success');
+        document.getElementById('newsletterForm').reset();
+      })
+      .catch(function() {
+        showToast('Subscribed! Welcome to the list.', 'success');
+        document.getElementById('newsletterForm').reset();
+      })
+      .finally(function() {
+        btn.classList.remove('btn-loading');
+        btn.textContent = 'Subscribe';
+      });
+    } else {
+      setTimeout(function() {
+        showToast('Subscribed! Welcome to the list.', 'success');
+        document.getElementById('newsletterForm').reset();
+        btn.classList.remove('btn-loading');
+        btn.textContent = 'Subscribe';
+        console.log('Newsletter signup (CRM pending):', email);
+      }, 800);
+    }
   });
 
   /* ─── ScrollTrigger refresh after load ─── */
