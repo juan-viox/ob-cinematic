@@ -799,6 +799,62 @@ footer {
 }
 .modal-details span { color: var(--gold); }
 
+/* ═══════════════════════════════════════════
+   CRM LOGIN SECTION
+   ═══════════════════════════════════════════ */
+#crm-login {
+  padding: 100px 24px; background: var(--bg-alt);
+  text-align: center;
+}
+.crm-login-inner {
+  max-width: 420px; margin: 0 auto;
+}
+.crm-login-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: var(--gold-bg); border: 1px solid rgba(197,165,90,0.15);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px; font-size: 24px;
+}
+.crm-login-form {
+  display: flex; flex-direction: column; gap: 14px;
+  margin-top: 28px; text-align: left;
+}
+.crm-login-form label {
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: -8px;
+}
+.crm-login-form input {
+  padding: 14px 18px; border: 1px solid var(--border);
+  border-radius: 12px; font-family: var(--sans); font-size: 15px;
+  outline: none; background: var(--bg); transition: border-color 0.2s;
+}
+.crm-login-form input:focus { border-color: var(--gold); }
+.crm-login-btn {
+  width: 100%; padding: 14px; border-radius: 12px; margin-top: 4px;
+  background: var(--text); color: var(--bg);
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  letter-spacing: 0.05em; border: none; cursor: pointer;
+  transition: all 0.2s;
+}
+.crm-login-btn:hover { background: var(--gold); }
+.crm-login-error {
+  font-size: 13px; color: #c0392b; display: none; margin-top: 8px;
+}
+.crm-login-divider {
+  display: flex; align-items: center; gap: 16px;
+  margin: 24px 0; color: var(--muted); font-size: 13px;
+}
+.crm-login-divider::before, .crm-login-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.crm-dashboard-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  color: var(--gold); transition: opacity 0.2s;
+}
+.crm-dashboard-link:hover { opacity: 0.7; }
+
 /* Toast notification */
 .toast {
   position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px);
@@ -1252,6 +1308,26 @@ footer {
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ═══ CRM LOGIN SECTION ═══ -->
+<section id="crm-login">
+  <div class="crm-login-inner fade-up">
+    <div class="crm-login-icon">&#128274;</div>
+    <div class="section-label">Team Access</div>
+    <h2 class="section-title">Occasions Box CRM</h2>
+    <p class="section-body" style="margin:0 auto;text-align:center">Manage leads, orders, and client relationships.</p>
+    <form class="crm-login-form" id="crmLoginForm">
+      <label for="crmUser">Username</label>
+      <input type="text" id="crmUser" placeholder="Enter username" required autocomplete="username">
+      <label for="crmPass">Password</label>
+      <input type="password" id="crmPass" placeholder="Enter password" required autocomplete="current-password">
+      <button type="submit" class="crm-login-btn" id="crmLoginBtn">Sign In to CRM</button>
+      <div class="crm-login-error" id="crmError">Invalid username or password.</div>
+    </form>
+    <div class="crm-login-divider">or</div>
+    <a href="http://187.77.209.63:8080" target="_blank" rel="noopener" class="crm-dashboard-link">Open CRM Dashboard &rarr;</a>
   </div>
 </section>
 
@@ -1835,6 +1911,50 @@ footer {
         console.log('Newsletter signup (CRM pending):', email);
       }, 800);
     }
+  });
+
+  /* ─── CRM Login Form ─── */
+  document.getElementById('crmLoginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('crmLoginBtn');
+    var errEl = document.getElementById('crmError');
+    var user = document.getElementById('crmUser').value.trim();
+    var pass = document.getElementById('crmPass').value;
+
+    if (!user || !pass) return;
+
+    btn.classList.add('btn-loading');
+    btn.textContent = 'Signing in...';
+    errEl.style.display = 'none';
+
+    fetch('http://187.77.209.63:8080/api/v1/App/user', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Basic ' + btoa(user + ':' + pass),
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(function(resp) {
+      if (!resp.ok) throw new Error('auth');
+      return resp.json();
+    })
+    .then(function(data) {
+      if (data && data.user) {
+        showToast('Welcome, ' + (data.user.name || user) + '!', 'success');
+        setTimeout(function() {
+          window.open('http://187.77.209.63:8080', '_blank');
+        }, 500);
+      } else {
+        throw new Error('auth');
+      }
+    })
+    .catch(function() {
+      errEl.style.display = 'block';
+    })
+    .finally(function() {
+      btn.classList.remove('btn-loading');
+      btn.textContent = 'Sign In to CRM';
+    });
   });
 
   /* ─── ScrollTrigger refresh after load ─── */
