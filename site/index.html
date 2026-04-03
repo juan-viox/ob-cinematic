@@ -227,30 +227,37 @@ a { color: inherit; text-decoration: none; }
 .mask-overlay {
   position: absolute; inset: 0;
   background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.mask-label {
+  font-family: var(--sans);
+  font-size: clamp(12px, 1.5vw, 16px); font-weight: 500;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px;
+  position: relative; z-index: 2;
 }
 .mask-text {
   font-family: var(--serif);
-  font-size: clamp(60px, 18vw, 260px);
-  font-weight: 700; letter-spacing: -0.04em;
-  line-height: 0.9; text-align: center;
-  text-transform: uppercase;
+  font-size: clamp(32px, 7vw, 90px);
+  font-weight: 500; letter-spacing: -0.02em;
+  line-height: 1.1; text-align: center;
   background: var(--bg); color: transparent;
-  -webkit-text-stroke: 2px rgba(26,26,26,0.1);
+  -webkit-text-stroke: 1.5px rgba(26,26,26,0.12);
   position: relative; z-index: 2;
+  max-width: 900px;
 }
 .mask-reveal {
   position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
   z-index: 3;
   clip-path: inset(100% 0 0 0);
 }
 .mask-text-filled {
   font-family: var(--serif);
-  font-size: clamp(60px, 18vw, 260px);
-  font-weight: 700; letter-spacing: -0.04em;
-  line-height: 0.9; text-align: center;
-  text-transform: uppercase;
+  font-size: clamp(32px, 7vw, 90px);
+  font-weight: 500; letter-spacing: -0.02em;
+  line-height: 1.1; text-align: center;
+  max-width: 900px;
   color: transparent;
   background-image: linear-gradient(135deg, #c5a55a 0%, #d4be82 40%, #a68a3e 70%, #c5a55a 100%);
   -webkit-background-clip: text;
@@ -1107,7 +1114,6 @@ footer {
     <div class="hero-fallback" id="heroFallback"></div>
     <canvas id="heroCanvas"></canvas>
     <div class="hero-overlay">
-      <div class="hero-tagline">Custom Gifting, Thoughtfully Executed</div>
       <h1 class="hero-headline">The Art of<br>Thoughtful Gifting</h1>
       <p class="hero-sub">Luxury curated gift boxes for every occasion — corporate events, weddings, milestones, and moments that matter.</p>
       <a href="#products" class="hero-cta">Explore Collections</a>
@@ -1121,10 +1127,12 @@ footer {
   <div class="mask-sticky">
     <div class="mask-bg"></div>
     <div class="mask-overlay">
-      <div class="mask-text">CURATE</div>
+      <div class="mask-label">Occasions Box</div>
+      <div class="mask-text">Custom Gifting,<br>Thoughtfully Executed</div>
     </div>
     <div class="mask-reveal">
-      <div class="mask-text-filled">CURATE</div>
+      <div class="mask-label" style="color:var(--gold)">Occasions Box</div>
+      <div class="mask-text-filled">Custom Gifting,<br>Thoughtfully Executed</div>
     </div>
     <div class="mask-subtext">
       <p>Every box tells a story. We curate gifts that feel personal, premium, and unforgettable.</p>
@@ -1137,7 +1145,7 @@ footer {
 <section class="marquee-section">
   <div class="marquee-row marquee-giant" data-speed="1" data-direction="left">
     <div class="marquee-content">
-      <span class="marquee-item">CURATE<span class="dot"></span></span>
+      <span class="marquee-item">GIFT<span class="dot"></span></span>
       <span class="marquee-item">CELEBRATE<span class="dot"></span></span>
       <span class="marquee-item">GIFT<span class="dot"></span></span>
       <span class="marquee-item">DELIGHT<span class="dot"></span></span>
@@ -1145,7 +1153,7 @@ footer {
   </div>
   <div class="marquee-row marquee-outline" data-speed="0.7" data-direction="right">
     <div class="marquee-content">
-      <span class="marquee-item">CURATE<span class="dot"></span></span>
+      <span class="marquee-item">GIFT<span class="dot"></span></span>
       <span class="marquee-item">CELEBRATE<span class="dot"></span></span>
       <span class="marquee-item">GIFT<span class="dot"></span></span>
       <span class="marquee-item">DELIGHT<span class="dot"></span></span>
