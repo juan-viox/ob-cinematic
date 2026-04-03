@@ -1585,10 +1585,10 @@ footer {
      Replace these when EspoCRM is deployed
      ═══════════════════════════════════════════ */
   var CRM_CONFIG = {
-    leadCaptureUrl: '', // e.g. https://VPS_IP:8080/api/v1/LeadCapture/YOUR_KEY
-    apiUrl: '',         // e.g. https://VPS_IP:8080/api/v1
-    apiKey: '',         // EspoCRM API Key
-    enabled: false      // Set true once EspoCRM is deployed
+    leadCaptureUrl: 'http://187.77.209.63:8080/api/v1/LeadCapture/8e1b2cbe7526caed7e76843d786606cb',
+    apiUrl: 'http://187.77.209.63:8080/api/v1',
+    apiKey: '',   // Basic auth used for now via LeadCapture (no key needed)
+    enabled: true
   };
 
   /* ─── Toast Notifications ─── */
