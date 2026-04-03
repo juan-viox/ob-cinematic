@@ -66,8 +66,8 @@ a { color: inherit; text-decoration: none; }
   padding: 14px 40px;
   box-shadow: 0 1px 8px rgba(0,0,0,0.04);
 }
-.nav-logo img { height: 40px; transition: height 0.3s; }
-.nav.scrolled .nav-logo img { height: 32px; }
+.nav-logo img { height: 52px; transition: height 0.3s; }
+.nav.scrolled .nav-logo img { height: 42px; }
 .nav-links { display: flex; gap: 32px; align-items: center; }
 .nav-links a {
   font-family: var(--sans);
@@ -410,6 +410,64 @@ a { color: inherit; text-decoration: none; }
   transition: all 0.2s;
 }
 .products-cta a:hover { background: var(--gold); color: #fff; }
+
+/* ═══════════════════════════════════════════
+   SECTION 5B: SHOP GRID — ALL PRODUCTS
+   ═══════════════════════════════════════════ */
+#shop { padding: 120px 24px; max-width: 1200px; margin: 0 auto; }
+.shop-header { text-align: center; margin-bottom: 56px; }
+.shop-filters {
+  display: flex; justify-content: center; gap: 8px;
+  flex-wrap: wrap; margin-bottom: 48px;
+}
+.shop-filter {
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  padding: 8px 20px; border-radius: 100px;
+  border: 1px solid var(--border); background: var(--bg);
+  color: var(--muted); cursor: pointer; transition: all 0.2s;
+}
+.shop-filter:hover, .shop-filter.active {
+  background: var(--gold); color: #fff; border-color: var(--gold);
+}
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+.shop-card {
+  border-radius: 16px; overflow: hidden;
+  background: var(--bg); border: 1px solid var(--border);
+  transition: all 0.3s ease; cursor: pointer;
+}
+.shop-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(197,165,90,0.12);
+  border-color: var(--gold);
+}
+.shop-card-img {
+  width: 100%; aspect-ratio: 1; object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.shop-card:hover .shop-card-img { transform: scale(1.04); }
+.shop-card-body { padding: 20px; }
+.shop-card-name {
+  font-family: var(--serif); font-size: 18px; font-weight: 600;
+  color: var(--text); margin-bottom: 4px;
+}
+.shop-card-price {
+  font-family: var(--sans); font-size: 14px; color: var(--gold);
+  font-weight: 500;
+}
+.shop-card-btn {
+  display: block; width: 100%; margin-top: 12px;
+  padding: 10px; border-radius: 8px;
+  background: var(--gold-bg); color: var(--gold);
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  text-align: center; border: none; cursor: pointer;
+  transition: all 0.2s;
+}
+.shop-card-btn:hover { background: var(--gold); color: #fff; }
 
 /* ═══════════════════════════════════════════
    SECTION 6: HOW IT WORKS — STICKY STACK
@@ -780,7 +838,7 @@ footer {
 <section id="about">
   <div class="about-grid">
     <div class="about-image fade-up">
-      <img src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1513875474874-QV96W8LEUHMJWTJ9J5EX/OB+background.jpg?format=750w" alt="Occasions Box curated gift" loading="lazy">
+      <img src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1591903935605-BIUXVZA5RI61MUBP3J1Z/IMG_9248.JPG?format=750w" alt="Occasions Box curated gift" loading="lazy">
     </div>
     <div class="fade-up">
       <div class="section-label">Our Story</div>
@@ -814,7 +872,129 @@ footer {
     </div>
   </div>
   <div class="products-cta">
-    <a href="https://www.occasionsbox.com/shop">Shop All Collections</a>
+    <a href="#shop">Shop All Collections</a>
+  </div>
+</section>
+
+<!-- ═══ SECTION 5B: SHOP GRID ═══ -->
+<section id="shop">
+  <div class="shop-header fade-up">
+    <div class="section-label">Full Collection</div>
+    <h2 class="section-title">All Gift Boxes</h2>
+    <p class="section-body" style="margin:0 auto;text-align:center">Every box is thoughtfully curated with premium artisan products.</p>
+  </div>
+  <div class="shop-grid">
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710955832409-NTYZOZ92F2HM70NAB5XY/OB0_7441.jpg?format=500w" alt="Love You" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Love You</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710950041560-NYBFXXCGSQJ886TF3KMI/OB0_7537.jpg?format=500w" alt="Just Peachy" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Just Peachy</div><div class="shop-card-price">$132.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710956901960-IEGTBL5C4BCNTYNV3D21/OB0_7721.jpg?format=500w" alt="Long Weekend" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Long Weekend</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710950483349-NP0LODMGLBEGLBNGXVSW/OB0_7584.jpg?format=500w" alt="Coffee Lover" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Coffee Lover</div><div class="shop-card-price">$145.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710733325939-P40KAI02CYAS9KLOU3FX/OB0_7512.JPG?format=500w" alt="Zen" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Zen</div><div class="shop-card-price">$145.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650427747735-WJ4ZDMS7V0Q6XJRN9QKQ/0B0_5612.jpg?format=500w" alt="The Hostess" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">The Hostess</div><div class="shop-card-price">$175.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650421814586-WKKDUNT3YPT976PEIE0O/0B0_5453.jpg?format=500w" alt="Host's Delight - Rose" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Host's Delight - Rose</div><div class="shop-card-price">$105.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650299425040-JBEO6JMJXI2IGE160AC5/0B0_5067.jpg?format=500w" alt="Nightcap Essentials" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Nightcap Essentials</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650684551728-7VLJKITAU34QYBRL7IS0/0B0_5827.jpg?format=500w" alt="Lemonade" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Lemonade</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650682799836-HEJXVFJ9OC8N5POAKVK3/0B0_5699.JPG?format=500w" alt="Sunshine" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Sunshine</div><div class="shop-card-price">$105.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650297850985-NUID3LTF6V61MYCSIXCS/0B0_4910.jpg?format=500w" alt="Cheers" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Cheers</div><div class="shop-card-price">$145.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650298510889-IXSS9N5FELY2SW73VOUY/0B0_5137.jpg?format=500w" alt="Renewed Deluxe" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Renewed Deluxe</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650331580428-K0E9GJLFRDLQ3XI631PF/0B0_5183.jpg?format=500w" alt="Welcome Home" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Welcome Home</div><div class="shop-card-price">$125.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650297166055-D72O6QBNL68DOIAKO7O9/0B0_4712.jpg?format=500w" alt="Home Sweet Home" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Home Sweet Home</div><div class="shop-card-price">$170.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1623806920071-XSOHBJ1ASLQ6I754ISMB/_MG_1812.jpg?format=500w" alt="Manly" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Manly</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1612907268372-OOM7U1AU4KRM2LHC9KD5/ob_1471.jpg?format=500w" alt="Goodnight" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Goodnight</div><div class="shop-card-price">$130.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1605825272860-SYUHVO7YQICPF3L19JBH/OB_0299.jpg?format=500w" alt="Host's Delight - Green" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Host's Delight - Green</div><div class="shop-card-price">$105.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1631543263959-MK239AMULDH1A6ORLUG6/0B0_2489.jpg?format=500w" alt="Celebrate" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Celebrate</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1623799703361-1IHZJP3ANLMHIX2B43FM/_MG_1792.jpg?format=500w" alt="NightTime Ritual" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">NightTime Ritual</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1618449849038-4JTJ6MSJSS6EPJHNVRXO/IMG_9325.jpg?format=500w" alt="Mini Spa Day" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Mini Spa Day</div><div class="shop-card-price">$115.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1590549728636-YS0R040QAU9LY938Q3LW/ob_6944.jpg?format=500w" alt="Housewarming" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Housewarming</div><div class="shop-card-price">$110.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
+    <div class="shop-card fade-up">
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1618353481270-82HPFA92JWL78IKRPLMS/IMG_9730.jpg?format=500w" alt="Afternoon Tea" loading="lazy"></div>
+      <div class="shop-card-body"><div class="shop-card-name">Afternoon Tea</div><div class="shop-card-price">$128.00</div><button class="shop-card-btn">View Details</button></div>
+    </div>
+
   </div>
 </section>
 
@@ -985,17 +1165,17 @@ footer {
     </div>
     <div class="footer-col">
       <h4>Shop</h4>
-      <a href="https://www.occasionsbox.com/shop">All Collections</a>
-      <a href="https://www.occasionsbox.com/custom-gifting">Custom Gifting</a>
-      <a href="https://www.occasionsbox.com/shop">Corporate</a>
-      <a href="https://www.occasionsbox.com/shop">Wedding</a>
+      <a href="#shop">All Collections</a>
+      <a href="#contact">Custom Gifting</a>
+      <a href="#shop">Corporate</a>
+      <a href="#shop">Wedding</a>
     </div>
     <div class="footer-col">
       <h4>Company</h4>
       <a href="#about">About Us</a>
-      <a href="https://www.occasionsbox.com/journal">Journal</a>
+      <a href="#newsletter">Journal</a>
       <a href="#contact">Contact</a>
-      <a href="https://www.occasionsbox.com/shipping-returns">Shipping & Returns</a>
+      <a href="#contact">Shipping & Returns</a>
     </div>
     <div class="footer-col">
       <h4>Connect</h4>
