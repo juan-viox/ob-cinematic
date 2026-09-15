@@ -5,7 +5,14 @@ name: Localize Squarespace images
 # the result back to the branch the workflow was run from.
 
 on:
+  # Manual run from the Actions tab.
   workflow_dispatch:
+  # Also run automatically when the manifest (or this workflow) changes, so a
+  # fresh checkout ends up with the images without anyone clicking anything.
+  push:
+    paths:
+      - 'site/assets/img/manifest.tsv'
+      - '.github/workflows/localize-images.yml'
 
 permissions:
   contents: write
