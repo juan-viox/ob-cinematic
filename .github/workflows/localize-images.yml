@@ -1,14 +1,24 @@
 name: Localize Squarespace images
 
-# Downloads every image listed in site/assets/img/manifest.tsv
-# (<local filename>\t<original URL>) into site/assets/img/ and commits
-# the result back to the branch the workflow was run from.
+# Fills site/assets/img from site/assets/img/manifest.tsv (<filename>\t<source URL>)
+# and commits the result back to the branch the workflow ran from.
+#
+# The Squarespace CDN ignores the requested extension and returns whichever
+# format it feels like (JPEG on one request, WebP on the next), so every
+# download is converted to the format implied by its manifest filename. A file
+# that is already present in the right format is left alone, which keeps re-runs
+# from rewriting identical images with freshly re-encoded bytes.
 
 on:
-  # Manual run from the Actions tab.
+  # Manual run from the Actions tab. Tick "force" to re-fetch everything.
   workflow_dispatch:
-  # Also run automatically when the manifest (or this workflow) changes, so a
-  # fresh checkout ends up with the images without anyone clicking anything.
+    inputs:
+      force:
+        description: Re-download every image even if it is already correct
+        type: boolean
+        default: false
+  # Automatic run when the manifest or this workflow changes, so a fresh
+  # checkout ends up with the images without anyone clicking anything.
   push:
     paths:
       - 'site/assets/img/manifest.tsv'
@@ -27,36 +37,83 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Download images from manifest
+      - name: Download and normalise images
         shell: bash
+        env:
+          FORCE: ${{ inputs.force }}
         run: |
           set -euo pipefail
           MANIFEST="site/assets/img/manifest.tsv"
           DEST="site/assets/img"
           test -f "$MANIFEST" || { echo "Missing $MANIFEST"; exit 1; }
           mkdir -p "$DEST"
-          failed=0
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          failed=0 fetched=0 kept=0
+
+          # Image format ImageMagick should write for a given filename.
+          want_format() {
+            case "${1##*.}" in
+              jpg|jpeg) echo JPEG ;;
+              png)      echo PNG ;;
+              webp)     echo WEBP ;;
+              *)        echo "" ;;
+            esac
+          }
+
           while IFS=$'\t' read -r name url; do
             [ -z "${name:-}" ] && continue
             case "$name" in \#*) continue ;; esac
+            [ -n "${url:-}" ] || { echo "::error::No URL for $name"; failed=1; continue; }
+
+            want="$(want_format "$name")"
+            [ -n "$want" ] || { echo "::error::Unsupported extension for $name"; failed=1; continue; }
+
+            # Already correct? Leave it alone so re-runs produce no diff.
+            if [ "${FORCE:-false}" != "true" ] && [ -s "$DEST/$name" ]; then
+              have="$(magick identify -format '%m' "$DEST/$name"[0] 2>/dev/null || echo '')"
+              if [ "$have" = "$want" ]; then
+                kept=$((kept + 1))
+                continue
+              fi
+            fi
+
             echo "-> $name  <=  $url"
-            if ! curl -fL --retry 3 --retry-delay 2 -sS -o "$DEST/$name" "$url"; then
+            if ! curl -fL --retry 3 --retry-delay 2 -sS -o "$tmp/download" "$url"; then
               echo "::error::Download failed for $name ($url)"
-              rm -f "$DEST/$name"
               failed=1
               continue
             fi
-            if [ ! -s "$DEST/$name" ]; then
+            if [ ! -s "$tmp/download" ]; then
               echo "::error::Downloaded file is empty: $name ($url)"
-              rm -f "$DEST/$name"
               failed=1
+              continue
             fi
+            if ! magick "$tmp/download"[0] "$tmp/out.${name##*.}"; then
+              echo "::error::Could not convert $name to $want"
+              failed=1
+              continue
+            fi
+            mv "$tmp/out.${name##*.}" "$DEST/$name"
+            fetched=$((fetched + 1))
           done < "$MANIFEST"
+
+          echo "Fetched $fetched, already correct $kept."
           if [ "$failed" -ne 0 ]; then
-            echo "One or more downloads failed; see errors above."
+            echo "One or more images could not be localized; see errors above."
             exit 1
           fi
-          ls -la "$DEST"
+
+          # Every manifest entry must now exist in the right format.
+          while IFS=$'\t' read -r name url; do
+            [ -z "${name:-}" ] && continue
+            case "$name" in \#*) continue ;; esac
+            have="$(magick identify -format '%m' "$DEST/$name"[0])"
+            [ "$have" = "$(want_format "$name")" ] || {
+              echo "::error::$name is $have, expected $(want_format "$name")"
+              exit 1
+            }
+          done < "$MANIFEST"
 
       - name: Commit and push
         shell: bash
