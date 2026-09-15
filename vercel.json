@@ -1,6 +1,11 @@
 {
   "buildCommand": "",
   "outputDirectory": "site",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- site vercel.json || exit 1",
+  "rewrites": [
+    { "source": "/admin", "destination": "https://ob-crm-vio-x-bergsify.vercel.app/admin" },
+    { "source": "/admin/:path*", "destination": "https://ob-crm-vio-x-bergsify.vercel.app/admin/:path*" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
