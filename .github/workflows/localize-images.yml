@@ -37,6 +37,36 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
+      - name: Install ImageMagick
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The runner image does not ship ImageMagick. Install it together with
+          # the extra delegates package, which is what gives ImageMagick 6 its
+          # WebP reader — the CDN serves WebP for some requests.
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq imagemagick libmagickcore-6.q16-6-extra \
+            || sudo apt-get install -y -qq imagemagick
+
+          # ImageMagick 7 ships `magick`; 6 ships `convert` / `identify`.
+          if command -v magick >/dev/null 2>&1; then
+            echo "IM_CONVERT=magick" >> "$GITHUB_ENV"
+            echo "IM_IDENTIFY=magick identify" >> "$GITHUB_ENV"
+          elif command -v convert >/dev/null 2>&1; then
+            echo "IM_CONVERT=convert" >> "$GITHUB_ENV"
+            echo "IM_IDENTIFY=identify" >> "$GITHUB_ENV"
+          else
+            echo "::error::ImageMagick is not available after installation"
+            exit 1
+          fi
+
+          # Fail early and loudly if the WebP and JPEG readers are missing.
+          delegates="$(convert -version 2>/dev/null || magick -version)"
+          echo "$delegates"
+          for fmt in webp jpeg png; do
+            grep -q " $fmt" <<<"$delegates" || echo "::warning::ImageMagick reports no $fmt delegate"
+          done
+
       - name: Download and normalise images
         shell: bash
         env:
@@ -71,7 +101,7 @@ jobs:
 
             # Already correct? Leave it alone so re-runs produce no diff.
             if [ "${FORCE:-false}" != "true" ] && [ -s "$DEST/$name" ]; then
-              have="$(magick identify -format '%m' "$DEST/$name"[0] 2>/dev/null || echo '')"
+              have="$($IM_IDENTIFY -format '%m' "$DEST/$name"[0] 2>/dev/null || echo '')"
               if [ "$have" = "$want" ]; then
                 kept=$((kept + 1))
                 continue
@@ -89,7 +119,7 @@ jobs:
               failed=1
               continue
             fi
-            if ! magick "$tmp/download"[0] "$tmp/out.${name##*.}"; then
+            if ! $IM_CONVERT "$tmp/download"[0] "$tmp/out.${name##*.}"; then
               echo "::error::Could not convert $name to $want"
               failed=1
               continue
@@ -108,7 +138,7 @@ jobs:
           while IFS=$'\t' read -r name url; do
             [ -z "${name:-}" ] && continue
             case "$name" in \#*) continue ;; esac
-            have="$(magick identify -format '%m' "$DEST/$name"[0])"
+            have="$($IM_IDENTIFY -format '%m' "$DEST/$name"[0])"
             [ "$have" = "$(want_format "$name")" ] || {
               echo "::error::$name is $have, expected $(want_format "$name")"
               exit 1
