@@ -9,7 +9,7 @@
 <meta property="og:description" content="Luxury custom gift curation and concierge gifting service.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.occasionsbox.com">
-<link rel="icon" href="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1513626106818-IGYZTLKXDPRWAQT51OKG/favicon.ico?format=100w">
+<link rel="icon" href="assets/img/favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -514,14 +514,13 @@ a { color: inherit; text-decoration: none; }
 .mockup-icon {
   margin-bottom: 16px;
 }
-.mockup-icon svg, .icon svg, .contact-item-icon svg, .crm-login-icon svg {
+.mockup-icon svg, .icon svg, .contact-item-icon svg {
   width: 1em; height: 1em; fill: none; stroke: var(--gold); stroke-width: 1.5;
   stroke-linecap: round; stroke-linejoin: round;
 }
 .mockup-icon svg { width: 48px; height: 48px; }
 .icon svg { width: 28px; height: 28px; }
 .contact-item-icon svg { width: 20px; height: 20px; }
-.crm-login-icon svg { width: 28px; height: 28px; }
 .mockup-title {
   font-family: var(--serif); font-size: 24px; font-weight: 600;
   color: var(--text); margin-bottom: 8px;
@@ -1040,61 +1039,13 @@ footer {
   .concierge-includes { grid-template-columns: 1fr; }
 }
 
-/* ═══════════════════════════════════════════
-   CRM LOGIN SECTION
-   ═══════════════════════════════════════════ */
-#crm-login {
-  padding: 100px 24px; background: var(--bg-alt);
-  text-align: center;
+/* Footer team login link + honeypot field */
+.footer-team-login { margin-left: 16px; color: var(--muted); font-size: 12px; transition: color 0.2s; }
+.footer-team-login:hover { color: var(--gold); }
+.hp-field {
+  position: absolute !important; left: -9999px !important; top: auto !important;
+  width: 1px !important; height: 1px !important; overflow: hidden !important; opacity: 0 !important;
 }
-.crm-login-inner {
-  max-width: 420px; margin: 0 auto;
-}
-.crm-login-icon {
-  width: 56px; height: 56px; border-radius: 14px;
-  background: var(--gold-bg); border: 1px solid rgba(197,165,90,0.15);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 24px; font-size: 24px;
-}
-.crm-login-form {
-  display: flex; flex-direction: column; gap: 14px;
-  margin-top: 28px; text-align: left;
-}
-.crm-login-form label {
-  font-family: var(--sans); font-size: 12px; font-weight: 500;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: -8px;
-}
-.crm-login-form input {
-  padding: 14px 18px; border: 1px solid var(--border);
-  border-radius: 12px; font-family: var(--sans); font-size: 15px;
-  outline: none; background: var(--bg); transition: border-color 0.2s;
-}
-.crm-login-form input:focus { border-color: var(--gold); }
-.crm-login-btn {
-  width: 100%; padding: 14px; border-radius: 12px; margin-top: 4px;
-  background: var(--text); color: var(--bg);
-  font-family: var(--sans); font-size: 14px; font-weight: 500;
-  letter-spacing: 0.05em; border: none; cursor: pointer;
-  transition: all 0.2s;
-}
-.crm-login-btn:hover { background: var(--gold); }
-.crm-login-error {
-  font-size: 13px; color: #c0392b; display: none; margin-top: 8px;
-}
-.crm-login-divider {
-  display: flex; align-items: center; gap: 16px;
-  margin: 24px 0; color: var(--muted); font-size: 13px;
-}
-.crm-login-divider::before, .crm-login-divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-.crm-dashboard-link {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--sans); font-size: 13px; font-weight: 500;
-  color: var(--gold); transition: opacity 0.2s;
-}
-.crm-dashboard-link:hover { opacity: 0.7; }
 
 /* Toast notification */
 .toast {
@@ -1237,7 +1188,7 @@ footer {
 <section id="about">
   <div class="about-grid">
     <div class="about-image fade-up">
-      <img src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1591903935605-BIUXVZA5RI61MUBP3J1Z/IMG_9248.JPG?format=750w" alt="Occasions Box curated gift" loading="lazy">
+      <img src="assets/img/IMG_9248-750w.JPG" alt="Occasions Box curated gift" loading="lazy">
     </div>
     <div class="fade-up">
       <div class="section-label">Our Story</div>
@@ -1361,112 +1312,112 @@ footer {
   <div class="shop-grid">
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710955832409-NTYZOZ92F2HM70NAB5XY/OB0_7441.jpg?format=500w" alt="Love You" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/OB0_7441-500w.jpg" alt="Love You" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Love You</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710950041560-NYBFXXCGSQJ886TF3KMI/OB0_7537.jpg?format=500w" alt="Just Peachy" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/OB0_7537-500w.jpg" alt="Just Peachy" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Just Peachy</div><div class="shop-card-price">$132.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710956901960-IEGTBL5C4BCNTYNV3D21/OB0_7721.jpg?format=500w" alt="Long Weekend" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/OB0_7721-500w.jpg" alt="Long Weekend" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Long Weekend</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710950483349-NP0LODMGLBEGLBNGXVSW/OB0_7584.jpg?format=500w" alt="Coffee Lover" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/OB0_7584-500w.jpg" alt="Coffee Lover" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Coffee Lover</div><div class="shop-card-price">$145.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710733325939-P40KAI02CYAS9KLOU3FX/OB0_7512.JPG?format=500w" alt="Zen" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/OB0_7512-500w.JPG" alt="Zen" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Zen</div><div class="shop-card-price">$145.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650427747735-WJ4ZDMS7V0Q6XJRN9QKQ/0B0_5612.jpg?format=500w" alt="The Hostess" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/0B0_5612-500w.jpg" alt="The Hostess" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">The Hostess</div><div class="shop-card-price">$175.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650421814586-WKKDUNT3YPT976PEIE0O/0B0_5453.jpg?format=500w" alt="Host's Delight - Rose" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/0B0_5453-500w.jpg" alt="Host's Delight - Rose" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Host's Delight - Rose</div><div class="shop-card-price">$105.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650299425040-JBEO6JMJXI2IGE160AC5/0B0_5067.jpg?format=500w" alt="Nightcap Essentials" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/0B0_5067-500w.jpg" alt="Nightcap Essentials" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Nightcap Essentials</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650684551728-7VLJKITAU34QYBRL7IS0/0B0_5827.jpg?format=500w" alt="Lemonade" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/0B0_5827-500w.jpg" alt="Lemonade" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Lemonade</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650682799836-HEJXVFJ9OC8N5POAKVK3/0B0_5699.JPG?format=500w" alt="Sunshine" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/0B0_5699-500w.JPG" alt="Sunshine" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Sunshine</div><div class="shop-card-price">$105.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650297850985-NUID3LTF6V61MYCSIXCS/0B0_4910.jpg?format=500w" alt="Cheers" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/0B0_4910-500w.jpg" alt="Cheers" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Cheers</div><div class="shop-card-price">$145.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650298510889-IXSS9N5FELY2SW73VOUY/0B0_5137.jpg?format=500w" alt="Renewed Deluxe" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/0B0_5137-500w.jpg" alt="Renewed Deluxe" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Renewed Deluxe</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650331580428-K0E9GJLFRDLQ3XI631PF/0B0_5183.jpg?format=500w" alt="Welcome Home" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/0B0_5183-500w.jpg" alt="Welcome Home" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Welcome Home</div><div class="shop-card-price">$125.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650297166055-D72O6QBNL68DOIAKO7O9/0B0_4712.jpg?format=500w" alt="Home Sweet Home" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/0B0_4712-500w.jpg" alt="Home Sweet Home" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Home Sweet Home</div><div class="shop-card-price">$170.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1623806920071-XSOHBJ1ASLQ6I754ISMB/_MG_1812.jpg?format=500w" alt="Manly" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/_MG_1812-500w.jpg" alt="Manly" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Manly</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1612907268372-OOM7U1AU4KRM2LHC9KD5/ob_1471.jpg?format=500w" alt="Goodnight" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/ob_1471-500w.jpg" alt="Goodnight" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Goodnight</div><div class="shop-card-price">$130.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1605825272860-SYUHVO7YQICPF3L19JBH/OB_0299.jpg?format=500w" alt="Host's Delight - Green" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/OB_0299-500w.jpg" alt="Host's Delight - Green" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Host's Delight - Green</div><div class="shop-card-price">$105.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1631543263959-MK239AMULDH1A6ORLUG6/0B0_2489.jpg?format=500w" alt="Celebrate" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/0B0_2489-500w.jpg" alt="Celebrate" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Celebrate</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1623799703361-1IHZJP3ANLMHIX2B43FM/_MG_1792.jpg?format=500w" alt="NightTime Ritual" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/_MG_1792-500w.jpg" alt="NightTime Ritual" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">NightTime Ritual</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1618449849038-4JTJ6MSJSS6EPJHNVRXO/IMG_9325.jpg?format=500w" alt="Mini Spa Day" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/IMG_9325-500w.jpg" alt="Mini Spa Day" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Mini Spa Day</div><div class="shop-card-price">$115.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1590549728636-YS0R040QAU9LY938Q3LW/ob_6944.jpg?format=500w" alt="Housewarming" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/ob_6944-500w.jpg" alt="Housewarming" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Housewarming</div><div class="shop-card-price">$110.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
     <div class="shop-card fade-up">
-      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1618353481270-82HPFA92JWL78IKRPLMS/IMG_9730.jpg?format=500w" alt="Afternoon Tea" loading="lazy"></div>
+      <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="assets/img/IMG_9730-500w.jpg" alt="Afternoon Tea" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Afternoon Tea</div><div class="shop-card-price">$128.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
@@ -1706,6 +1657,7 @@ footer {
     <p class="section-body" style="margin:0 auto 24px;text-align:center">Join our list for curated gifting ideas, new collections, and exclusive offers.</p>
     <form class="newsletter-form" id="newsletterForm">
       <input type="email" placeholder="Your email address" required id="newsletterEmail">
+      <input type="text" name="hp_website_url" id="newsletterWebsite" class="hp-field" autocomplete="new-password" data-lpignore="true" data-1p-ignore data-form-type="other" tabindex="-1" aria-hidden="true">
       <button type="submit" id="newsletterBtn">Subscribe</button>
     </form>
   </div>
@@ -1721,6 +1673,7 @@ footer {
         <input type="text" placeholder="Your Name" required id="contactName">
         <input type="email" placeholder="Email Address" required id="contactEmail">
         <textarea placeholder="Tell us about your gifting needs..." id="contactMessage"></textarea>
+        <input type="text" name="hp_website_url" id="contactWebsite" class="hp-field" autocomplete="new-password" data-lpignore="true" data-1p-ignore data-form-type="other" tabindex="-1" aria-hidden="true">
         <button type="submit" id="contactBtn">Send Message</button>
       </form>
     </div>
@@ -1757,26 +1710,6 @@ footer {
   </div>
 </section>
 
-<!-- ═══ CRM LOGIN SECTION ═══ -->
-<section id="crm-login">
-  <div class="crm-login-inner fade-up">
-    <div class="crm-login-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-    <div class="section-label">Team Access</div>
-    <h2 class="section-title">Occasions Box CRM</h2>
-    <p class="section-body" style="margin:0 auto;text-align:center">Manage leads, orders, and client relationships.</p>
-    <form class="crm-login-form" id="crmLoginForm">
-      <label for="crmUser">Username</label>
-      <input type="text" id="crmUser" placeholder="Enter username" required autocomplete="username">
-      <label for="crmPass">Password</label>
-      <input type="password" id="crmPass" placeholder="Enter password" required autocomplete="current-password">
-      <button type="submit" class="crm-login-btn" id="crmLoginBtn">Sign In to CRM</button>
-      <div class="crm-login-error" id="crmError">Invalid username or password.</div>
-    </form>
-    <div class="crm-login-divider">or</div>
-    <a href="http://187.77.209.63:8080" target="_blank" rel="noopener" class="crm-dashboard-link">Open CRM Dashboard &rarr;</a>
-  </div>
-</section>
-
 <!-- ═══ SECTION 10: FOOTER ═══ -->
 <footer>
   <div class="footer-grid">
@@ -1807,7 +1740,7 @@ footer {
     </div>
   </div>
   <div class="footer-bottom">
-    <p>&copy; 2026 Occasions Box. All rights reserved.</p>
+    <p>&copy; 2026 Occasions Box. All rights reserved. <a href="/admin/login" rel="nofollow" class="footer-team-login">Team login</a></p>
     <div class="footer-social">
       <a href="https://instagram.com/occasionsbox" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
       <a href="https://pinterest.com/occasionsbox" target="_blank" rel="noopener" aria-label="Pinterest"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>
@@ -1844,6 +1777,7 @@ footer {
 <div class="toast" id="toast"></div>
 
 <!-- PayPal SDK (Sandbox) -->
+<!-- SANDBOX — replace client-id=sb with the live PayPal client ID before launch -->
 <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&intent=capture" data-namespace="paypalSDK"></script>
 
 <!-- ElevenLabs ConvAI Widget -->
@@ -2010,14 +1944,14 @@ footer {
 
   /* ─── 3D Coverflow Carousel ─── */
   var products = [
-    {name:'Love You', price:'$150', img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710955832409-NTYZOZ92F2HM70NAB5XY/OB0_7441.jpg?format=500w'},
-    {name:'Just Peachy', price:'$132', img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710950041560-NYBFXXCGSQJ886TF3KMI/OB0_7537.jpg?format=500w'},
-    {name:'Long Weekend', price:'$120', img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710956901960-IEGTBL5C4BCNTYNV3D21/OB0_7721.jpg?format=500w'},
-    {name:'Coffee Lover', price:'$145', img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710950483349-NP0LODMGLBEGLBNGXVSW/OB0_7584.jpg?format=500w'},
-    {name:'Zen', price:'$145', img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710733325939-P40KAI02CYAS9KLOU3FX/OB0_7512.JPG?format=500w'},
-    {name:'The Hostess', price:'$175', img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650427747735-WJ4ZDMS7V0Q6XJRN9QKQ/0B0_5612.jpg?format=500w'},
-    {name:"Host's Delight", price:'$105', img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650421814586-WKKDUNT3YPT976PEIE0O/0B0_5453.jpg?format=500w'},
-    {name:'Nightcap', price:'$120', img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650299425040-JBEO6JMJXI2IGE160AC5/0B0_5067.jpg?format=500w'}
+    {name:'Love You', price:'$150', img:'assets/img/OB0_7441-500w.jpg'},
+    {name:'Just Peachy', price:'$132', img:'assets/img/OB0_7537-500w.jpg'},
+    {name:'Long Weekend', price:'$120', img:'assets/img/OB0_7721-500w.jpg'},
+    {name:'Coffee Lover', price:'$145', img:'assets/img/OB0_7584-500w.jpg'},
+    {name:'Zen', price:'$145', img:'assets/img/OB0_7512-500w.JPG'},
+    {name:'The Hostess', price:'$175', img:'assets/img/0B0_5612-500w.jpg'},
+    {name:"Host's Delight", price:'$105', img:'assets/img/0B0_5453-500w.jpg'},
+    {name:'Nightcap', price:'$120', img:'assets/img/0B0_5067-500w.jpg'}
   ];
 
   var track = document.getElementById('productTrack');
@@ -2105,14 +2039,9 @@ footer {
 
   /* ═══════════════════════════════════════════
      CRM & PAYMENT CONFIGURATION
-     Replace these when EspoCRM is deployed
+     Same-origin through the /admin rewrite (OccasionsBox CRM ingest API)
      ═══════════════════════════════════════════ */
-  var CRM_CONFIG = {
-    leadCaptureUrl: 'http://187.77.209.63:8080/api/v1/LeadCapture/8e1b2cbe7526caed7e76843d786606cb',
-    apiUrl: 'http://187.77.209.63:8080/api/v1',
-    apiKey: '',   // Basic auth used for now via LeadCapture (no key needed)
-    enabled: true
-  };
+  var CRM_CONFIG = { apiUrl: '/admin/api/v1/ingest', enabled: true };
 
   /* ─── Toast Notifications ─── */
   function showToast(msg, type) {
@@ -2125,28 +2054,28 @@ footer {
 
   /* ─── Product Modal + PayPal ─── */
   var allProducts = [
-    {name:'Love You', price:150, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710955832409-NTYZOZ92F2HM70NAB5XY/OB0_7441.jpg?format=750w'},
-    {name:'Just Peachy', price:132, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710950041560-NYBFXXCGSQJ886TF3KMI/OB0_7537.jpg?format=750w'},
-    {name:'Long Weekend', price:120, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710956901960-IEGTBL5C4BCNTYNV3D21/OB0_7721.jpg?format=750w'},
-    {name:'Coffee Lover', price:145, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710950483349-NP0LODMGLBEGLBNGXVSW/OB0_7584.jpg?format=750w'},
-    {name:'Zen', price:145, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1710733325939-P40KAI02CYAS9KLOU3FX/OB0_7512.JPG?format=750w'},
-    {name:'The Hostess', price:175, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650427747735-WJ4ZDMS7V0Q6XJRN9QKQ/0B0_5612.jpg?format=750w'},
-    {name:"Host's Delight - Rose", price:105, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650421814586-WKKDUNT3YPT976PEIE0O/0B0_5453.jpg?format=750w'},
-    {name:'Nightcap Essentials', price:120, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650299425040-JBEO6JMJXI2IGE160AC5/0B0_5067.jpg?format=750w'},
-    {name:'Lemonade', price:120, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650684551728-7VLJKITAU34QYBRL7IS0/0B0_5827.jpg?format=750w'},
-    {name:'Sunshine', price:105, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650682799836-HEJXVFJ9OC8N5POAKVK3/0B0_5699.JPG?format=750w'},
-    {name:'Cheers', price:145, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650297850985-NUID3LTF6V61MYCSIXCS/0B0_4910.jpg?format=750w'},
-    {name:'Renewed Deluxe', price:150, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650298510889-IXSS9N5FELY2SW73VOUY/0B0_5137.jpg?format=750w'},
-    {name:'Welcome Home', price:125, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650331580428-K0E9GJLFRDLQ3XI631PF/0B0_5183.jpg?format=750w'},
-    {name:'Home Sweet Home', price:170, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1650297166055-D72O6QBNL68DOIAKO7O9/0B0_4712.jpg?format=750w'},
-    {name:'Manly', price:150, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1623806920071-XSOHBJ1ASLQ6I754ISMB/_MG_1812.jpg?format=750w'},
-    {name:'Goodnight', price:130, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1612907268372-OOM7U1AU4KRM2LHC9KD5/ob_1471.jpg?format=750w'},
-    {name:"Host's Delight - Green", price:105, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1605825272860-SYUHVO7YQICPF3L19JBH/OB_0299.jpg?format=750w'},
-    {name:'Celebrate', price:120, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1631543263959-MK239AMULDH1A6ORLUG6/0B0_2489.jpg?format=750w'},
-    {name:'NightTime Ritual', price:150, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1623799703361-1IHZJP3ANLMHIX2B43FM/_MG_1792.jpg?format=750w'},
-    {name:'Mini Spa Day', price:115, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1618449849038-4JTJ6MSJSS6EPJHNVRXO/IMG_9325.jpg?format=750w'},
-    {name:'Housewarming', price:110, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1590549728636-YS0R040QAU9LY938Q3LW/ob_6944.jpg?format=750w'},
-    {name:'Afternoon Tea', price:128, img:'https://images.squarespace-cdn.com/content/v1/5a35a8d129f187ac01aa178a/1618353481270-82HPFA92JWL78IKRPLMS/IMG_9730.jpg?format=750w'}
+    {name:'Love You', price:150, img:'assets/img/OB0_7441-750w.jpg'},
+    {name:'Just Peachy', price:132, img:'assets/img/OB0_7537-750w.jpg'},
+    {name:'Long Weekend', price:120, img:'assets/img/OB0_7721-750w.jpg'},
+    {name:'Coffee Lover', price:145, img:'assets/img/OB0_7584-750w.jpg'},
+    {name:'Zen', price:145, img:'assets/img/OB0_7512-750w.JPG'},
+    {name:'The Hostess', price:175, img:'assets/img/0B0_5612-750w.jpg'},
+    {name:"Host's Delight - Rose", price:105, img:'assets/img/0B0_5453-750w.jpg'},
+    {name:'Nightcap Essentials', price:120, img:'assets/img/0B0_5067-750w.jpg'},
+    {name:'Lemonade', price:120, img:'assets/img/0B0_5827-750w.jpg'},
+    {name:'Sunshine', price:105, img:'assets/img/0B0_5699-750w.JPG'},
+    {name:'Cheers', price:145, img:'assets/img/0B0_4910-750w.jpg'},
+    {name:'Renewed Deluxe', price:150, img:'assets/img/0B0_5137-750w.jpg'},
+    {name:'Welcome Home', price:125, img:'assets/img/0B0_5183-750w.jpg'},
+    {name:'Home Sweet Home', price:170, img:'assets/img/0B0_4712-750w.jpg'},
+    {name:'Manly', price:150, img:'assets/img/_MG_1812-750w.jpg'},
+    {name:'Goodnight', price:130, img:'assets/img/ob_1471-750w.jpg'},
+    {name:"Host's Delight - Green", price:105, img:'assets/img/OB_0299-750w.jpg'},
+    {name:'Celebrate', price:120, img:'assets/img/0B0_2489-750w.jpg'},
+    {name:'NightTime Ritual', price:150, img:'assets/img/_MG_1792-750w.jpg'},
+    {name:'Mini Spa Day', price:115, img:'assets/img/IMG_9325-750w.jpg'},
+    {name:'Housewarming', price:110, img:'assets/img/ob_6944-750w.jpg'},
+    {name:'Afternoon Tea', price:128, img:'assets/img/IMG_9730-750w.jpg'}
   ];
 
   var currentProduct = null;
@@ -2202,28 +2131,37 @@ footer {
         onApprove: function(data, actions) {
           return actions.order.capture().then(function(details) {
             closeModal();
-            showToast('Order confirmed! Thank you, ' + details.payer.name.given_name + '.', 'success');
+            // Guest checkout / some funding sources return a payer without a name object.
+            var payer = (details && details.payer) || {};
+            var given = (payer.name && payer.name.given_name) || '';
+            showToast('Order confirmed! Thank you' + (given ? ', ' + given : '') + '.', 'success');
 
-            // Create GiftBoxOrder in EspoCRM if configured
+            // Record the order in the OccasionsBox CRM (payment itself already succeeded)
             if (CRM_CONFIG.enabled && CRM_CONFIG.apiUrl) {
               var qty = parseInt(document.getElementById('modalQty').value) || 1;
-              fetch(CRM_CONFIG.apiUrl + '/GiftBoxOrder', {
+              var payerName = [payer.name && payer.name.given_name, payer.name && payer.name.surname]
+                .filter(Boolean).join(' ');
+              fetch(CRM_CONFIG.apiUrl + '/order', {
                 method: 'POST',
-                headers: {
-                  'X-Api-Key': CRM_CONFIG.apiKey,
-                  'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  name: currentProduct.name + ' - Order #' + data.orderID,
                   productName: currentProduct.name,
                   amount: currentProduct.price * qty,
                   quantity: qty,
+                  currency: 'USD',
                   paypalOrderId: data.orderID,
-                  payerEmail: details.payer.email_address,
-                  payerName: details.payer.name.given_name + ' ' + details.payer.name.surname,
-                  status: 'Paid'
+                  payerEmail: payer.email_address || '',
+                  payerName: payerName,
+                  status: 'paid'
                 })
-              }).catch(function() {});
+              })
+              .then(function(res) {
+                if (!res.ok) throw new Error('CRM order ingest failed: HTTP ' + res.status);
+              })
+              .catch(function(err) {
+                console.error('Order recorded by PayPal but not by the CRM:', err);
+                showToast('Order received — we\'ll confirm by email', 'success');
+              });
             }
           });
         },
@@ -2266,98 +2204,76 @@ footer {
     });
   });
 
-  /* ─── Contact Form → EspoCRM Lead ─── */
+  /* ─── Contact Form → CRM Lead ─── */
   document.getElementById('contactForm').addEventListener('submit', function(e) {
     e.preventDefault();
     var btn = document.getElementById('contactBtn');
     var name = document.getElementById('contactName').value.trim();
     var email = document.getElementById('contactEmail').value.trim();
     var message = document.getElementById('contactMessage').value.trim();
+    var honeypot = document.getElementById('contactWebsite').value;
 
     if (!name || !email) return;
 
     btn.classList.add('btn-loading');
     btn.textContent = 'Sending...';
 
-    if (CRM_CONFIG.enabled && CRM_CONFIG.leadCaptureUrl) {
-      fetch(CRM_CONFIG.leadCaptureUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: name.split(' ')[0],
-          lastName: name.split(' ').slice(1).join(' ') || '-',
-          emailAddress: email,
-          description: message,
-          source: 'Web Site'
-        })
+    fetch(CRM_CONFIG.apiUrl + '/lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        emailAddress: email,
+        description: message,
+        website: honeypot,
+        source: 'web_form'
       })
-      .then(function() {
-        showToast('Message sent! We\'ll get back to you soon.', 'success');
-        document.getElementById('contactForm').reset();
-      })
-      .catch(function() {
-        showToast('Sent! We\'ll be in touch.', 'success');
-        document.getElementById('contactForm').reset();
-      })
-      .finally(function() {
-        btn.classList.remove('btn-loading');
-        btn.textContent = 'Send Message';
-      });
-    } else {
-      // CRM not configured yet — show success and log
-      setTimeout(function() {
-        showToast('Message sent! We\'ll get back to you soon.', 'success');
-        document.getElementById('contactForm').reset();
-        btn.classList.remove('btn-loading');
-        btn.textContent = 'Send Message';
-        console.log('Contact form submitted (CRM pending):', { name: name, email: email, message: message });
-      }, 800);
-    }
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      showToast('Message sent! We\'ll get back to you soon.', 'success');
+      document.getElementById('contactForm').reset();
+    })
+    .catch(function(err) {
+      console.error('Contact form submit failed:', err);
+      showToast('Something went wrong — email Hello@occasionsbox.com', 'error');
+    })
+    .finally(function() {
+      btn.classList.remove('btn-loading');
+      btn.textContent = 'Send Message';
+    });
   });
 
-  /* ─── Newsletter Form → EspoCRM Lead ─── */
+  /* ─── Newsletter Form → CRM Newsletter ─── */
   document.getElementById('newsletterForm').addEventListener('submit', function(e) {
     e.preventDefault();
     var btn = document.getElementById('newsletterBtn');
     var email = document.getElementById('newsletterEmail').value.trim();
+    var honeypot = document.getElementById('newsletterWebsite').value;
 
     if (!email) return;
 
     btn.classList.add('btn-loading');
     btn.textContent = 'Subscribing...';
 
-    if (CRM_CONFIG.enabled && CRM_CONFIG.leadCaptureUrl) {
-      fetch(CRM_CONFIG.leadCaptureUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: 'Newsletter',
-          lastName: 'Subscriber',
-          emailAddress: email,
-          source: 'Newsletter'
-        })
-      })
-      .then(function() {
-        showToast('Subscribed! Welcome to the list.', 'success');
-        document.getElementById('newsletterForm').reset();
-      })
-      .catch(function() {
-        showToast('Subscribed! Welcome to the list.', 'success');
-        document.getElementById('newsletterForm').reset();
-      })
-      .finally(function() {
-        btn.classList.remove('btn-loading');
-        btn.textContent = 'Subscribe';
-      });
-    } else {
-      setTimeout(function() {
-        showToast('Subscribed! Welcome to the list.', 'success');
-        document.getElementById('newsletterForm').reset();
-        btn.classList.remove('btn-loading');
-        btn.textContent = 'Subscribe';
-        console.log('Newsletter signup (CRM pending):', email);
-      }, 800);
-    }
+    fetch(CRM_CONFIG.apiUrl + '/newsletter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, website: honeypot })
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      showToast('Subscribed! Welcome to the list.', 'success');
+      document.getElementById('newsletterForm').reset();
+    })
+    .catch(function(err) {
+      console.error('Newsletter signup failed:', err);
+      showToast('Something went wrong — email Hello@occasionsbox.com', 'error');
+    })
+    .finally(function() {
+      btn.classList.remove('btn-loading');
+      btn.textContent = 'Subscribe';
+    });
   });
 
   /* ─── Concierge Billing Toggle ─── */
@@ -2375,50 +2291,6 @@ footer {
       el.textContent = mode === 'annual' ? 'per month (billed annually)' : 'per month';
     });
   };
-
-  /* ─── CRM Login Form ─── */
-  document.getElementById('crmLoginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    var btn = document.getElementById('crmLoginBtn');
-    var errEl = document.getElementById('crmError');
-    var user = document.getElementById('crmUser').value.trim();
-    var pass = document.getElementById('crmPass').value;
-
-    if (!user || !pass) return;
-
-    btn.classList.add('btn-loading');
-    btn.textContent = 'Signing in...';
-    errEl.style.display = 'none';
-
-    fetch('http://187.77.209.63:8080/api/v1/App/user', {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Basic ' + btoa(user + ':' + pass),
-        'Content-Type': 'application/json'
-      }
-    })
-    .then(function(resp) {
-      if (!resp.ok) throw new Error('auth');
-      return resp.json();
-    })
-    .then(function(data) {
-      if (data && data.user) {
-        showToast('Welcome, ' + (data.user.name || user) + '!', 'success');
-        setTimeout(function() {
-          window.open('http://187.77.209.63:8080', '_blank');
-        }, 500);
-      } else {
-        throw new Error('auth');
-      }
-    })
-    .catch(function() {
-      errEl.style.display = 'block';
-    })
-    .finally(function() {
-      btn.classList.remove('btn-loading');
-      btn.textContent = 'Sign In to CRM';
-    });
-  });
 
   /* ─── ScrollTrigger refresh after load ─── */
   window.addEventListener('load', function() {

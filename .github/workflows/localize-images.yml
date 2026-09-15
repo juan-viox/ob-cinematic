@@ -1,0 +1,66 @@
+name: Localize Squarespace images
+
+# Downloads every image listed in site/assets/img/manifest.tsv
+# (<local filename>\t<original URL>) into site/assets/img/ and commits
+# the result back to the branch the workflow was run from.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  localize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the calling ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Download images from manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          MANIFEST="site/assets/img/manifest.tsv"
+          DEST="site/assets/img"
+          test -f "$MANIFEST" || { echo "Missing $MANIFEST"; exit 1; }
+          mkdir -p "$DEST"
+          failed=0
+          while IFS=$'\t' read -r name url; do
+            [ -z "${name:-}" ] && continue
+            case "$name" in \#*) continue ;; esac
+            echo "-> $name  <=  $url"
+            if ! curl -fL --retry 3 --retry-delay 2 -sS -o "$DEST/$name" "$url"; then
+              echo "::error::Download failed for $name ($url)"
+              rm -f "$DEST/$name"
+              failed=1
+              continue
+            fi
+            if [ ! -s "$DEST/$name" ]; then
+              echo "::error::Downloaded file is empty: $name ($url)"
+              rm -f "$DEST/$name"
+              failed=1
+            fi
+          done < "$MANIFEST"
+          if [ "$failed" -ne 0 ]; then
+            echo "One or more downloads failed; see errors above."
+            exit 1
+          fi
+          ls -la "$DEST"
+
+      - name: Commit and push
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/assets/img
+          if git diff --cached --quiet; then
+            echo "Nothing changed; skipping commit."
+            exit 0
+          fi
+          git commit -m "Localize Squarespace images"
+          git push origin HEAD:${{ github.ref_name }}

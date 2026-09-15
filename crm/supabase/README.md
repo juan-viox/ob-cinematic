@@ -1,0 +1,66 @@
+# Supabase schema — OccasionsBox CRM
+
+Apply the migrations in **this exact order** in the Supabase SQL Editor
+(Dashboard → SQL Editor → New query → paste the file → Run), one file at a time,
+on a fresh project:
+
+| # | File | What it creates |
+|---|------|-----------------|
+| 1 | `migrations/001_initial_schema.sql` | Multi-tenant core: `organizations`, `profiles`, `companies`, `contacts`, `deal_stages`, `deals`, `activities`, `notes`, `tags`, `entity_tags`, `cinematic_sites`, `documents`, `get_user_org_id()`, RLS for all of them |
+| 2 | `migrations/002_org_branding_superadmin_v2.sql` | Branding columns on `organizations`, `super_admins` + `is_super_admin()` (referenced by later policies), `portal_users` |
+| 3 | `migrations/003_email_templates.sql` | `email_templates`, `products`, `invoices`, `invoice_items`, `workflows` (+ RLS) |
+| 4 | `migrations/004_custom_fields.sql` | `custom_field_definitions`, `custom_field_values` (+ RLS) |
+| 5 | `migrations/005_notifications.sql` | `notifications` (+ RLS) |
+| 6 | `migrations/006_occasionsbox.sql` | OccasionsBox alignment: role CHECK (owner/admin/member), extra contact sources, `organization_id` auto-fill trigger, `documents` columns + `documents` storage bucket, team-management policies on `profiles`, drops the VioX stage-seed trigger (stages come from `crm.config.ts`) |
+
+`006_occasionsbox.sql` is idempotent and can be re-run.
+
+Files that used to live here and must **not** be applied (deleted from the repo):
+
+- `001_standalone_schema.sql` — single-tenant schema for a different template
+  mode; the code uses the multi-tenant `001_initial_schema.sql`.
+- `002_org_branding_superadmin.sql` — superseded by `..._v2.sql` (same content
+  in idempotent form).
+
+## After the migrations
+
+1. **Auth → URL configuration**: Site URL `https://ob-crm-vio-x-bergsify.vercel.app/admin`,
+   redirect URLs `https://ob-crm-vio-x-bergsify.vercel.app/admin/auth/callback`
+   and `https://occasionsbox.com/admin/auth/callback`.
+2. **First sign-up becomes the owner.** `/signup` → `/api/auth/setup` creates the
+   `occasionsbox` organization (slug from `crm.config.ts`) and seeds the pipeline
+   stages (Inquiry → Quote Sent → Approved → Fulfillment → Delivered / Lost).
+   Every later account is invite-only (Settings → Team).
+3. The public ingest API (`/api/v1/ingest/*`) writes with the service role, which
+   bypasses RLS; it always sets `organization_id` explicitly.
+
+## How the schema maps to the code (audit summary)
+
+Tables referenced by `crm/src` (`.from('…')`): `activities`, `cinematic_sites`,
+`companies`, `contacts`, `custom_field_definitions`, `custom_field_values`,
+`deal_stages`, `deals`, `documents`, `email_templates`, `entity_tags`,
+`invoice_items`, `invoices`, `notes`, `notifications`, `organizations`,
+`products`, `profiles`, `tags`, `workflows`, plus the `documents` storage bucket.
+All exist after 001–006. Column-level gaps found and how they are handled:
+
+| Code | Schema gap | Resolution |
+|------|-----------|------------|
+| Client-side inserts into `companies`, `products`, `email_templates`, `workflows`, `custom_field_definitions`, `invoices`, `notes` without `organization_id` | column is NOT NULL + RLS `WITH CHECK` | `*_set_org` BEFORE INSERT trigger in 006 fills it from the caller's profile |
+| `FileAttachments` → `documents.contact_id/company_id/deal_id/file_url/file_type` | columns did not exist | added in 006, synced with `entity_type/entity_id/file_path/mime_type` |
+| `FileAttachments` → storage bucket `documents` | bucket did not exist | created (public read) with authenticated write/delete policies in 006 |
+| `/contacts/new` sources `cold_call`, `other` | not in `contacts.source` CHECK | CHECK extended in 006 |
+| Contacts / Leads tables render `contact.status` (`lead`/`active`/`inactive`) | column did not exist | `contacts.status` added in 006 (default `lead`) |
+| Settings → Team updates roles / deletes members | `profiles` only allowed self-update, no DELETE policy | `profiles_admin_update` / `profiles_admin_delete` in 006 |
+| `src/types` role union `owner|admin|member` | 002 added `viewer` | CHECK reset to owner/admin/member in 006 |
+| `activities.completed` (see below) | column does not exist (`status` / `completed_at` do) | **must be fixed in code** — see "Known code-side issues" |
+| `notes.contact_id` update in contact merge | `notes` is polymorphic (`entity_type`/`entity_id`) | **must be fixed in code** |
+
+### Known code-side issues (not solvable in SQL)
+
+- `activities` inserts with `completed: true` in
+  `src/app/api/v1/email/send/route.ts`, `src/app/api/v1/workflows/execute/route.ts`
+  and `src/app/api/v1/contacts/merge/route.ts` fail with "column completed does not
+  exist". Use `status: 'completed', completed_at: <now>` instead.
+- `src/app/api/v1/contacts/merge/route.ts` updates `notes.contact_id`; use
+  `.eq('entity_type','contact').eq('entity_id', duplicateId)` →
+  `{ entity_id: survivorId }` instead.
