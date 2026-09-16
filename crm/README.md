@@ -20,8 +20,9 @@ host-agnostic (relative `Location` headers that include the base path).
 ### 1. Supabase project
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open the SQL Editor and run the migrations **in order** (see
-   `supabase/README.md`):
+2. Open the SQL Editor and run `supabase/setup-all.sql` — it is all six
+   migrations concatenated in the right order, so one paste is enough on a new
+   project. To apply them one at a time instead (see `supabase/README.md`):
    1. `supabase/migrations/001_initial_schema.sql`
    2. `supabase/migrations/002_org_branding_superadmin_v2.sql`
    3. `supabase/migrations/003_email_templates.sql`

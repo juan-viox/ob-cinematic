@@ -1,8 +1,14 @@
 # Supabase schema — OccasionsBox CRM
 
-Apply the migrations in **this exact order** in the Supabase SQL Editor
-(Dashboard → SQL Editor → New query → paste the file → Run), one file at a time,
-on a fresh project:
+**Quickest path on a new, empty project:** paste `setup-all.sql` into the
+Supabase SQL Editor and run it once. It is the six migrations below concatenated
+in order, so there is nothing to sequence by hand. Do not run it against a
+database that already has the CRM schema — section 1 uses plain `CREATE TABLE`
+and will stop at the first table that exists. To update an older CRM database,
+run only `migrations/006_occasionsbox.sql`, which is idempotent.
+
+The individual migrations, in **this exact order**, if you would rather apply
+them one at a time (Dashboard → SQL Editor → New query → paste the file → Run):
 
 | # | File | What it creates |
 |---|------|-----------------|
