@@ -67,7 +67,7 @@ const PAGES = [
       h1: 'Gifting Should Feel Effortless',
       p: 'Every box is packed by hand with high-quality items and finished ready to give, so marking the moment takes one decision instead of ten.',
     },
-    sections: ['about', 'clients'],
+    sections: ['about', 'founders', 'clients'],
   },
   {
     slug: 'contact', url: '/contact', nav: 'contact',
