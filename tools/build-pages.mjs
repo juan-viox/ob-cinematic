@@ -37,12 +37,12 @@ const PAGES = [
   },
   {
     slug: 'shop', url: '/shop', nav: 'shop',
-    title: 'Shop All Boxes — Occasions Box',
-    desc: 'Browse our ready-to-ship curated gift boxes. Every box is hand-packed, gift-wrapped and sent with a handwritten note.',
+    title: 'Shop Ready-to-Gift Boxes — Occasions Box',
+    desc: 'Shop curated gift boxes that are already packed, ribboned and ready to send. Every box is hand-finished with a handwritten note.',
     header: {
-      eyebrow: 'Collections',
-      h1: 'Shop All Boxes',
-      p: 'Ready-to-ship gift boxes, hand-packed and finished with ribbon and a handwritten note. Need something bespoke? We build those too.',
+      eyebrow: 'Ready to Gift',
+      h1: 'Wrapped &amp; Waiting',
+      p: 'Curated boxes that are already packed, ribboned and finished with a handwritten note \u2014 pick one and it ships. Need something bespoke? We build those too.',
     },
     sections: ['products', 'shop'],
     modal: true, paypal: true,
