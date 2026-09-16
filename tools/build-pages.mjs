@@ -157,10 +157,22 @@ ${paypal}
 `;
 }
 
+/** An unclosed <!-- swallows the rest of the document, including the script
+ *  tag. Cheap to check, invisible in a browser until something silently dies. */
+function assertCommentsBalanced(slug, html) {
+  const open = (html.match(/<!--/g) || []).length;
+  const close = (html.match(/-->/g) || []).length;
+  if (open !== close) {
+    throw new Error(`${slug}: unbalanced HTML comments (${open} open, ${close} close)`);
+  }
+}
+
 let n = 0;
 for (const page of PAGES) {
   const out = `site/${page.slug}.html`;
-  writeFileSync(join(ROOT, out), render(page), 'utf8');
+  const html = render(page);
+  assertCommentsBalanced(page.slug, html);
+  writeFileSync(join(ROOT, out), html, 'utf8');
   console.log(`${out.padEnd(28)} ${page.url.padEnd(18)} ${page.sections.join(', ')}`);
   n++;
 }
