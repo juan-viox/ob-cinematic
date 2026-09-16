@@ -31,47 +31,47 @@ const WIDGETS = partial('widgets');
 const PAGES = [
   {
     slug: 'index', url: '/', nav: 'home',
-    title: 'Occasions Box — Custom Gifting, Thoughtfully Executed',
+    title: 'Occasions Box | Custom Gifting, Thoughtfully Executed',
     desc: 'Luxury custom gift curation and concierge gifting for corporate events, weddings and milestones. Now booking Holiday 2026.',
     sections: ['hero', 'mask', 'marquee', 'products', 'testimonials', 'clients', 'newsletter'],
   },
   {
     slug: 'shop', url: '/shop', nav: 'shop',
-    title: 'Shop Ready-to-Gift Boxes — Occasions Box',
+    title: 'Shop Ready-to-Gift Boxes | Occasions Box',
     desc: 'Shop curated gift boxes that are already packed, ribboned and ready to send. Every box is hand-finished with a handwritten note.',
     header: {
       eyebrow: 'Ready to Gift',
       h1: 'Wrapped &amp; Waiting',
-      p: 'Curated boxes that are already packed, ribboned and finished with a handwritten note \u2014 pick one and it ships. Need something bespoke? We build those too.',
+      p: 'Curated boxes that are already packed, ribboned and finished with a handwritten note; pick one and it ships. Need something bespoke? We build those too.',
     },
     sections: ['products', 'shop'],
     modal: true, paypal: true,
   },
   {
     slug: 'custom-gifting', url: '/custom-gifting', nav: 'custom-gifting',
-    title: 'Business + Custom Gifting — Occasions Box',
+    title: 'Business + Custom Gifting | Occasions Box',
     desc: 'Corporate and custom gifting concierge. Volume pricing, bespoke curation and full white-glove fulfilment for clients, teams and events.',
     header: {
       eyebrow: 'Business + Custom Gifting',
       h1: 'Gifting, Handled End to End',
-      p: 'We partner with you to create elevated, custom gift experiences for clients, teams and milestones — concept to delivery, handled by our concierge.',
+      p: 'We build custom gift programs for clients, teams and milestones, and our concierge handles them from concept to delivery.',
     },
     sections: ['howitworks', 'pricing', 'concierge'],
   },
   {
     slug: 'about', url: '/about', nav: 'about',
-    title: 'About Us — Occasions Box',
+    title: 'About Us | Occasions Box',
     desc: 'Occasions Box curates elevated, deeply personal gifts. Learn how we work and who we build for.',
     header: {
       eyebrow: 'About Us',
       h1: 'Gifting Should Feel Effortless',
-      p: 'Every box is thoughtfully curated with high-quality items, beautifully packaged and ready to gift — so you can mark the moments that matter without the stress.',
+      p: 'Every box is packed by hand with high-quality items and finished ready to give, so marking the moment takes one decision instead of ten.',
     },
     sections: ['about', 'clients'],
   },
   {
     slug: 'contact', url: '/contact', nav: 'contact',
-    title: 'Contact — Occasions Box',
+    title: 'Contact | Occasions Box',
     desc: 'Start a custom gift, request corporate pricing, or ask us anything. We reply within one business day.',
     header: {
       eyebrow: 'Get in Touch',
