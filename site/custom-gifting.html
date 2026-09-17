@@ -28,7 +28,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 </head>
-<body>
+<body class="page-custom-gifting">
 
 <!-- ═══ NAVIGATION ═══ -->
 <nav class="nav scrolled" id="mainNav">
@@ -38,6 +38,7 @@
   <div class="nav-links">
     <a href="/shop">Shop</a>
     <a href="/custom-gifting" class="active">Custom Gifting</a>
+    <a href="/concierge">Concierge</a>
     <a href="/about">About</a>
     <a href="/contact">Contact</a>
     <a href="/contact" class="nav-cta">Start Your Gift</a>
@@ -51,6 +52,7 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="/shop" onclick="toggleMobile()">Shop</a>
   <a href="/custom-gifting" onclick="toggleMobile()">Custom Gifting</a>
+  <a href="/concierge" onclick="toggleMobile()">Concierge</a>
   <a href="/about" onclick="toggleMobile()">About</a>
   <a href="/contact" onclick="toggleMobile()">Contact</a>
 </div>
@@ -195,113 +197,41 @@
     <div class="pricing-volume-item"><div class="qty">50+</div><div class="disc">15% Off</div></div>
     <div class="pricing-volume-item"><div class="qty">100+</div><div class="disc">Custom Quote</div></div>
   </div>
+
+  <div class="pricing-minimums fade-up">
+    <div class="pricing-minimum">
+      <div class="pm-label">Corporate &amp; event gifting</div>
+      <div class="pm-value">12 box minimum</div>
+      <div class="pm-note">Our tiers as they are, in your quantity. Volume pricing begins at 25.</div>
+    </div>
+    <div class="pricing-minimum">
+      <div class="pm-label">Fully bespoke projects</div>
+      <div class="pm-value">From $5,000</div>
+      <div class="pm-note">Custom sourcing, custom packaging and branding designed for you from scratch.</div>
+    </div>
+  </div>
 </section>
 
-<!-- ═══ SECTION 9: GIFTING CONCIERGE SUBSCRIPTION ═══ -->
-<section id="concierge">
-  <div class="concierge-header fade-up">
-    <div class="section-label">Gifting Concierge</div>
-    <h2 class="section-title">Never Miss an Occasion</h2>
-    <p class="section-body" style="margin:0 auto;text-align:center">We hold your gifting calendar for the year. We remember the dates, curate the boxes, write the notes and send them; you approve each one, or let them go automatically.</p>
-  </div>
-
-  <div class="concierge-toggle" id="billingToggle">
-    <button class="concierge-toggle-btn active" data-billing="monthly" onclick="toggleBilling('monthly')">Monthly</button>
-    <button class="concierge-toggle-btn" data-billing="annual" onclick="toggleBilling('annual')">Annual <span style="font-size:10px;color:var(--gold)">(Save 10%)</span></button>
-  </div>
-
-  <div class="concierge-grid">
-    <div class="concierge-card fade-up">
-      <div class="concierge-tier">Essential</div>
-      <div class="concierge-price" data-monthly="$199" data-annual="$179">$199</div>
-      <div class="concierge-period">per month</div>
-      <div class="concierge-annual" data-monthly="$2,388/year" data-annual="$2,148/year (save $240)">$2,388/year</div>
-      <div class="concierge-desc">For professionals gifting 1–2 times per month. Perfect for real estate agents and small practices.</div>
-      <ul class="concierge-features">
-        <li>Up to 2 curated boxes/month</li>
-        <li>Prestige tier boxes ($225 value)</li>
-        <li>Dedicated gifting calendar</li>
-        <li>25 recipient profiles</li>
-        <li>Handwritten note cards</li>
-        <li>Free standard shipping</li>
-        <li>Quarterly review call</li>
-      </ul>
-      <a href="/contact" class="concierge-cta">Start Concierge</a>
+<!-- ═══ CONCIERGE TEASER ═══ -->
+<section id="concierge-teaser">
+  <div class="ct-inner fade-up">
+    <div class="ct-copy">
+      <div class="section-label">Gifting Concierge</div>
+      <h2 class="section-title">Gift All Year, Decide Once</h2>
+      <p class="section-body">Most gifting goes wrong the same way: the date arrives before the gift does. We hold your calendar for the year, curate each box, write the notes and send them. You approve, or you let them go.</p>
+      <div class="ct-points">
+        <div class="ct-point">Every birthday, holiday and milestone mapped in advance</div>
+        <div class="ct-point">Preferences, allergies and style kept on file per recipient</div>
+        <div class="ct-point">Preview each box before it ships, or auto-send</div>
+      </div>
+      <a href="/concierge" class="ct-cta">See Concierge Plans</a>
     </div>
-
-    <div class="concierge-card featured fade-up">
-      <div class="concierge-tier">Professional</div>
-      <div class="concierge-price" data-monthly="$449" data-annual="$404">$449</div>
-      <div class="concierge-period">per month</div>
-      <div class="concierge-annual" data-monthly="$5,388/year" data-annual="$4,848/year (save $540)">$5,388/year</div>
-      <div class="concierge-desc">For active professionals gifting 3–5 times/month. Ideal for top agents, law firms, and corporate teams.</div>
-      <ul class="concierge-features">
-        <li>Up to 5 curated boxes/month</li>
-        <li>Prestige + Luxe tier boxes</li>
-        <li>Priority 48hr turnaround</li>
-        <li>75 recipient profiles</li>
-        <li>Custom branding on boxes</li>
-        <li>Free express shipping</li>
-        <li>Dedicated concierge contact</li>
-        <li>Monthly review calls</li>
-        <li>Unused boxes roll over</li>
-      </ul>
-      <a href="/contact" class="concierge-cta">Start Concierge</a>
-    </div>
-
-    <div class="concierge-card fade-up">
-      <div class="concierge-tier">Executive</div>
-      <div class="concierge-price" data-monthly="$899" data-annual="$809">$899</div>
-      <div class="concierge-period">per month</div>
-      <div class="concierge-annual" data-monthly="$10,788/year" data-annual="$9,708/year (save $1,080)">$10,788/year</div>
-      <div class="concierge-desc">White-glove concierge for high-volume gifters. Built for firms, practices, and executives.</div>
-      <ul class="concierge-features">
-        <li>Up to 12 curated boxes/month</li>
-        <li>All tiers including Grand</li>
-        <li>Same-day rush available</li>
-        <li>Unlimited recipient profiles</li>
-        <li>Full custom branding suite</li>
-        <li>Named personal concierge</li>
-        <li>Proactive occasion reminders</li>
-        <li>Bulk event support</li>
-        <li>Annual strategy session</li>
-        <li>VIP packaging upgrades</li>
-        <li>Rollover + 10% bonus credits</li>
-      </ul>
-      <a href="/contact" class="concierge-cta">Start Concierge</a>
-    </div>
-  </div>
-
-  <div class="concierge-includes fade-up">
-    <div class="concierge-include">
-      <div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-      <div class="title">Gifting Calendar</div>
-      <div class="desc">We map every birthday, holiday, and milestone for the whole year</div>
-    </div>
-    <div class="concierge-include">
-      <div class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-      <div class="title">Recipient Profiles</div>
-      <div class="desc">Preferences, allergies and style, kept on file for every recipient</div>
-    </div>
-    <div class="concierge-include">
-      <div class="icon"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
-      <div class="title">Preview & Approve</div>
-      <div class="desc">See each box before it ships, or let us auto-send</div>
-    </div>
-    <div class="concierge-include">
-      <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
-      <div class="title">Handwritten Notes</div>
-      <div class="desc">Personal touch on every single delivery</div>
-    </div>
-    <div class="concierge-include">
-      <div class="icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
-      <div class="title">Signature Packaging</div>
-      <div class="desc">Charcoal gray box, gold emboss, ivory ribbon</div>
-    </div>
-    <div class="concierge-include">
-      <div class="icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-      <div class="title">Quarterly Reviews</div>
-      <div class="desc">We update your calendar and plan the next season together</div>
+    <div class="ct-figure">
+      <div class="ct-plan">
+        <div class="ct-plan-label">From</div>
+        <div class="ct-plan-price">$199<span>/mo</span></div>
+        <div class="ct-plan-note">Up to 2 curated boxes a month, shipping included</div>
+      </div>
     </div>
   </div>
 </section>
@@ -322,7 +252,7 @@
     <div class="footer-col">
       <h4>Services</h4>
       <a href="/custom-gifting">Business + Custom Gifting</a>
-      <a href="/custom-gifting#concierge">Gifting Concierge</a>
+      <a href="/concierge">Gifting Concierge</a>
       <a href="/custom-gifting#how-it-works">How It Works</a>
       <a href="/about">About Us</a>
       <a href="/contact">Contact</a>

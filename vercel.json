@@ -5,18 +5,40 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    { "source": "/about-us-1", "destination": "/about", "permanent": true },
-    { "source": "/index.html", "destination": "/", "permanent": true }
+    {
+      "source": "/about-us-1",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/gifting-concierge",
+      "destination": "/concierge",
+      "permanent": true
+    }
   ],
   "rewrites": [
-    { "source": "/admin", "destination": "https://ob-crm-vio-x-bergsify.vercel.app/admin" },
-    { "source": "/admin/:path*", "destination": "https://ob-crm-vio-x-bergsify.vercel.app/admin/:path*" }
+    {
+      "source": "/admin",
+      "destination": "https://ob-crm-vio-x-bergsify.vercel.app/admin"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "https://ob-crm-vio-x-bergsify.vercel.app/admin/:path*"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
       ]
     }
   ]

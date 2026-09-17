@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gifting Concierge | Occasions Box</title>
+<meta name="description" content="A managed gifting calendar for the year. We remember the dates, curate the boxes, write the notes and send them. Plans from $199 a month.">
+<link rel="canonical" href="https://www.occasionsbox.com/concierge">
+<meta property="og:title" content="Gifting Concierge | Occasions Box">
+<meta property="og:description" content="A managed gifting calendar for the year. We remember the dates, curate the boxes, write the notes and send them. Plans from $199 a month.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.occasionsbox.com/concierge">
+<meta property="og:image" content="https://www.occasionsbox.com/assets/hero-holiday-2026.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css">
+<script>
+  /* Mark that JS is live so scroll-reveal content may start hidden, with a
+     failsafe that reveals it if the animation library never arrives. */
+  document.documentElement.className += ' anim';
+  window.__animFailsafe = setTimeout(function () {
+    document.documentElement.classList.remove('anim');
+  }, 2500);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body class="page-concierge">
+
+<!-- ═══ NAVIGATION ═══ -->
+<nav class="nav scrolled" id="mainNav">
+  <a href="/" class="nav-logo">
+    <img src="/assets/ob-logo-gold.png" alt="Occasions Box">
+  </a>
+  <div class="nav-links">
+    <a href="/shop">Shop</a>
+    <a href="/custom-gifting">Custom Gifting</a>
+    <a href="/concierge" class="active">Concierge</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+    <a href="/contact" class="nav-cta">Start Your Gift</a>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMobile()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="/shop" onclick="toggleMobile()">Shop</a>
+  <a href="/custom-gifting" onclick="toggleMobile()">Custom Gifting</a>
+  <a href="/concierge" onclick="toggleMobile()">Concierge</a>
+  <a href="/about" onclick="toggleMobile()">About</a>
+  <a href="/contact" onclick="toggleMobile()">Contact</a>
+</div>
+
+<!-- ═══ PAGE HEADER ═══ -->
+<header class="page-header">
+  <p class="eyebrow">Gifting Concierge</p>
+  <h1>Gift All Year, Decide Once</h1>
+  <p>Most gifting goes wrong the same way: the date arrives before the gift does. We hold the calendar, curate each box and send it, so the only thing left for you is to approve it.</p>
+</header>
+
+<!-- ═══ SECTION 9: GIFTING CONCIERGE SUBSCRIPTION ═══ -->
+<section id="concierge">
+  <div class="concierge-toggle" id="billingToggle">
+    <button class="concierge-toggle-btn active" data-billing="monthly" onclick="toggleBilling('monthly')">Monthly</button>
+    <button class="concierge-toggle-btn" data-billing="annual" onclick="toggleBilling('annual')">Annual <span style="font-size:10px;color:var(--gold)">(Save 10%)</span></button>
+  </div>
+
+  <div class="concierge-grid">
+    <div class="concierge-card fade-up">
+      <div class="concierge-tier">Essential</div>
+      <div class="concierge-price" data-monthly="$199" data-annual="$179">$199</div>
+      <div class="concierge-period">per month</div>
+      <div class="concierge-annual" data-monthly="$2,388/year" data-annual="$2,148/year (save $240)">$2,388/year</div>
+      <div class="concierge-desc">For professionals gifting 1–2 times per month. Perfect for real estate agents and small practices.</div>
+      <ul class="concierge-features">
+        <li>Up to 2 curated boxes/month</li>
+        <li>Prestige tier boxes ($225 value)</li>
+        <li>Dedicated gifting calendar</li>
+        <li>25 recipient profiles</li>
+        <li>Handwritten note cards</li>
+        <li>Free standard shipping</li>
+        <li>Quarterly review call</li>
+      </ul>
+      <a href="/contact" class="concierge-cta">Start Concierge</a>
+    </div>
+
+    <div class="concierge-card featured fade-up">
+      <div class="concierge-tier">Professional</div>
+      <div class="concierge-price" data-monthly="$449" data-annual="$404">$449</div>
+      <div class="concierge-period">per month</div>
+      <div class="concierge-annual" data-monthly="$5,388/year" data-annual="$4,848/year (save $540)">$5,388/year</div>
+      <div class="concierge-desc">For active professionals gifting 3–5 times/month. Ideal for top agents, law firms, and corporate teams.</div>
+      <ul class="concierge-features">
+        <li>Up to 5 curated boxes/month</li>
+        <li>Prestige + Luxe tier boxes</li>
+        <li>Priority 48hr turnaround</li>
+        <li>75 recipient profiles</li>
+        <li>Custom branding on boxes</li>
+        <li>Free express shipping</li>
+        <li>Dedicated concierge contact</li>
+        <li>Monthly review calls</li>
+        <li>Unused boxes roll over</li>
+      </ul>
+      <a href="/contact" class="concierge-cta">Start Concierge</a>
+    </div>
+
+    <div class="concierge-card fade-up">
+      <div class="concierge-tier">Executive</div>
+      <div class="concierge-price" data-monthly="$899" data-annual="$809">$899</div>
+      <div class="concierge-period">per month</div>
+      <div class="concierge-annual" data-monthly="$10,788/year" data-annual="$9,708/year (save $1,080)">$10,788/year</div>
+      <div class="concierge-desc">White-glove concierge for high-volume gifters. Built for firms, practices, and executives.</div>
+      <ul class="concierge-features">
+        <li>Up to 12 curated boxes/month</li>
+        <li>All tiers including Grand</li>
+        <li>Same-day rush available</li>
+        <li>Unlimited recipient profiles</li>
+        <li>Full custom branding suite</li>
+        <li>Named personal concierge</li>
+        <li>Proactive occasion reminders</li>
+        <li>Bulk event support</li>
+        <li>Annual strategy session</li>
+        <li>VIP packaging upgrades</li>
+        <li>Rollover + 10% bonus credits</li>
+      </ul>
+      <a href="/contact" class="concierge-cta">Start Concierge</a>
+    </div>
+  </div>
+
+  <div class="concierge-includes fade-up">
+    <div class="concierge-include">
+      <div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <div class="title">Gifting Calendar</div>
+      <div class="desc">We map every birthday, holiday, and milestone for the whole year</div>
+    </div>
+    <div class="concierge-include">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="title">Recipient Profiles</div>
+      <div class="desc">Preferences, allergies and style, kept on file for every recipient</div>
+    </div>
+    <div class="concierge-include">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+      <div class="title">Preview & Approve</div>
+      <div class="desc">See each box before it ships, or let us auto-send</div>
+    </div>
+    <div class="concierge-include">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
+      <div class="title">Handwritten Notes</div>
+      <div class="desc">Personal touch on every single delivery</div>
+    </div>
+    <div class="concierge-include">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+      <div class="title">Signature Packaging</div>
+      <div class="desc">Charcoal gray box, gold emboss, ivory ribbon</div>
+    </div>
+    <div class="concierge-include">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+      <div class="title">Quarterly Reviews</div>
+      <div class="desc">We update your calendar and plan the next season together</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <img src="/assets/ob-logo-gold.png" alt="Occasions Box" style="height:28px;opacity:0.9">
+      <p>Custom gifting, thoughtfully executed. Premium curated gift boxes for every occasion.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <a href="/shop">All Gift Boxes</a>
+      <a href="/shop#products">Collections</a>
+      <a href="/custom-gifting#pricing">Pricing</a>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <a href="/custom-gifting">Business + Custom Gifting</a>
+      <a href="/concierge">Gifting Concierge</a>
+      <a href="/custom-gifting#how-it-works">How It Works</a>
+      <a href="/about">About Us</a>
+      <a href="/contact">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Connect</h4>
+      <a href="https://instagram.com/occasionsbox" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://pinterest.com/occasionsbox" target="_blank" rel="noopener">Pinterest</a>
+      <a href="mailto:Hello@occasionsbox.com">Email Us</a>
+      <a href="tel:+15512457492">(551) 245-7492</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 Occasions Box. All rights reserved. <a href="/admin/login" rel="nofollow" class="footer-team-login">Team login</a></p>
+    <div class="footer-social">
+      <a href="https://instagram.com/occasionsbox" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+      <a href="https://pinterest.com/occasionsbox" target="_blank" rel="noopener" aria-label="Pinterest"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>
+      <a href="mailto:Hello@occasionsbox.com" aria-label="Email"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- PayPal SDK (Sandbox) -->
+<!-- SANDBOX — replace client-id=sb with the live PayPal client ID before launch -->
+<script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&intent=capture" data-namespace="paypalSDK"></script>
+
+<!-- ElevenLabs ConvAI Widget -->
+<elevenlabs-convai agent-id="agent_3101kn8rkd7heb0rt2p5gtfqjf3a"></elevenlabs-convai>
+<script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+
+<script src="/assets/js/site.js"></script>
+
+</body>
+</html>

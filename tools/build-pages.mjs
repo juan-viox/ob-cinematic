@@ -33,7 +33,7 @@ const PAGES = [
     slug: 'index', url: '/', nav: 'home',
     title: 'Occasions Box | Custom Gifting, Thoughtfully Executed',
     desc: 'Luxury custom gift curation and concierge gifting for corporate events, weddings and milestones. Now booking Holiday 2026.',
-    sections: ['hero', 'mask', 'marquee', 'products', 'testimonials', 'clients', 'newsletter'],
+    sections: ['hero', 'mask', 'marquee', 'products', 'concierge-teaser', 'testimonials', 'clients', 'newsletter'],
   },
   {
     slug: 'shop', url: '/shop', nav: 'shop',
@@ -56,7 +56,18 @@ const PAGES = [
       h1: 'Gifting, Handled End to End',
       p: 'We build custom gift programs for clients, teams and milestones, and our concierge handles them from concept to delivery.',
     },
-    sections: ['howitworks', 'pricing', 'concierge'],
+    sections: ['howitworks', 'pricing', 'concierge-teaser'],
+  },
+  {
+    slug: 'concierge', url: '/concierge', nav: 'concierge',
+    title: 'Gifting Concierge | Occasions Box',
+    desc: 'A managed gifting calendar for the year. We remember the dates, curate the boxes, write the notes and send them. Plans from $199 a month.',
+    header: {
+      eyebrow: 'Gifting Concierge',
+      h1: 'Gift All Year, Decide Once',
+      p: 'Most gifting goes wrong the same way: the date arrives before the gift does. We hold the calendar, curate each box and send it, so the only thing left for you is to approve it.',
+    },
+    sections: ['concierge'],
   },
   {
     slug: 'about', url: '/about', nav: 'about',
@@ -88,6 +99,7 @@ const navFor = (page) => {
     .replaceAll('{{NAV_SCROLLED}}', page.nav === 'home' ? '' : ' scrolled')
     .replaceAll('{{A_SHOP}}', mark('shop'))
     .replaceAll('{{A_CUSTOM}}', mark('custom-gifting'))
+    .replaceAll('{{A_CONCIERGE}}', mark('concierge'))
     .replaceAll('{{A_ABOUT}}', mark('about'))
     .replaceAll('{{A_CONTACT}}', mark('contact'));
 };
@@ -140,7 +152,7 @@ function render(page) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 </head>
-<body${page.nav === 'home' ? ' class="home"' : ''}>
+<body class="${page.nav === 'home' ? 'home' : `page-${page.slug}`}">
 
 ${navFor(page)}
 ${headerFor(page)}
