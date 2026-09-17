@@ -1170,7 +1170,12 @@ body.page-concierge #concierge { padding-top: 64px; }
   color: var(--text); line-height: 1; margin-bottom: 2px;
 }
 .concierge-period { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
-.concierge-annual { font-size: 12px; color: var(--gold); font-weight: 500; margin-bottom: 18px; }
+/* Carries the yearly figure plus the perk annual billing earns, so it has
+   to sit on two lines without crowding the description under it. */
+.concierge-annual {
+  font-size: 12px; color: var(--gold); font-weight: 500;
+  line-height: 1.5; margin-bottom: 18px; min-height: 2.2em;
+}
 .concierge-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
 .concierge-features { list-style: none; padding: 0; margin-bottom: 24px; }
 .concierge-features li {
