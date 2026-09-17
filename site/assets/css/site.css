@@ -717,8 +717,8 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 .contact-form button:hover { background: var(--gold-dark); }
 .contact-info { padding-top: 8px; }
 .contact-item {
-  display: flex; align-items: flex-start; gap: 16px;
-  margin-bottom: 28px;
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 20px;
 }
 .contact-item-icon {
   width: 40px; height: 40px; border-radius: 50%;
@@ -726,15 +726,29 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   display: flex; align-items: center; justify-content: center;
   font-size: 18px; flex-shrink: 0;
 }
-.contact-item-label {
-  font-family: var(--sans); font-size: 12px; font-weight: 500;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 4px;
-}
 .contact-item-value {
   font-family: var(--serif); font-size: 18px; font-weight: 400;
   color: var(--text);
 }
+/* The three brand marks, no captions. Same gold discs as the rows above so
+   the column still reads as one list. */
+.contact-socials { display: flex; gap: 14px; margin-top: 34px; }
+.contact-socials a {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--gold-bg); color: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.25s, color 0.25s;
+}
+.contact-socials a:hover { background: var(--gold); color: #fff; }
+.contact-socials a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+/* Same outline treatment as the icons above; currentColor so they invert
+   on hover. The Pinterest mark is a solid glyph, not an outline. */
+.contact-socials svg {
+  width: 19px; height: 19px;
+  fill: none; stroke: currentColor; stroke-width: 1.5;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.contact-socials svg.is-solid { fill: currentColor; stroke: none; }
 .contact-item-value a { color: var(--gold); }
 .contact-item-value a:hover { text-decoration: underline; }
 
