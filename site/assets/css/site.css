@@ -851,6 +851,12 @@ footer {
    would anchor the wrong way. The buyer still learns they exist. */
 /* Bounds what "local" and "white-glove" commit us to, directly under the
    delivery add-on rather than in fine print somewhere else. */
+/* The under-12 route out of this card has to look clickable. */
+.pm-note a {
+  color: var(--gold); border-bottom: 1px solid rgba(197,165,90,0.35);
+  transition: border-color 0.2s;
+}
+.pm-note a:hover { border-bottom-color: var(--gold); }
 .pa-note {
   max-width: 560px; margin: 20px auto 0; text-align: center;
   font-size: 12.5px; line-height: 1.6; color: var(--muted);

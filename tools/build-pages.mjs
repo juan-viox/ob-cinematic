@@ -50,7 +50,7 @@ const PAGES = [
   {
     slug: 'custom-gifting', url: '/custom-gifting', nav: 'custom-gifting',
     title: 'Business + Custom Gifting | Occasions Box',
-    desc: 'Corporate and custom gifting concierge. Volume pricing, bespoke curation and full white-glove fulfilment for clients, teams and events.',
+    desc: 'Corporate and custom gifting concierge. Volume pricing, bespoke curation and end-to-end fulfilment for clients, teams and events.',
     header: {
       eyebrow: 'Business + Custom Gifting',
       h1: 'Gifting, Handled End to End',
