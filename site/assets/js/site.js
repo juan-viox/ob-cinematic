@@ -148,12 +148,12 @@
   var allProducts = [
     {name:'Love You', price:150, img: '/assets/img/OB0_7441-750w.jpg'},
     {name:'Peaches & Cream', price:132, img: '/assets/img/OB0_7537-750w.jpg'},
-    {name:'Spa Weekend', price:120, img: '/assets/img/OB0_7721-750w.jpg'},
+    {name:'Spa Weekend', note:"Contains eucalyptus mint body wash and lemon curd biscuits.", price:120, img: '/assets/img/OB0_7721-750w.jpg'},
     {name:'Coffee Lover', price:145, img: '/assets/img/OB0_7584-750w.jpg'},
     {name:'The Reset', price:145, img: '/assets/img/OB0_7512-750w.jpg'},
-    {name:'The Dinner Party', price:175, img: '/assets/img/0B0_5612-750w.jpg'},
+    {name:'The Dinner Party', note:"Contains almond cookies (tree nuts).", price:175, img: '/assets/img/0B0_5612-750w.jpg'},
     {name:"Host's Delight - Rose", price:105, img: '/assets/img/0B0_5453-750w.jpg'},
-    {name:'The Nightcap', price:120, img: '/assets/img/0B0_5067-750w.jpg'},
+    {name:'The Nightcap', note:"Contains almond cookies (tree nuts).", price:120, img: '/assets/img/0B0_5067-750w.jpg'},
     {name:'Lemonade', price:120, img: '/assets/img/0B0_5827-750w.jpg'},
     {name:'Bright Side', price:105, img: '/assets/img/0B0_5699-750w.jpg'},
     {name:'Cheers', price:145, img: '/assets/img/0B0_4910-750w.jpg'},
@@ -165,9 +165,9 @@
     {name:"Host's Delight - Green", price:105, img: '/assets/img/OB_0299-750w.jpg'},
     {name:'Uncorked', price:120, img: '/assets/img/0B0_2489-750w.jpg'},
     {name:'The Wind Down', price:150, img: '/assets/img/_MG_1792-750w.jpg'},
-    {name:'Mini Spa Day', price:115, img: '/assets/img/IMG_9325-750w.jpg'},
+    {name:'Mini Spa Day', note:"Contains essential oils and a clay mask. Not suitable as a gift for someone who is pregnant or nursing \u2014 tell us and we will swap the bath products for something safe.", price:115, img: '/assets/img/IMG_9325-750w.jpg'},
     {name:'First Night In', price:110, img: '/assets/img/ob_6944-750w.jpg'},
-    {name:'Afternoon Tea', price:128, img: '/assets/img/IMG_9730-750w.jpg'}
+    {name:'Afternoon Tea', note:"Contains almond cookies (tree nuts).", price:128, img: '/assets/img/IMG_9730-750w.jpg'}
   ];
 
   var currentProduct = null;
@@ -182,6 +182,12 @@
     document.getElementById('modalName').textContent = product.name;
     document.getElementById('modalPrice').textContent = '$' + product.price.toFixed(2);
     document.getElementById('modalQty').value = 1;
+
+    var caution = document.getElementById('modalCaution');
+    if (caution) {
+      caution.textContent = product.note || '';
+      caution.hidden = !product.note;
+    }
 
     var contents = PRODUCT_CONTENTS[product.name];
     var list = document.getElementById('modalContents');

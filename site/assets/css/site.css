@@ -349,6 +349,12 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   background: var(--bg); border: 1px solid var(--border);
   transition: all 0.3s ease; cursor: pointer;
 }
+.modal-caution {
+  font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
+  color: var(--text-light); margin: 14px 0 0;
+  padding: 10px 14px; border-left: 2px solid var(--gold);
+  background: var(--gold-bg); border-radius: 0 4px 4px 0;
+}
 .modal-sub {
   font-family: var(--sans); font-size: 12px; line-height: 1.6;
   color: var(--muted); margin: 14px 0 0;
