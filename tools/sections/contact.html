@@ -1,17 +1,99 @@
 <!-- ═══ SECTION 9: CONTACT ═══ -->
+<section id="how-we-start">
+  <div class="hws-header fade-up">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Three Steps to a Proposal</h2>
+  </div>
+  <div class="hws-steps fade-up">
+    <div class="hws-step">
+      <div class="hws-num">01</div>
+      <div class="hws-title">Submit Your Request</div>
+      <div class="hws-desc">Share the occasion, the quantity, your timeline and your budget per gift using the form below.</div>
+    </div>
+    <div class="hws-step">
+      <div class="hws-num">02</div>
+      <div class="hws-title">Concierge Call</div>
+      <div class="hws-desc">We schedule a short call to understand who you are gifting, and why.</div>
+    </div>
+    <div class="hws-step">
+      <div class="hws-num">03</div>
+      <div class="hws-title">Curated Proposal</div>
+      <div class="hws-desc">Within about a week you receive a curated proposal with options at more than one price point.</div>
+    </div>
+  </div>
+</section>
+
 <section id="contact">
   <div class="contact-grid">
     <div class="fade-up">
-      <div class="section-label">Get in Touch</div>
-      <h2 class="section-title">Let's Create Something Special</h2>
-      <form class="contact-form" id="contactForm">
-        <input type="text" placeholder="Your Name" required id="contactName">
-        <input type="email" placeholder="Email Address" required id="contactEmail">
-        <textarea placeholder="Tell us about your gifting needs..." id="contactMessage"></textarea>
+      <div class="section-label">Start Your Custom Gifting Experience</div>
+      <h2 class="section-title">Tell Us About the Occasion</h2>
+      <p class="section-body" style="margin-bottom:28px">Tell us a bit about what you need and our concierge team will be in touch within one business day.</p>
+
+      <form class="contact-form" id="contactForm" novalidate>
+        <div class="cf-row">
+          <label class="cf-field">
+            <span class="cf-label">First name <em>required</em></span>
+            <input type="text" id="contactFirst" autocomplete="given-name" required>
+          </label>
+          <label class="cf-field">
+            <span class="cf-label">Last name <em>required</em></span>
+            <input type="text" id="contactLast" autocomplete="family-name" required>
+          </label>
+        </div>
+
+        <label class="cf-field">
+          <span class="cf-label">Company name</span>
+          <input type="text" id="contactCompany" autocomplete="organization">
+        </label>
+
+        <div class="cf-row">
+          <label class="cf-field">
+            <span class="cf-label">Email <em>required</em></span>
+            <input type="email" id="contactEmail" autocomplete="email" required>
+          </label>
+          <label class="cf-field">
+            <span class="cf-label">Phone</span>
+            <input type="tel" id="contactPhone" autocomplete="tel">
+          </label>
+        </div>
+
+        <fieldset class="cf-field cf-fieldset">
+          <legend class="cf-label">Tell us about your occasion</legend>
+          <div class="cf-checks">
+            <label><input type="checkbox" name="occasion" value="Wedding"><span>Wedding</span></label>
+            <label><input type="checkbox" name="occasion" value="Event favors"><span>Event favors</span></label>
+            <label><input type="checkbox" name="occasion" value="Special occasion"><span>Special occasion</span></label>
+            <label><input type="checkbox" name="occasion" value="Holiday"><span>Holiday</span></label>
+            <label><input type="checkbox" name="occasion" value="Corporate"><span>Corporate</span></label>
+            <label><input type="checkbox" name="occasion" value="Individual gift"><span>Individual gift</span></label>
+            <label><input type="checkbox" name="occasion" value="Other"><span>Other</span></label>
+          </div>
+        </fieldset>
+
+        <div class="cf-row">
+          <label class="cf-field">
+            <span class="cf-label">How many gifts <em>required</em></span>
+            <input type="text" id="contactQty" inputmode="numeric" placeholder="e.g. 80" required>
+          </label>
+          <label class="cf-field">
+            <span class="cf-label">Budget per gift <em>required</em></span>
+            <input type="text" id="contactBudget" placeholder="e.g. $150" required>
+          </label>
+        </div>
+
+        <label class="cf-field">
+          <span class="cf-label">What do you have in mind? <em>required</em></span>
+          <span class="cf-help">Questions? Email us directly at <a href="mailto:Collaborate@occasionsbox.com">Collaborate@occasionsbox.com</a>.</span>
+          <textarea id="contactMessage" rows="5" required></textarea>
+        </label>
+
         <input type="text" name="hp_website_url" id="contactWebsite" class="hp-field" autocomplete="new-password" data-lpignore="true" data-1p-ignore data-form-type="other" tabindex="-1" aria-hidden="true">
-        <button type="submit" id="contactBtn">Send Message</button>
+        <p class="cf-error" id="contactError" role="alert" hidden></p>
+        <button type="submit" id="contactBtn">Submit Request</button>
       </form>
     </div>
+
     <div class="contact-info fade-up">
       <div class="contact-item">
         <div class="contact-item-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>

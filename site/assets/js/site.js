@@ -393,12 +393,52 @@
   if (contactFormEl) contactFormEl.addEventListener('submit', function(e) {
     e.preventDefault();
     var btn = document.getElementById('contactBtn');
-    var name = document.getElementById('contactName').value.trim();
-    var email = document.getElementById('contactEmail').value.trim();
-    var message = document.getElementById('contactMessage').value.trim();
-    var honeypot = document.getElementById('contactWebsite').value;
+    var err = document.getElementById('contactError');
+    var val = function(id) {
+      var el = document.getElementById(id);
+      return el ? el.value.trim() : '';
+    };
 
-    if (!name || !email) return;
+    var first   = val('contactFirst');
+    var last    = val('contactLast');
+    var email   = val('contactEmail');
+    var phone   = val('contactPhone');
+    var company = val('contactCompany');
+    var qty     = val('contactQty');
+    var budget  = val('contactBudget');
+    var message = val('contactMessage');
+    var honeypot = val('contactWebsite');
+
+    var occasions = [];
+    contactFormEl.querySelectorAll('input[name="occasion"]:checked')
+      .forEach(function(c) { occasions.push(c.value); });
+
+    var missing = [];
+    if (!first) missing.push('first name');
+    if (!last) missing.push('last name');
+    if (!email) missing.push('email');
+    if (!qty) missing.push('how many gifts');
+    if (!budget) missing.push('budget per gift');
+    if (!message) missing.push('what you have in mind');
+    if (missing.length) {
+      if (err) {
+        err.textContent = 'Please fill in: ' + missing.join(', ') + '.';
+        err.hidden = false;
+      }
+      return;
+    }
+    if (err) err.hidden = true;
+
+    /* The CRM's lead endpoint takes a single free-text description, so the
+       structured answers are folded into it as labelled lines rather than
+       lost. Whoever picks the lead up reads them in one block. */
+    var description = [
+      occasions.length ? 'Occasion: ' + occasions.join(', ') : null,
+      qty ? 'Quantity: ' + qty : null,
+      budget ? 'Budget per gift: ' + budget : null,
+      '',
+      message
+    ].filter(function(line) { return line !== null; }).join('\n');
 
     btn.classList.add('btn-loading');
     btn.textContent = 'Sending...';
@@ -407,25 +447,28 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: name,
+        firstName: first,
+        lastName: last,
         emailAddress: email,
-        description: message,
+        phone: phone,
+        company: company,
+        description: description,
         website: honeypot,
         source: 'web_form'
       })
     })
     .then(function(res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      showToast('Message sent! We\'ll get back to you soon.', 'success');
-      document.getElementById('contactForm').reset();
+      showToast('Request sent. We\'ll be in touch within one business day.', 'success');
+      contactFormEl.reset();
     })
-    .catch(function(err) {
-      console.error('Contact form submit failed:', err);
+    .catch(function(error) {
+      console.error('Contact form submit failed:', error);
       showToast('Something went wrong — email Hello@occasionsbox.com', 'error');
     })
     .finally(function() {
       btn.classList.remove('btn-loading');
-      btn.textContent = 'Send Message';
+      btn.textContent = 'Submit Request';
     });
   });
 
