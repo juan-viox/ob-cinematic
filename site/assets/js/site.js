@@ -142,7 +142,7 @@
   var PRODUCT_CONTENTS = {
     "Love You": ["<b>Leather Wristlet</b> | Camel", "<b>Twin Sparrow</b> | \u201cLove You\u201d script keychain", "<b>Ramona &amp; Ruth</b> | Soft blush slim notebook", "<b>Vinoos</b> | Vegan wine gummies, 13 units | no alcohol, gluten, fat, nuts, gelatine or lactose", "<b>P.F. Candle Co.</b> | Soy candle, 7.2oz | Sunbloom", "<b>OB</b> | Mini signature matches, white tip", "<b>OB</b> | Gold ballpoint pen", "Occasions Box keepsake box | 11\u2033 &times; 8.66\u2033 &times; 4.33\u2033", "A handwritten card of your choice"],
     "Peaches & Cream": ["<b>Towel</b> | Hand-loomed Turkish hand or face towel | coral and white", "<b>Uber Star</b> | Reusable glass travel coffee cup, 12oz | silicone sleeve and matching lid in blush pink", "<b>OB Bath Sponge</b> | Fee sea sponge", "<b>Candlefolk</b> | Gold travel candle, 4oz | Juniper &amp; Mint", "<b>Fruition Chocolate Works</b> | Vanilla bean toasted white | Dominican chocolate, 38% cocoa", "<b>OB</b> | Mimi matches, red tip", "Occasions Box keepsake box | 11\u2033 &times; 8.66\u2033 &times; 4.33\u2033", "A handwritten card of your choice"],
-    "Host's Delight - Rose": ["<b>Madeira Housewares</b> | Teak edge-grain chop block, 8\u2033 &times; 8\u2033 &times; 1.25\u2033", "<b>OB x Beautea Studio</b> | Organic rose mint loose-leaf tea", "<b>The Bee Box</b> | Mini specialty honey jar, 4oz | USDA certified organic", "<b>Three Blue Birds</b> | Swedish dishcloths, 2 count | absorbs 20&times; its weight, replaces 17 rolls of paper towels | 70% FSC cellulose, 30% organic cotton", "<b>OB Coffee Scoop</b> | 304 stainless measuring scoop with bag clip", "<b>OB</b> | Wooden honey dipper", "Occasions Box keepsake box | 11\u2033 &times; 8.66\u2033 &times; 4.33\u2033", "A handwritten card of your choice"]
+    "Host's Delight": ["<b>Madeira Housewares</b> | Teak edge-grain chop block, 8\u2033 &times; 8\u2033 &times; 1.25\u2033", "<b>OB x Beautea Studio</b> | Organic rose mint loose-leaf tea", "<b>The Bee Box</b> | Mini specialty honey jar, 4oz | USDA certified organic", "<b>Three Blue Birds</b> | Swedish dishcloths, 2 count | absorbs 20&times; its weight, replaces 17 rolls of paper towels | 70% FSC cellulose, 30% organic cotton", "<b>OB Coffee Scoop</b> | 304 stainless measuring scoop with bag clip", "<b>OB</b> | Wooden honey dipper", "Occasions Box keepsake box | 11\u2033 &times; 8.66\u2033 &times; 4.33\u2033", "A handwritten card of your choice"]
   };
 
   var allProducts = [
@@ -152,7 +152,7 @@
     {name:'Coffee Lover', price:145, img: '/assets/img/OB0_7584-750w.jpg'},
     {name:'The Reset', price:145, img: '/assets/img/OB0_7512-750w.jpg'},
     {name:'The Dinner Party', note:"Contains almond cookies (tree nuts).", price:175, img: '/assets/img/0B0_5612-750w.jpg'},
-    {name:"Host's Delight - Rose", price:105, img: '/assets/img/0B0_5453-750w.jpg'},
+    {name:"Host's Delight", price:105, img: '/assets/img/0B0_5453-750w.jpg', variants:[{label:'Rose', img:'/assets/img/0B0_5453-750w.jpg', tea:'<b>OB x Beautea Studio</b> | Organic rose mint loose-leaf tea'},{label:'Green', img:'/assets/img/OB_0299-750w.jpg', tea:'<b>OB x Beautea Studio</b> | Organic chamomile loose-leaf tea'}]},
     {name:'The Nightcap', note:"Contains almond cookies (tree nuts).", price:120, img: '/assets/img/0B0_5067-750w.jpg'},
     {name:'Lemonade', price:120, img: '/assets/img/0B0_5827-750w.jpg'},
     {name:'Bright Side', price:105, img: '/assets/img/0B0_5699-750w.jpg'},
@@ -162,7 +162,6 @@
     {name:'The New Keys', price:170, img: '/assets/img/0B0_4712-750w.jpg'},
     {name:'The Valet', price:150, img: '/assets/img/_MG_1812-750w.jpg'},
     {name:'Goodnight', price:130, img: '/assets/img/ob_1471-750w.jpg'},
-    {name:"Host's Delight - Green", price:105, img: '/assets/img/OB_0299-750w.jpg'},
     {name:'Uncorked', price:120, img: '/assets/img/0B0_2489-750w.jpg'},
     {name:'The Wind Down', price:150, img: '/assets/img/_MG_1792-750w.jpg'},
     {name:'Mini Spa Day', note:"Contains essential oils and a clay mask. Not suitable as a gift for someone who is pregnant or nursing \u2014 tell us and we will swap the bath products for something safe.", price:115, img: '/assets/img/IMG_9325-750w.jpg'},
@@ -171,6 +170,14 @@
   ];
 
   var currentProduct = null;
+  var currentVariant = null;
+
+  /* The colourway is part of what someone bought, so it travels with the
+     order to PayPal and to the CRM, not just the picture on screen. */
+  function orderName() {
+    if (!currentProduct) return '';
+    return currentProduct.name + (currentVariant ? ' \u2014 ' + currentVariant.label : '');
+  }
 
   function openModal(productName) {
     var product = allProducts.find(function(p) { return p.name === productName; });
@@ -189,7 +196,47 @@
       caution.hidden = !product.note;
     }
 
+    currentVariant = (product.variants && product.variants[0]) || null;
+
+    var vwrap = document.getElementById('modalVariants');
+    if (vwrap) {
+      if (product.variants && product.variants.length) {
+        vwrap.innerHTML = '<div class="modal-variants-label">Choose your colour</div>' +
+          product.variants.map(function(v, i) {
+            return '<button type="button" class="modal-variant' + (i === 0 ? ' active' : '') +
+                   '" data-variant="' + i + '">' + v.label + '</button>';
+          }).join('');
+        vwrap.hidden = false;
+        vwrap.querySelectorAll('.modal-variant').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var v = product.variants[parseInt(this.dataset.variant, 10)];
+            if (!v) return;
+            currentVariant = v;
+            vwrap.querySelectorAll('.modal-variant').forEach(function(b) {
+              b.classList.toggle('active', b === btn);
+            });
+            document.getElementById('modalImg').src = v.img;
+            document.getElementById('modalImg').alt = orderName();
+            renderContents(product);
+          });
+        });
+      } else {
+        vwrap.hidden = true;
+        vwrap.innerHTML = '';
+      }
+    }
+
+    renderContents(product);
+    mountCheckout();
+  }
+
+  /* The tea is the one line that differs between the colourways. */
+  function renderContents(product) {
     var contents = PRODUCT_CONTENTS[product.name];
+    if (contents && currentVariant && currentVariant.tea) {
+      contents = contents.slice();
+      contents[1] = currentVariant.tea;
+    }
     var list = document.getElementById('modalContents');
     var desc = document.getElementById('modalDesc');
     if (list) {
@@ -204,6 +251,9 @@
       }
     }
 
+  }
+
+  function mountCheckout() {
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 
@@ -224,7 +274,7 @@
           var qty = parseInt(document.getElementById('modalQty').value) || 1;
           return actions.order.create({
             purchase_units: [{
-              description: currentProduct.name + ' Gift Box',
+              description: orderName() + ' Gift Box',
               amount: {
                 value: (currentProduct.price * qty).toFixed(2),
                 currency_code: 'USD',
@@ -233,7 +283,7 @@
                 }
               },
               items: [{
-                name: currentProduct.name,
+                name: orderName(),
                 unit_amount: { value: currentProduct.price.toFixed(2), currency_code: 'USD' },
                 quantity: String(qty),
                 category: 'PHYSICAL_GOODS'
@@ -258,7 +308,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  productName: currentProduct.name,
+                  productName: orderName(),
                   amount: currentProduct.price * qty,
                   quantity: qty,
                   currency: 'USD',
