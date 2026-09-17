@@ -104,6 +104,14 @@ a { color: inherit; text-decoration: none; }
 }
 .mobile-menu a:hover { color: var(--gold); }
 
+/* ─── Shared line icons ─── */
+.icon svg, .contact-item-icon svg {
+  fill: none; stroke: var(--gold); stroke-width: 1.5;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.icon svg { width: 28px; height: 28px; }
+.contact-item-icon svg { width: 20px; height: 20px; }
+
 /* ─── Section Utilities ─── */
 .section-label {
   font-family: var(--sans);
@@ -214,83 +222,6 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 @keyframes heroShift {
   0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}
 }
-
-/* ═══════════════════════════════════════════
-   SECTION 2: TEXT MASK REVEAL — "CURATE"
-   ═══════════════════════════════════════════ */
-.mask-section { position: relative; min-height: 300vh; }
-.mask-sticky {
-  position: sticky; top: 0;
-  min-height: 100dvh;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden; background: var(--bg);
-}
-.mask-bg {
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, #faf8f5 0%, #f3ead8 30%, #e8dece 60%, #faf8f5 100%);
-  background-size: 400% 400%;
-  animation: heroShift 10s ease infinite;
-  opacity: 0.6;
-}
-.mask-overlay {
-  position: absolute; inset: 0;
-  background: var(--bg);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.mask-label {
-  font-family: var(--sans);
-  font-size: clamp(12px, 1.5vw, 16px); font-weight: 500;
-  letter-spacing: 0.25em; text-transform: uppercase;
-  color: var(--gold); margin-bottom: 16px;
-  position: relative; z-index: 2;
-}
-.mask-text {
-  font-family: var(--serif);
-  font-size: clamp(32px, 7vw, 90px);
-  font-weight: 400; letter-spacing: -0.02em;
-  line-height: 1.1; text-align: center;
-  background: var(--bg); color: transparent;
-  -webkit-text-stroke: 1.5px rgba(26,26,26,0.12);
-  position: relative; z-index: 2;
-  max-width: 900px;
-}
-.mask-reveal {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  z-index: 3;
-  clip-path: inset(100% 0 0 0);
-}
-.mask-text-filled {
-  font-family: var(--serif);
-  font-size: clamp(32px, 7vw, 90px);
-  font-weight: 400; letter-spacing: -0.02em;
-  line-height: 1.1; text-align: center;
-  max-width: 900px;
-  color: transparent;
-  background-image: linear-gradient(135deg, #c5a55a 0%, #d4be82 40%, #a68a3e 70%, #c5a55a 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.mask-subtext {
-  position: absolute; bottom: 15%; left: 50%;
-  transform: translateX(-50%); text-align: center;
-  opacity: 0; z-index: 4;
-}
-.mask-subtext p {
-  font-family: var(--serif);
-  font-size: clamp(16px, 2vw, 22px);
-  color: var(--muted); max-width: 45ch; line-height: 1.6;
-  font-style: italic;
-}
-.mask-subtext a {
-  display: inline-block; margin-top: 16px;
-  font-family: var(--sans); font-size: 13px; font-weight: 500;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--gold);
-}
-.mask-subtext a:hover { text-decoration: underline; }
-.mask-subtext a::after { content: ' \203A'; }
 
 /* ═══════════════════════════════════════════
    SECTION 4: ABOUT
@@ -412,80 +343,86 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 .shop-card-btn:hover { background: var(--gold); color: #fff; }
 
 /* ═══════════════════════════════════════════
-   SECTION 6: HOW IT WORKS — STICKY STACK
+   SECTION 6: HOW IT WORKS — PROCESS RAIL
+   Four steps read at a glance, in one screen. The old version pinned a
+   mockup and dimmed three of the four steps until you scrolled past them,
+   which meant the page cost four screens of scrolling to say four things.
    ═══════════════════════════════════════════ */
-.stack-section {
-  max-width: 1100px; margin: 0 auto;
+.process-section {
+  max-width: 1180px; margin: 0 auto;
   padding: 120px 24px;
 }
-.stack-header { text-align: center; margin-bottom: 64px; }
-.stack-container {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 48px; align-items: start;
+.process-header { text-align: center; margin-bottom: 72px; }
+.process-rail {
+  list-style: none;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
 }
-.stack-visual { position: sticky; top: 120px; height: fit-content; }
-.mockup {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 16px; overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.06);
-}
-.mockup-bar {
-  height: 10px; background: var(--gold);
-  border-radius: 16px 16px 0 0;
-}
-.mockup-body {
-  padding: 40px; min-height: 360px;
-  display: flex; flex-direction: column; justify-content: center;
+.process-step {
   position: relative;
+  text-align: center;
 }
-.mockup-state {
-  position: absolute; inset: 0; padding: 40px;
-  display: flex; flex-direction: column; justify-content: center;
-  align-items: center; text-align: center;
-  opacity: 0; transition: opacity 0.5s ease;
+/* The hairline that ties the four markers into one run. It starts clear of
+   this step's marker and stops clear of the next one. */
+.process-step::after {
+  content: ''; position: absolute;
+  top: 31px; height: 1px;
+  left: calc(50% + 44px); right: calc(-50% + 44px);
+  background: var(--border);
 }
-.mockup-state.active { opacity: 1; }
-.mockup-icon {
-  margin-bottom: 16px;
+.process-step:last-child::after { display: none; }
+.process-marker {
+  width: 62px; height: 62px; margin: 0 auto 22px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  background: var(--gold-bg);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; z-index: 1;
 }
-.mockup-icon svg, .icon svg, .contact-item-icon svg {
-  width: 1em; height: 1em; fill: none; stroke: var(--gold); stroke-width: 1.5;
-  stroke-linecap: round; stroke-linejoin: round;
+.process-marker svg {
+  width: 26px; height: 26px; fill: none; stroke: var(--gold);
+  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
 }
-.mockup-icon svg { width: 48px; height: 48px; }
-.icon svg { width: 28px; height: 28px; }
-.contact-item-icon svg { width: 20px; height: 20px; }
-.mockup-title {
-  font-family: var(--serif); font-size: 24px; font-weight: 400;
-  color: var(--text); margin-bottom: 8px;
+.process-num {
+  font-family: var(--sans); font-size: 11px; font-weight: 500;
+  color: var(--gold); letter-spacing: 0.16em;
+  text-transform: uppercase; margin-bottom: 10px;
 }
-.mockup-desc {
-  font-size: 14px; color: var(--muted); max-width: 30ch; line-height: 1.5;
+.process-step h3 {
+  font-family: var(--serif); font-size: 21px; font-weight: 400;
+  letter-spacing: -0.01em; line-height: 1.25;
+  text-wrap: balance; margin-bottom: 12px;
 }
-.stack-features {
-  display: flex; flex-direction: column; gap: 48px; padding: 40px 0;
+.process-step p {
+  font-size: 14px; color: var(--muted); line-height: 1.65;
 }
-.feature-card {
-  padding: 36px 28px; border-radius: 16px;
-  background: var(--bg); border: 1px solid var(--border);
-  opacity: 0.35; transform: translateY(10px);
-  transition: all 0.4s cubic-bezier(.16,1,.3,1);
+
+/* Two-up: the rail keeps running across each pair, so the connector is
+   hidden on every second step instead of only the last. */
+@media (max-width: 1040px) {
+  .process-rail { grid-template-columns: repeat(2, 1fr); gap: 56px 40px; }
+  .process-step:nth-child(2n)::after { display: none; }
 }
-.feature-card.active {
-  opacity: 1; transform: translateY(0);
-  border-color: var(--gold);
-  box-shadow: 0 0 0 1px var(--gold), 0 12px 40px rgba(197,165,90,0.08);
+
+/* On a phone the four steps read as a vertical run: marker in a left
+   gutter, copy beside it, and the connector turns to run downward. */
+@media (max-width: 640px) {
+  .process-section { padding: 80px 20px; }
+  .process-header { margin-bottom: 48px; }
+  .process-rail { grid-template-columns: 1fr; gap: 32px; }
+  .process-step {
+    display: grid; grid-template-columns: 52px 1fr;
+    gap: 18px; text-align: left; align-items: start;
+  }
+  .process-marker { width: 52px; height: 52px; margin: 0; }
+  .process-marker svg { width: 22px; height: 22px; }
+  .process-step::after {
+    top: 60px; bottom: -32px; height: auto;
+    left: 26px; right: auto; width: 1px;
+  }
+  .process-step:last-child::after { display: none; }
+  .process-step h3 { font-size: 19px; }
 }
-.feature-num {
-  font-family: var(--sans); font-size: 12px; font-weight: 500;
-  color: var(--gold); letter-spacing: 0.1em;
-  text-transform: uppercase; margin-bottom: 12px;
-}
-.feature-card h3 {
-  font-family: var(--serif); font-size: 22px; font-weight: 400;
-  letter-spacing: -0.01em; margin-bottom: 10px;
-}
-.feature-card p { font-size: 15px; color: var(--muted); line-height: 1.6; }
 
 /* ═══════════════════════════════════════════
    SECTION 7: TESTIMONIALS — STICKY CARDS
@@ -720,8 +657,6 @@ footer {
   .founders-grid { grid-template-columns: 1fr; gap: 56px; }
   .founder-photo img { height: 420px; }
   .about-services { grid-template-columns: 1fr; }
-  .stack-container { grid-template-columns: 1fr; }
-  .stack-visual { position: relative; top: 0; }
   .contact-grid { grid-template-columns: 1fr; gap: 48px; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .newsletter-form { flex-direction: column; }
@@ -730,11 +665,8 @@ footer {
 @media (max-width: 480px) {
   .nav { padding: 16px 20px; }
   .nav.scrolled { padding: 12px 20px; }
-  /* There is no room for the indent once the hamburger takes over. */
-  .nav-logo { margin-left: 0; }
   .nav-logo img { height: 44px; }
   #about, #contact { padding: 80px 16px; }
-  .stack-section { padding: 80px 16px; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
 }
@@ -1388,6 +1320,8 @@ body.page-concierge #concierge { padding-top: 64px; }
 @media (max-width: 1024px) {
   .nav-links { display: none; }
   .nav-hamburger { display: block; }
+  /* There is no room for the wordmark indent once the hamburger takes over. */
+  .nav-logo { margin-left: 0; }
 }
 
 /* Inner pages open with the compact nav and no hero behind it, so the 26px

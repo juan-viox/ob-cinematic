@@ -33,7 +33,7 @@ const PAGES = [
     slug: 'index', url: '/', nav: 'home',
     title: 'Occasions Box | Custom Gifting, Thoughtfully Executed',
     desc: 'Luxury custom gift curation and concierge gifting for corporate events, weddings and milestones. Now booking Holiday 2026.',
-    sections: ['hero', 'mask', 'custom-band', 'products', 'concierge-teaser', 'testimonials', 'clients', 'newsletter'],
+    sections: ['hero', 'custom-band', 'products', 'concierge-teaser', 'testimonials', 'clients', 'newsletter'],
   },
   {
     slug: 'shop', url: '/shop', nav: 'shop',

@@ -62,49 +62,6 @@
     }
   }
 
-  /* ─── Text Mask Reveal ─── */
-  var maskSection = document.querySelector('.mask-section');
-  if (maskSection) {
-    gsap.to('.mask-reveal', {
-      clipPath: 'inset(0% 0 0 0)',
-      ease: 'none',
-      scrollTrigger: {
-        trigger: maskSection,
-        start: 'top top',
-        end: '60% bottom',
-        scrub: 0.3
-      }
-    });
-    gsap.to('.mask-subtext', {
-      opacity: 1, y: 0,
-      scrollTrigger: {
-        trigger: maskSection,
-        start: '55% top',
-        end: '70% top',
-        scrub: true
-      }
-    });
-  }
-
-  /* ─── Sticky Stack (How It Works) ─── */
-  var featureCards = document.querySelectorAll('.feature-card');
-  var mockupStates = document.querySelectorAll('.mockup-state');
-
-  featureCards.forEach(function(card) {
-    ScrollTrigger.create({
-      trigger: card,
-      start: 'top 60%',
-      end: 'bottom 40%',
-      onEnter: function() { activateFeature(card.dataset.feature); },
-      onEnterBack: function() { activateFeature(card.dataset.feature); }
-    });
-  });
-
-  function activateFeature(num) {
-    featureCards.forEach(function(c) { c.classList.toggle('active', c.dataset.feature === num); });
-    mockupStates.forEach(function(s) { s.classList.toggle('active', s.dataset.state === num); });
-  }
-
   /* ─── Sticky Cards (Testimonials) ─── */
   var stackCards = document.querySelectorAll('.stack-card');
   stackCards.forEach(function(card, i) {
