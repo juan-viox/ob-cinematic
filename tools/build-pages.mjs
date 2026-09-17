@@ -84,11 +84,11 @@ const PAGES = [
   {
     slug: 'contact', url: '/contact', nav: 'contact',
     title: 'Contact | Occasions Box',
-    desc: 'Start a custom gift, request corporate pricing, or ask us anything. We reply within one business day.',
+    desc: 'Start a custom gift, request corporate pricing, or ask us anything. We reply within 48 hours.',
     header: {
       eyebrow: 'Get in Touch',
       h1: 'Start Your Gift',
-      p: 'Tell us about the occasion, the recipients and the timeline. We reply within one business day.',
+      p: 'Tell us about the occasion, the recipients and the timeline. We reply within 48 hours.',
     },
     sections: ['contact', 'newsletter'],
   },
