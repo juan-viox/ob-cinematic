@@ -50,7 +50,9 @@ a { color: inherit; text-decoration: none; }
   padding: 14px 40px;
   box-shadow: 0 1px 8px rgba(0,0,0,0.04);
 }
-.nav-logo { flex-shrink: 0; }
+/* The wordmark sat hard against the 40px nav gutter; this brings it in to
+   roughly a two-tab indent without moving the nav links. */
+.nav-logo { flex-shrink: 0; margin-left: 64px; }
 .nav-logo img { height: 60px; width: auto; transition: all 0.3s; }
 .nav.scrolled .nav-logo img { height: 26px; }
 .nav-links { display: flex; gap: 32px; align-items: center; white-space: nowrap; }
@@ -154,11 +156,11 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
     linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.72) 9%, rgba(255,255,255,0) 22%),
     linear-gradient(90deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.70) 52%, rgba(255,255,255,0.94) 72%);
 }
-.hero-copy { max-width: 600px; width: 100%; }
+.hero-copy { max-width: 600px; width: 100%; margin-top: 64px; }
 .hero-copy .hero-headline { font-size: clamp(34px, 4.2vw, 60px); }
 .hero-tagline {
   font-family: var(--sans);
-  font-size: 11px; font-weight: 500;
+  font-size: 13px; font-weight: 500;
   letter-spacing: 0.25em; text-transform: uppercase;
   color: var(--gold); margin-bottom: 16px;
 }
@@ -699,7 +701,9 @@ footer {
    RESPONSIVE
    ═══════════════════════════════════════════ */
 @media (max-width: 900px) {
-  /* Not enough width for a side column — stack the hero copy at the bottom. */
+  /* Not enough width for a side column — stack the hero copy at the bottom.
+     The desktop drop would push it into the scroll hint from here. */
+  .hero-copy { margin-top: 0; }
   .hero-overlay {
     flex-direction: column; align-items: center; justify-content: flex-end;
     padding: 0 24px 11vh; text-align: center;
@@ -726,6 +730,8 @@ footer {
 @media (max-width: 480px) {
   .nav { padding: 16px 20px; }
   .nav.scrolled { padding: 12px 20px; }
+  /* There is no room for the indent once the hamburger takes over. */
+  .nav-logo { margin-left: 0; }
   .nav-logo img { height: 44px; }
   #about, #contact { padding: 80px 16px; }
   .stack-section { padding: 80px 16px; }
