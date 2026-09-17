@@ -89,21 +89,21 @@
     });
   }
 
-  /* ─── Sticky Cards (Testimonials) ─── */
-  var stackCards = document.querySelectorAll('.stack-card');
-  stackCards.forEach(function(card, i) {
-    if (i < stackCards.length - 1) {
-      gsap.to(card, {
-        scale: 0.95, opacity: 0.5,
-        scrollTrigger: {
-          trigger: stackCards[i + 1],
-          start: 'top 80%',
-          end: 'top 20%',
-          scrub: true
-        }
-      });
-    }
-  });
+  /* ─── Reviews Marquee ───
+     Duplicate the cards so translateX(-50%) lands on an identical frame and
+     the loop has no visible seam. The clone is hidden from screen readers so
+     the same five reviews are not announced twice. */
+  var reviewsTrack = document.getElementById('reviewsTrack');
+  if (reviewsTrack && reviewsTrack.children.length) {
+    var reviewClones = Array.prototype.slice.call(reviewsTrack.cloneNode(true).children);
+    reviewClones.forEach(function(card) {
+      card.setAttribute('aria-hidden', 'true');
+      reviewsTrack.appendChild(card);
+    });
+    /* Only scroll once the second copy is in place; translateX(-50%) on a
+       single copy would loop mid-card. */
+    reviewsTrack.classList.add('is-looped');
+  }
 
   /* ─── Fade Up Animations ─── */
   gsap.utils.toArray('.fade-up').forEach(function(el) {
