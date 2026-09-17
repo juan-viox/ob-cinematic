@@ -226,9 +226,8 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 /* ═══════════════════════════════════════════
    SECTION 4: ABOUT
    ═══════════════════════════════════════════ */
-#about {
-  padding: 120px 24px; max-width: 1100px; margin: 0 auto;
-}
+#about { padding: 120px 24px; background: var(--bg-alt); }
+.about-inner { max-width: 1100px; margin: 0 auto; }
 .about-grid {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 64px; align-items: center;
@@ -254,9 +253,8 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 /* ═══════════════════════════════════════════
    FOUNDERS
    ═══════════════════════════════════════════ */
-#founders {
-  padding: 0 24px 120px; max-width: 900px; margin: 0 auto;
-}
+#founders { padding: 110px 24px 120px; background: var(--bg); }
+.founders-inner { max-width: 900px; margin: 0 auto; }
 .founders-header { text-align: center; margin-bottom: 56px; }
 .founders-grid {
   display: grid; grid-template-columns: 1fr 1fr;
@@ -420,10 +418,8 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
    mockup and dimmed three of the four steps until you scrolled past them,
    which meant the page cost four screens of scrolling to say four things.
    ═══════════════════════════════════════════ */
-.process-section {
-  max-width: 1180px; margin: 0 auto;
-  padding: 120px 24px;
-}
+.process-section { padding: 120px 24px; background: var(--bg-alt); }
+.process-inner { max-width: 1180px; margin: 0 auto; }
 .process-header { text-align: center; margin-bottom: 72px; }
 .process-rail {
   list-style: none;
@@ -559,7 +555,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 /* ═══════════════════════════════════════════
    SECTION 9: CONNECT — NEWSLETTER + SOCIAL
    ═══════════════════════════════════════════ */
-#connect { padding: 92px 24px; background: var(--bg-alt); }
+#connect { padding: 92px 24px; background: var(--bg); }
 .connect-grid {
   max-width: 1040px; margin: 0 auto;
   display: grid; grid-template-columns: 1fr 1fr; align-items: start;
@@ -618,7 +614,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
    CLIENT LOGOS SECTION
    ═══════════════════════════════════════════ */
 #clients {
-  padding: 80px 24px 100px; background: var(--bg);
+  padding: 80px 24px 100px; background: var(--bg-alt);
   text-align: center;
 }
 .clients-header {
