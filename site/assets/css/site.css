@@ -640,9 +640,9 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   color: var(--gold-dark); margin-bottom: 56px;
 }
 .clients-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(3, 1fr);
   justify-items: center; align-items: center;
-  gap: 56px 48px; max-width: 920px; margin: 0 auto;
+  gap: 52px 56px; max-width: 840px; margin: 0 auto;
 }
 .client-logo {
   flex-shrink: 0; width: auto;
@@ -654,7 +654,8 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 /* Heights are set per mark, not shared: a bold wide wordmark at the same
    height as a badge with fine internal type shouts over the whole row. */
 .cl-heisenberg { height: 78px; }
-.cl-viox       { height: 56px; }
+.cl-viox       { height: 44px; }
+.cl-yh         { height: 54px; }
 .cl-ch5        { height: 60px; }
 .cl-superior   { height: 60px; }
 .cl-nw         { height: 76px; }
