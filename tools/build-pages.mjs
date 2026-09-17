@@ -33,7 +33,7 @@ const PAGES = [
     slug: 'index', url: '/', nav: 'home',
     title: 'Occasions Box | Custom Gifting, Thoughtfully Executed',
     desc: 'Luxury custom gift curation and concierge gifting for corporate events, weddings and milestones. Now booking Holiday 2026.',
-    sections: ['hero', 'mask', 'marquee', 'products', 'concierge-teaser', 'testimonials', 'clients', 'newsletter'],
+    sections: ['hero', 'mask', 'custom-band', 'products', 'concierge-teaser', 'testimonials', 'clients', 'newsletter'],
   },
   {
     slug: 'shop', url: '/shop', nav: 'shop',
@@ -44,7 +44,7 @@ const PAGES = [
       h1: 'Wrapped &amp; Waiting',
       p: 'Curated boxes that are already packed, ribboned and finished with a handwritten note; pick one and it ships. Need something bespoke? We build those too.',
     },
-    sections: ['products', 'shop'],
+    sections: ['shop'],
     modal: true, paypal: true,
   },
   {

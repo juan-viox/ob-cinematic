@@ -1,6 +1,6 @@
 (function() {
   /* The animation library loads from a CDN. If it is unavailable, stub it out
-     so forms, the modal and the carousel still work and no content stays
+     so forms, the modal and the shop grid still work and no content stays
      hidden behind a fade-in that will never fire. */
   if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
     document.documentElement.classList.remove('anim');
@@ -85,91 +85,6 @@
       }
     });
   }
-
-  /* ─── Kinetic Marquee ─── */
-  document.querySelectorAll('.marquee-row').forEach(function(row) {
-    var content = row.querySelector('.marquee-content');
-    if (content) {
-      row.appendChild(content.cloneNode(true));
-    }
-  });
-
-  var marqueeRows = document.querySelectorAll('.marquee-row');
-  var baseSpeed = 60;
-  var scrollVelocity = 0;
-
-  ScrollTrigger.create({
-    onUpdate: function(self) {
-      scrollVelocity = Math.abs(self.getVelocity());
-    }
-  });
-
-  marqueeRows.forEach(function(row) {
-    var content = row.querySelector('.marquee-content');
-    if (!content) return;
-    var direction = row.dataset.direction === 'right' ? 1 : -1;
-    var speedMult = parseFloat(row.dataset.speed) || 1;
-    var contentWidth = content.offsetWidth;
-    var x = direction === -1 ? 0 : -contentWidth;
-
-    function animate() {
-      var speed = (baseSpeed + scrollVelocity * 0.12) * speedMult;
-      x += direction * -1 * speed / 60;
-      if (direction === -1 && x <= -contentWidth) x += contentWidth;
-      if (direction === 1 && x >= 0) x -= contentWidth;
-      row.style.transform = 'translateX(' + x + 'px)';
-      requestAnimationFrame(animate);
-    }
-    animate();
-  });
-
-  /* ─── 3D Coverflow Carousel ─── */
-  var products = [
-    {name:'Love You', price:'$150', img: '/assets/img/OB0_7441-500w.jpg'},
-    {name:'Just Peachy', price:'$132', img: '/assets/img/OB0_7537-500w.jpg'},
-    {name:'Long Weekend', price:'$120', img: '/assets/img/OB0_7721-500w.jpg'},
-    {name:'Coffee Lover', price:'$145', img: '/assets/img/OB0_7584-500w.jpg'},
-    {name:'Zen', price:'$145', img: '/assets/img/OB0_7512-500w.jpg'},
-    {name:'The Hostess', price:'$175', img: '/assets/img/0B0_5612-500w.jpg'},
-    {name:"Host's Delight", price:'$105', img: '/assets/img/0B0_5453-500w.jpg'},
-    {name:'Nightcap', price:'$120', img: '/assets/img/0B0_5067-500w.jpg'}
-  ];
-
-  var track = document.getElementById('productTrack');
-  var carouselCurrent = Math.floor(products.length / 2);
-
-  products.forEach(function(item, i) {
-    var el = document.createElement('div');
-    el.className = 'carousel-item';
-    el.style.backgroundImage = 'url(' + item.img + ')';
-    el.innerHTML = '<div class="carousel-item-info"><h3>' + item.name + '</h3><p>' + item.price + '</p></div>';
-    el.addEventListener('click', function() { carouselCurrent = i; renderCarousel(); });
-    if (track) track.appendChild(el);
-  });
-
-  window.moveCarousel = function(dir) {
-    carouselCurrent = Math.max(0, Math.min(products.length - 1, carouselCurrent + dir));
-    renderCarousel();
-  };
-
-  function renderCarousel() {
-    if (!track) return;
-    var els = track.children;
-    for (var i = 0; i < els.length; i++) {
-      var off = i - carouselCurrent;
-      var absOff = Math.abs(off);
-      var tx = off * 320;
-      var ry = off < 0 ? 35 : off > 0 ? -35 : 0;
-      var sc = absOff === 0 ? 1 : 0.82;
-      var z = absOff === 0 ? 10 : 10 - absOff;
-      var op = absOff > 2 ? 0 : 1 - absOff * 0.25;
-      els[i].style.transform = 'translateX(' + tx + 'px) rotateY(' + ry + 'deg) scale(' + sc + ')';
-      els[i].style.zIndex = z;
-      els[i].style.opacity = op;
-      els[i].style.filter = absOff === 0 ? 'brightness(1)' : 'brightness(0.7)';
-    }
-  }
-  renderCarousel();
 
   /* ─── Sticky Stack (How It Works) ─── */
   var featureCards = document.querySelectorAll('.feature-card');
@@ -403,13 +318,6 @@
     btn.addEventListener('click', function() {
       var name = this.closest('.shop-card').querySelector('.shop-card-name').textContent;
       openModal(name);
-    });
-  });
-
-  // Wire coverflow carousel items to open modal on double-click
-  document.querySelectorAll('.carousel-item').forEach(function(item, i) {
-    item.addEventListener('dblclick', function() {
-      openModal(products[i].name);
     });
   });
 
