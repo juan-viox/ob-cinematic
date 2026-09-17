@@ -748,7 +748,7 @@
     })
     .then(function(res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      showToast('Request sent. We\'ll be in touch within 48 hours.', 'success');
+      showToast('Request sent. We\'ll be in touch within two business days.', 'success');
       contactFormEl.reset();
     })
     .catch(function(error) {

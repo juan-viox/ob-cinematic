@@ -34,7 +34,7 @@ const PAGES = [
     slug: 'index', url: '/', nav: 'home',
     title: 'Occasions Box | Custom Gifting, Thoughtfully Executed',
     desc: 'Luxury custom gift curation and concierge gifting for corporate events, weddings and milestones. Now booking Holiday 2026.',
-    sections: ['hero', 'custom-band', 'products', 'concierge-teaser', 'testimonials', 'clients', 'newsletter', 'social'],
+    sections: ['hero', 'custom-band', 'products', 'concierge-teaser', 'testimonials', 'clients', 'connect'],
   },
   {
     slug: 'shop', url: '/shop', nav: 'shop',
@@ -84,11 +84,11 @@ const PAGES = [
   {
     slug: 'contact', url: '/contact', nav: 'contact',
     title: 'Contact | Occasions Box',
-    desc: 'Start a custom gift, request corporate pricing, or ask us anything. We reply within 48 hours.',
+    desc: 'Start a custom gift, request corporate pricing, or ask us anything. We reply within two business days.',
     header: {
       eyebrow: 'Get in Touch',
       h1: 'Start Your Gift',
-      p: 'Tell us about the occasion, the recipients and the timeline. We reply within 48 hours.',
+      p: 'Tell us about the occasion, the recipients and the timeline. We reply within two business days.',
     },
     sections: ['contact', 'newsletter'],
   },

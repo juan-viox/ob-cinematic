@@ -557,6 +557,28 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 }
 
 /* ═══════════════════════════════════════════
+   SECTION 9: CONNECT — NEWSLETTER + SOCIAL
+   ═══════════════════════════════════════════ */
+#connect { padding: 92px 24px; background: var(--bg-alt); }
+.connect-grid {
+  max-width: 1040px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; align-items: start;
+}
+.connect-col { text-align: center; padding: 0 44px; }
+.connect-col + .connect-col { border-left: 1px solid var(--border); }
+.connect-title {
+  font-family: var(--serif); font-weight: 400;
+  font-size: clamp(24px, 2.4vw, 31px); line-height: 1.18;
+  color: var(--text); text-wrap: balance; margin-top: 12px;
+}
+.connect-body {
+  font-family: var(--sans); font-size: 14.5px; line-height: 1.7;
+  color: var(--text-light); margin-top: 12px;
+}
+.connect-col .newsletter-form { margin-top: 26px; }
+.connect-col .social-links { margin-top: 30px; }
+
+/* ═══════════════════════════════════════════
    SECTION 9: FOLLOW ALONG — SOCIAL
    ═══════════════════════════════════════════ */
 #social {
@@ -789,6 +811,12 @@ footer {
   .contact-grid { grid-template-columns: 1fr; gap: 48px; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .newsletter-form { flex-direction: column; }
+  .connect-grid { grid-template-columns: 1fr; }
+  .connect-col { padding: 0; }
+  .connect-col + .connect-col {
+    border-left: none; border-top: 1px solid var(--border);
+    margin-top: 44px; padding-top: 44px;
+  }
   /* A 90px fade eats too much of a 300px card on a phone. */
   .reviews-marquee {
     -webkit-mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent);
@@ -804,7 +832,7 @@ footer {
   #about, #contact { padding: 80px 16px; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
-  #social { padding: 72px 16px; }
+  #social, #connect { padding: 72px 16px; }
   .social-links { gap: 22px; }
 }
 
@@ -1151,42 +1179,26 @@ footer {
   font-family: var(--sans); font-size: 15px; line-height: 1.7;
   color: var(--text-light); margin-top: 16px;
 }
+
+/* Figure and intro sit side by side. The card used to overlap the photo and
+   crop a third of the composition out of it. */
 .cb-stage {
-  max-width: 1100px; margin: 0 auto; position: relative;
-  display: grid; grid-template-columns: 1fr; align-items: center;
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 1.1fr 1fr;
+  gap: 56px; align-items: center;
 }
 .cb-figure {
-  grid-area: 1 / 1; margin-left: auto; width: 72%;
   border-radius: 4px; overflow: hidden;
   box-shadow: 0 30px 80px rgba(0,0,0,0.10);
 }
-.cb-figure img { display: block; width: 100%; height: 540px; object-fit: cover; }
-.cb-card {
-  grid-area: 1 / 1; position: relative; z-index: 2;
-  width: min(460px, 52%); background: var(--bg);
-  padding: 44px 40px; box-shadow: 0 30px 80px rgba(0,0,0,0.08);
+.cb-figure img { display: block; width: 100%; height: 440px; object-fit: cover; }
+.cb-intro h3 {
+  font-family: var(--serif); font-weight: 400; font-size: 27px;
+  color: var(--text); margin: 0 0 16px; line-height: 1.25;
 }
-.cb-card h3 {
-  font-family: var(--serif); font-weight: 400; font-size: 25px;
-  color: var(--text); margin: 0 0 14px; line-height: 1.25;
-}
-.cb-card > p {
-  font-family: var(--sans); font-size: 14.5px; line-height: 1.75;
-  color: var(--text-light); margin: 0 0 24px;
-}
-.cb-routes { display: grid; gap: 1px; background: var(--border); margin-bottom: 24px; }
-.cb-route {
-  display: block; background: var(--bg); padding: 14px 0;
-  text-decoration: none; transition: padding-left 0.25s;
-}
-.cb-route:hover { padding-left: 10px; }
-.cb-route-name {
-  display: block; font-family: var(--sans); font-size: 11px;
-  letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-dark);
-}
-.cb-route-note {
-  display: block; font-family: var(--sans); font-size: 13.5px;
-  color: var(--text-light); margin-top: 5px;
+.cb-intro p {
+  font-family: var(--sans); font-size: 15px; line-height: 1.75;
+  color: var(--text-light); margin: 0 0 26px;
 }
 .cb-link {
   font-family: var(--sans); font-size: 12px; letter-spacing: 0.14em;
@@ -1194,6 +1206,83 @@ footer {
   border-bottom: 1px solid var(--gold); padding-bottom: 3px;
 }
 .cb-link:hover { color: var(--gold-dark); }
+
+/* ─── The three routes ─── */
+.cb-routes {
+  max-width: 1100px; margin: 56px auto 0;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+.cb-route {
+  display: flex; flex-direction: column;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+  padding: 30px 28px; text-decoration: none;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+.cb-route:hover {
+  border-color: var(--gold); transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.07);
+}
+.cb-route:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.cb-route-name {
+  font-family: var(--serif); font-size: 22px; color: var(--text); line-height: 1.2;
+}
+.cb-route-desc {
+  font-family: var(--sans); font-size: 14px; line-height: 1.7;
+  color: var(--text-light); margin-top: 10px;
+}
+/* margin-top:auto pins the numbers to the bottom so the three line up
+   however long the description runs. */
+.cb-route-facts {
+  display: block; margin-top: auto; padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.cb-route-facts { margin-top: auto; }
+.cb-route-price {
+  display: block; font-family: var(--serif); font-weight: 400; font-size: 21px;
+  color: var(--gold-dark); font-variant-numeric: tabular-nums;
+}
+.cb-route-meta {
+  display: block; font-family: var(--sans); font-size: 12.5px;
+  color: var(--muted); margin-top: 3px; line-height: 1.55;
+}
+.cb-route-go {
+  display: block; font-family: var(--sans); font-size: 11px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--gold-dark); margin-top: 16px;
+}
+
+/* ─── Concierge: a different kind of thing, so it does not look like a route ─── */
+.cb-concierge {
+  max-width: 1100px; margin: 20px auto 0;
+  display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center;
+  background: var(--footer-bg); border-radius: 12px;
+  padding: 30px 34px; text-decoration: none;
+  transition: transform 0.25s;
+}
+.cb-concierge:hover { transform: translateY(-3px); }
+.cb-concierge:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.cb-conc-label {
+  display: block; font-family: var(--serif); font-size: 21px; color: #fff; line-height: 1.25;
+}
+.cb-conc-text {
+  display: block; font-family: var(--sans); font-size: 14px; line-height: 1.7;
+  color: rgba(255,255,255,0.74); margin-top: 8px; max-width: 62ch;
+}
+.cb-conc-cta { text-align: right; white-space: nowrap; }
+.cb-conc-cta b {
+  display: block; font-family: var(--serif); font-weight: 400; font-size: 25px;
+  color: var(--gold); font-variant-numeric: tabular-nums;
+}
+.cb-conc-cta > span {
+  display: block; font-family: var(--sans); font-size: 12px; color: rgba(255,255,255,0.55);
+}
+.cb-conc-go {
+  font-family: var(--sans); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: #fff !important; margin-top: 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cb-route:hover, .cb-concierge:hover { transform: none; }
+}
 
 /* ═══════════════════════════════════════════
    SECTION 5: A LOOK INSIDE THE SHOP
@@ -1237,15 +1326,18 @@ footer {
 
 @media (max-width: 1000px) {
   .cb-stage { gap: 0; }
-  .cb-figure { width: 100%; }
-  .cb-figure img { height: 420px; }
-  .cb-card { width: 86%; margin: -80px auto 0; grid-area: 2 / 1; padding: 36px 30px; }
+  .cb-stage { grid-template-columns: 1fr; gap: 32px; }
+  .cb-figure img { height: 360px; }
+  .cb-routes { grid-template-columns: 1fr; gap: 14px; margin-top: 40px; }
+  .cb-concierge { grid-template-columns: 1fr; gap: 20px; }
+  .cb-conc-cta { text-align: left; }
   .peek-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
 }
 @media (max-width: 560px) {
   #custom-band { padding: 90px 24px; }
-  .cb-figure img { height: 320px; }
-  .cb-card { width: 100%; margin-top: -48px; }
+  .cb-figure img { height: 300px; }
+  .cb-route { padding: 26px 22px; }
+  .cb-concierge { padding: 26px 24px; }
   .peek-grid { grid-template-columns: 1fr; max-width: 360px; }
   .peek-img img { height: 300px; }
 }

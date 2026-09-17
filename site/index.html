@@ -97,26 +97,58 @@
       <img src="/assets/img/IMG_9730-750w.jpg" width="750" height="750" loading="lazy"
            alt="An Occasions Box gift box packed with a candle, loose-leaf tea and chocolate, styled on ivory sheepskin">
     </div>
-    <div class="cb-card">
+    <div class="cb-intro">
       <h3>Three ways in, one standard</h3>
       <p>Whether it is one box or two hundred, the work is the same: we source from independent makers, pack every box by hand, and write the note before it ships.</p>
-      <div class="cb-routes">
-        <a class="cb-route" href="/shop">
-          <span class="cb-route-name">Ready to Gift</span>
-          <span class="cb-route-note">Packed and waiting, from $105</span>
-        </a>
-        <a class="cb-route" href="/custom-gifting">
-          <span class="cb-route-name">Corporate &amp; Events</span>
-          <span class="cb-route-note">From 12 boxes, your branding from 50</span>
-        </a>
-        <a class="cb-route" href="/custom-gifting#pricing">
-          <span class="cb-route-name">Fully Bespoke</span>
-          <span class="cb-route-note">Built from scratch, from $5,000</span>
-        </a>
-      </div>
       <a href="/about" class="cb-link">More about how we work &rsaquo;</a>
     </div>
   </div>
+
+  <!-- The three routes are the decision this section exists to make, so they
+       get their own row rather than a list inside a caption. -->
+  <div class="cb-routes fade-up">
+    <a class="cb-route" href="/shop">
+      <span class="cb-route-name">Ready to Gift</span>
+      <span class="cb-route-desc">Boxes we have already made. Pick one, we write the note, it ships.</span>
+      <span class="cb-route-facts">
+        <b class="cb-route-price">From $105</b>
+        <span class="cb-route-meta">a box &middot; no minimum &middot; ships in 1&ndash;3 days</span>
+        <span class="cb-route-go">Shop the boxes &rsaquo;</span>
+      </span>
+    </a>
+    <a class="cb-route" href="/custom-gifting">
+      <span class="cb-route-name">Corporate &amp; Events</span>
+      <span class="cb-route-desc">Gifting a whole list at once. We build the box around who is receiving it and send the list for you.</span>
+      <span class="cb-route-facts">
+        <b class="cb-route-price">From $225</b>
+        <span class="cb-route-meta">a box &middot; from 12 boxes &middot; your branding from 50</span>
+        <span class="cb-route-go">See tiers and pricing &rsaquo;</span>
+      </span>
+    </a>
+    <a class="cb-route" href="/custom-gifting#pricing">
+      <span class="cb-route-name">Fully Bespoke</span>
+      <span class="cb-route-desc">Nothing off the shelf. We go find or make the items, design the packaging and build it from zero.</span>
+      <span class="cb-route-facts">
+        <b class="cb-route-price">From $5,000</b>
+        <span class="cb-route-meta">quoted per project &middot; concept and setup included</span>
+        <span class="cb-route-go">Start a conversation &rsaquo;</span>
+      </span>
+    </a>
+  </div>
+
+  <!-- Deliberately not a fourth route: the three above are what you buy,
+       the concierge is who does the remembering. -->
+  <a class="cb-concierge fade-up" href="/concierge">
+    <span class="cb-conc-body">
+      <span class="cb-conc-label">Gifting all year, not just once?</span>
+      <span class="cb-conc-text">The Gifting Concierge holds your calendar, keeps a file on every recipient, and brings you each gift to approve before it goes. No order minimum.</span>
+    </span>
+    <span class="cb-conc-cta">
+      <b>From $199</b>
+      <span>a month</span>
+      <span class="cb-conc-go">See concierge plans &rsaquo;</span>
+    </span>
+  </a>
 </section>
 
 <!-- ═══ SECTION 5: A LOOK INSIDE THE SHOP ═══ -->
@@ -250,27 +282,29 @@
   </div>
 </section>
 
-<!-- ═══ SECTION 8: NEWSLETTER ═══ -->
-<section id="newsletter">
-  <div class="newsletter-inner fade-up">
-    <div class="section-label">Stay Inspired</div>
-    <h2 class="section-title">Gifting Inspiration, Delivered</h2>
-    <p class="section-body" style="margin:0 auto 24px;text-align:center">Join our list for curated gifting ideas, new collections, and exclusive offers.</p>
-    <form class="newsletter-form" id="newsletterForm">
-      <input type="email" placeholder="Your email address" required id="newsletterEmail">
-      <input type="text" name="hp_website_url" id="newsletterWebsite" class="hp-field" autocomplete="new-password" data-lpignore="true" data-1p-ignore data-form-type="other" tabindex="-1" aria-hidden="true">
-      <button type="submit" id="newsletterBtn">Subscribe</button>
-    </form>
-  </div>
-</section>
+<!-- ═══ SECTION 9: CONNECT — NEWSLETTER + SOCIAL, ONE BAND ═══ -->
+<!-- Two small asks that were two full screens of scrolling. The newsletter
+     form keeps the ids site.js binds to; /contact still uses newsletter.html
+     on its own, so the two are never on the same page. -->
+<section id="connect">
+  <div class="connect-grid">
 
-<!-- ═══ SECTION 9: FOLLOW ALONG ═══ -->
-<section id="social">
-  <div class="social-inner fade-up">
-    <div class="section-label">Follow Along</div>
-    <h2 class="social-title">See What We&rsquo;re Packing</h2>
-    <p class="social-body">New boxes, behind-the-scenes packing days and the makers we buy from.</p>
-    <div class="social-links">
+    <div class="connect-col fade-up">
+      <div class="section-label">Stay Inspired</div>
+      <h2 class="connect-title">Gifting Inspiration, Delivered</h2>
+      <p class="connect-body">Join our list for curated gifting ideas, new collections, and exclusive offers.</p>
+      <form class="newsletter-form" id="newsletterForm">
+        <input type="email" placeholder="Your email address" required id="newsletterEmail">
+        <input type="text" name="hp_website_url" id="newsletterWebsite" class="hp-field" autocomplete="new-password" data-lpignore="true" data-1p-ignore data-form-type="other" tabindex="-1" aria-hidden="true">
+        <button type="submit" id="newsletterBtn">Subscribe</button>
+      </form>
+    </div>
+
+    <div class="connect-col fade-up">
+      <div class="section-label">Follow Along</div>
+      <h2 class="connect-title">See What We&rsquo;re Packing</h2>
+      <p class="connect-body">New boxes, behind-the-scenes packing days and the makers we buy from.</p>
+<div class="social-links">
       <a class="social-link" href="https://instagram.com/occasionsbox" target="_blank" rel="noopener" aria-label="Occasions Box on Instagram">
         <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
       </a>
@@ -284,6 +318,8 @@
         <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       </a>
     </div>
+    </div>
+
   </div>
 </section>
 
