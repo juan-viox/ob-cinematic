@@ -2,7 +2,10 @@
 <section id="hero">
   <div class="hero-sticky">
     <div class="hero-fallback" id="heroFallback"></div>
-    <img class="hero-photo" id="heroPhoto" src="/assets/hero-holiday-2026.jpg"
+    <!-- The hero photo is the home page's largest paint, and how fast it
+         arrives is part of how Google scores the page. fetchpriority tells the
+         browser to fetch it ahead of the scripts in <head>. -->
+    <img class="hero-photo" id="heroPhoto" src="/assets/hero-holiday-2026.jpg" fetchpriority="high"
          alt="An Occasions Box gift box in warm grey with an ivory grosgrain ribbon and gold foil branding, styled with evergreen sprigs and candlelight on marble">
     <div class="hero-overlay">
       <div class="hero-copy">

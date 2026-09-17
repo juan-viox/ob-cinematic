@@ -19,6 +19,36 @@
       "source": "/gifting-concierge",
       "destination": "/concierge",
       "permanent": true
+    },
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/about-us",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/about-full",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/about-the-founders",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/shop-1",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/shop/:slug*",
+      "destination": "/shop",
+      "permanent": true
     }
   ],
   "rewrites": [

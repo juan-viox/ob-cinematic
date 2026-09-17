@@ -3,15 +3,124 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Occasions Box | Custom Gifting, Thoughtfully Executed</title>
-<meta name="description" content="Luxury custom gift curation and concierge gifting for corporate events, weddings and milestones. Now booking Holiday 2026.">
+<title>Custom Gift Boxes &amp; Corporate Gifting NJ | Occasions Box</title>
+<meta name="description" content="Luxury custom gift boxes and corporate gifting, packed by hand in Fort Lee, New Jersey and shipped nationwide. Now booking Holiday 2026.">
 <link rel="canonical" href="https://www.occasionsbox.com/">
-<meta property="og:title" content="Occasions Box | Custom Gifting, Thoughtfully Executed">
-<meta property="og:description" content="Luxury custom gift curation and concierge gifting for corporate events, weddings and milestones. Now booking Holiday 2026.">
+<meta property="og:title" content="Custom Gift Boxes &amp; Corporate Gifting NJ | Occasions Box">
+<meta property="og:description" content="Luxury custom gift boxes and corporate gifting, packed by hand in Fort Lee, New Jersey and shipped nationwide. Now booking Holiday 2026.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.occasionsbox.com/">
-<meta property="og:image" content="https://www.occasionsbox.com/assets/hero-holiday-2026.jpg">
+<meta property="og:site_name" content="Occasions Box">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.occasionsbox.com/assets/og/occasionsbox.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A charcoal Occasions Box gift box with a gold embossed lid and ivory ribbon">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Custom Gift Boxes &amp; Corporate Gifting NJ | Occasions Box">
+<meta name="twitter:description" content="Luxury custom gift boxes and corporate gifting, packed by hand in Fort Lee, New Jersey and shipped nationwide. Now booking Holiday 2026.">
+<meta name="twitter:image" content="https://www.occasionsbox.com/assets/og/occasionsbox.jpg">
+<meta name="twitter:image:alt" content="A charcoal Occasions Box gift box with a gold embossed lid and ivory ribbon">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": [
+        "Organization",
+        "LocalBusiness"
+      ],
+      "@id": "https://www.occasionsbox.com/#organization",
+      "name": "Occasions Box",
+      "legalName": "Occasions Box LLC",
+      "url": "https://www.occasionsbox.com/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.occasionsbox.com/assets/ob-logo-gold.png",
+        "width": 1718,
+        "height": 341
+      },
+      "image": "https://www.occasionsbox.com/assets/og/occasionsbox.jpg",
+      "description": "Luxury curated gift boxes and corporate gifting, packed by hand in Fort Lee, New Jersey and shipped nationwide.",
+      "email": "Hello@occasionsbox.com",
+      "telephone": "+1-551-245-7492",
+      "priceRange": "$$$",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Fort Lee",
+        "addressRegion": "NJ",
+        "addressCountry": "US"
+      },
+      "areaServed": [
+        {
+          "@type": "Country",
+          "name": "United States"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Bergen County, New Jersey"
+        }
+      ],
+      "founder": [
+        {
+          "@type": "Person",
+          "name": "Kari Aragon",
+          "jobTitle": "Co-Founder & CEO"
+        },
+        {
+          "@type": "Person",
+          "name": "Sarah De Jesus",
+          "jobTitle": "Co-Founder & Chief Creative Officer"
+        }
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "sales",
+        "email": "Hello@occasionsbox.com",
+        "telephone": "+1-551-245-7492",
+        "areaServed": "US",
+        "availableLanguage": [
+          "English"
+        ]
+      },
+      "sameAs": [
+        "https://instagram.com/occasionsbox",
+        "https://pinterest.com/occasionsbox",
+        "https://facebook.com/occasionsbox",
+        "https://www.linkedin.com/in/occasions-box-llc-7b7955192/"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.occasionsbox.com/#website",
+      "url": "https://www.occasionsbox.com/",
+      "name": "Occasions Box",
+      "inLanguage": "en-US",
+      "publisher": {
+        "@id": "https://www.occasionsbox.com/#organization"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.occasionsbox.com/#webpage",
+      "url": "https://www.occasionsbox.com/",
+      "name": "Custom Gift Boxes & Corporate Gifting NJ | Occasions Box",
+      "description": "Luxury custom gift boxes and corporate gifting, packed by hand in Fort Lee, New Jersey and shipped nationwide. Now booking Holiday 2026.",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@id": "https://www.occasionsbox.com/#website"
+      },
+      "about": {
+        "@id": "https://www.occasionsbox.com/#organization"
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://www.occasionsbox.com/assets/og/occasionsbox.jpg"
+      }
+    }
+  ]
+}
+</script>
 <link rel="icon" type="image/png" href="/assets/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,7 +176,10 @@
 <section id="hero">
   <div class="hero-sticky">
     <div class="hero-fallback" id="heroFallback"></div>
-    <img class="hero-photo" id="heroPhoto" src="/assets/hero-holiday-2026.jpg"
+    <!-- The hero photo is the home page's largest paint, and how fast it
+         arrives is part of how Google scores the page. fetchpriority tells the
+         browser to fetch it ahead of the scripts in <head>. -->
+    <img class="hero-photo" id="heroPhoto" src="/assets/hero-holiday-2026.jpg" fetchpriority="high"
          alt="An Occasions Box gift box in warm grey with an ivory grosgrain ribbon and gold foil branding, styled with evergreen sprigs and candlelight on marble">
     <div class="hero-overlay">
       <div class="hero-copy">
