@@ -1060,6 +1060,13 @@ footer {
   font-family: var(--sans); font-size: 14px; color: var(--text-light);
   text-align: center; margin: 56px auto 0; max-width: 540px;
 }
+/* Quieter than the tiers, but it sits with them rather than in the Terms. */
+.pricing-excl {
+  font-family: var(--sans); font-size: 13px; line-height: 1.7;
+  color: var(--muted); text-align: center;
+  margin: 14px auto 0; max-width: 620px;
+}
+.pricing-excl b { color: var(--text-light); font-weight: 500; }
 
 .modal-contents { margin: 4px 0 20px; }
 .modal-contents-title {
