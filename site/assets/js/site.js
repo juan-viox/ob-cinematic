@@ -62,6 +62,32 @@
     }
   }
 
+  /* ─── Shop occasion filter ─── */
+  var shopFilters = document.querySelectorAll('.shop-filter');
+  if (shopFilters.length) {
+    var shopCards = document.querySelectorAll('.shop-card');
+    var shopEmpty = document.getElementById('shopEmpty');
+    shopFilters.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var want = btn.dataset.filter;
+        shopFilters.forEach(function(b) { b.classList.toggle('active', b === btn); });
+        var shown = 0;
+        shopCards.forEach(function(card) {
+          var match = want === 'all' || card.dataset.occasion === want;
+          card.hidden = !match;
+          /* Cards below the fold are still parked at opacity 0 waiting on their
+             scroll reveal. Filtering can bring one into view without the
+             trigger ever firing, so settle them the moment we filter. */
+          card.style.opacity = '1';
+          card.style.transform = 'none';
+          if (match) shown++;
+        });
+        if (shopEmpty) shopEmpty.hidden = shown > 0;
+        if (window.ScrollTrigger && ScrollTrigger.refresh) ScrollTrigger.refresh();
+      });
+    });
+  }
+
   /* ─── Sticky Cards (Testimonials) ─── */
   var stackCards = document.querySelectorAll('.stack-card');
   stackCards.forEach(function(card, i) {

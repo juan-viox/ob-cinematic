@@ -5,114 +5,126 @@
     <h2 class="section-title">All Gift Boxes</h2>
     <p class="section-body" style="margin:0 auto;text-align:center">Every box is thoughtfully curated with premium artisan products.</p>
   </div>
+  <div class="shop-filters fade-up" role="group" aria-label="Filter boxes by occasion">
+      <button class="shop-filter active" data-filter="all">All <span>22</span></button>
+      <button class="shop-filter" data-filter="selfcare">Self-Care &amp; Rest <span>6</span></button>
+      <button class="shop-filter" data-filter="celebration">Celebration <span>5</span></button>
+      <button class="shop-filter" data-filter="hostess">Hostess &amp; Thank You <span>3</span></button>
+      <button class="shop-filter" data-filter="home">Home &amp; Housewarming <span>3</span></button>
+      <button class="shop-filter" data-filter="treats">Treats &amp; Sips <span>3</span></button>
+      <button class="shop-filter" data-filter="forhim">For Him <span>2</span></button>
+  </div>
+
+  <p class="shop-empty" id="shopEmpty" hidden>No boxes in that category yet.</p>
+
   <div class="shop-grid">
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="celebration">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/OB0_7441-500w.jpg" alt="Love You" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Love You</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="celebration">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/OB0_7537-500w.jpg" alt="Just Peachy" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Just Peachy</div><div class="shop-card-price">$132.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="forhim">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/OB0_7721-500w.jpg" alt="Long Weekend" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Long Weekend</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="treats">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/OB0_7584-500w.jpg" alt="Coffee Lover" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Coffee Lover</div><div class="shop-card-price">$145.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="selfcare">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/OB0_7512-500w.jpg" alt="Zen" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Zen</div><div class="shop-card-price">$145.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="hostess">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/0B0_5612-500w.jpg" alt="The Hostess" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">The Hostess</div><div class="shop-card-price">$175.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="hostess">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/0B0_5453-500w.jpg" alt="Host's Delight - Rose" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Host's Delight - Rose</div><div class="shop-card-price">$105.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="selfcare">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/0B0_5067-500w.jpg" alt="Nightcap Essentials" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Nightcap Essentials</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="treats">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/0B0_5827-500w.jpg" alt="Lemonade" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Lemonade</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="celebration">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/0B0_5699-500w.jpg" alt="Sunshine" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Sunshine</div><div class="shop-card-price">$105.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="celebration">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/0B0_4910-500w.jpg" alt="Cheers" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Cheers</div><div class="shop-card-price">$145.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="selfcare">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/0B0_5137-500w.jpg" alt="Renewed Deluxe" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Renewed Deluxe</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="home">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/0B0_5183-500w.jpg" alt="Welcome Home" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Welcome Home</div><div class="shop-card-price">$125.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="home">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/0B0_4712-500w.jpg" alt="Home Sweet Home" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Home Sweet Home</div><div class="shop-card-price">$170.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="forhim">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/_MG_1812-500w.jpg" alt="Manly" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Manly</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="selfcare">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/ob_1471-500w.jpg" alt="Goodnight" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Goodnight</div><div class="shop-card-price">$130.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="hostess">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/OB_0299-500w.jpg" alt="Host's Delight - Green" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Host's Delight - Green</div><div class="shop-card-price">$105.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="celebration">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/0B0_2489-500w.jpg" alt="Celebrate" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Celebrate</div><div class="shop-card-price">$120.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="selfcare">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/_MG_1792-500w.jpg" alt="NightTime Ritual" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">NightTime Ritual</div><div class="shop-card-price">$150.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="selfcare">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/IMG_9325-500w.jpg" alt="Mini Spa Day" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Mini Spa Day</div><div class="shop-card-price">$115.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="home">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/ob_6944-500w.jpg" alt="Housewarming" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Housewarming</div><div class="shop-card-price">$110.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
 
-    <div class="shop-card fade-up">
+    <div class="shop-card fade-up" data-occasion="treats">
       <div style="overflow:hidden;border-radius:16px 16px 0 0"><img class="shop-card-img" src="/assets/img/IMG_9730-500w.jpg" alt="Afternoon Tea" loading="lazy"></div>
       <div class="shop-card-body"><div class="shop-card-name">Afternoon Tea</div><div class="shop-card-price">$128.00</div><button class="shop-card-btn">View Details</button></div>
     </div>
