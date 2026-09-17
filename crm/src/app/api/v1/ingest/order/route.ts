@@ -28,6 +28,17 @@ const ORDER_STAGE_NAME = 'Approved'
 /** PayPal order ids are alphanumeric (e.g. 5O190127TN364715T); keep the check strict. */
 const PAYPAL_ORDER_ID_RE = /^[A-Za-z0-9_-]{4,64}$/
 
+/** A cart of 50 distinct boxes is already far past anything we would ship
+ *  unreviewed; beyond that it is a malformed or hostile body, not an order. */
+const MAX_LINES = 50
+
+/** One line of an order: a product, its unit price and how many were bought. */
+interface OrderLine {
+  name: string
+  unitAmount: number
+  quantity: number
+}
+
 /** Marker written into deals.notes so the order can be found again (idempotency). */
 function orderMarker(paypalOrderId: string): string {
   return `PayPal order ${paypalOrderId}`
@@ -45,6 +56,66 @@ function currencyCode(v: unknown): string | null {
   if (typeof v !== 'string') return null
   const s = v.trim().toUpperCase()
   return /^[A-Z]{3}$/.test(s) ? s : null
+}
+
+/**
+ * Parses the cart. Returns null when the caller sent no items at all (the
+ * older single-product body, which is still accepted), the line array when
+ * they are well formed, or a message describing the first bad line.
+ */
+function parseLines(v: unknown): OrderLine[] | string | null {
+  if (v === undefined || v === null) return null
+  if (!Array.isArray(v)) return 'items must be an array of order lines'
+  if (v.length === 0) return 'items must contain at least one line'
+  if (v.length > MAX_LINES) return `items may contain at most ${MAX_LINES} lines`
+
+  const lines: OrderLine[] = []
+  for (let i = 0; i < v.length; i++) {
+    const raw = v[i]
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      return `items[${i}] must be an object`
+    }
+    const row = raw as Record<string, unknown>
+
+    const name = str(row.name ?? row.productName ?? row.product, LIMITS.title)
+    if (!name) return `items[${i}].name is required`
+
+    const unitAmount = num(row.unitAmount ?? row.unit_amount ?? row.price)
+    if (unitAmount === null || unitAmount < 0 || unitAmount > 1_000_000) {
+      return `items[${i}].unitAmount must be a non-negative number`
+    }
+
+    const qtyRaw =
+      row.quantity === undefined || row.quantity === null || row.quantity === ''
+        ? 1
+        : num(row.quantity)
+    if (qtyRaw === null || !Number.isInteger(qtyRaw) || qtyRaw < 1 || qtyRaw > 10_000) {
+      return `items[${i}].quantity must be a positive integer`
+    }
+
+    lines.push({ name, unitAmount, quantity: qtyRaw })
+  }
+  return lines
+}
+
+/** Money adds up in cents. 105.10 × 3 in floats does not. */
+function linesTotal(lines: OrderLine[]): number {
+  const cents = lines.reduce(
+    (sum, line) => sum + Math.round(line.unitAmount * 100) * line.quantity,
+    0
+  )
+  return cents / 100
+}
+
+/** A deal title someone can read in a list view without opening it. */
+function orderTitle(prefix: string, lines: OrderLine[], totalUnits: number): string {
+  if (lines.length === 1) return `${prefix}: ${lines[0].name} x${lines[0].quantity}`
+  const head = lines
+    .slice(0, 2)
+    .map((line) => `${line.name} x${line.quantity}`)
+    .join(', ')
+  const rest = lines.length - 2
+  return `${prefix}: ${totalUnits} boxes — ${head}${rest > 0 ? ` +${rest} more` : ''}`
 }
 
 /** Existing deal for this PayPal order id within the org, if any. */
@@ -76,8 +147,18 @@ export function OPTIONS(request: Request) {
 
 /**
  * POST /api/v1/ingest/order
- * Body: { productName, amount, quantity?, currency?, paypalOrderId, payerEmail?, payerName?, status: 'paid' }
- * Idempotent on paypalOrderId.
+ *
+ * Body (cart, preferred):
+ *   { items: [{ name, unitAmount, quantity? }, …], amount?, currency?,
+ *     paypalOrderId, payerEmail?, payerName?, status: 'paid' }
+ *
+ * Body (single product, still accepted):
+ *   { productName, amount, quantity?, currency?, paypalOrderId, … }
+ *
+ * The order total is computed from the lines, in cents, and an `amount` sent
+ * alongside them must agree with it to the penny — the cart and the total are
+ * two claims about the same purchase, and a mismatch means one of them is
+ * wrong. Idempotent on paypalOrderId.
  *
  * Trust model (the Origin check alone is spoofable, so a body must never be
  * taken as proof of payment):
@@ -103,19 +184,62 @@ export async function POST(request: Request) {
       return jsonError(request, 'A valid paypalOrderId is required', 400)
     }
 
-    const productName = str(body.productName ?? body.product, LIMITS.title)
-    if (!productName) return jsonError(request, 'productName is required', 400)
+    const parsedLines = parseLines(body.items ?? body.lineItems)
+    if (typeof parsedLines === 'string') return jsonError(request, parsedLines, 400)
 
-    const amount = num(body.amount)
-    if (amount === null || amount < 0 || amount > 1_000_000) {
+    const statedAmount = body.amount === undefined || body.amount === null || body.amount === ''
+      ? null
+      : num(body.amount)
+    if (body.amount !== undefined && body.amount !== null && body.amount !== '' && statedAmount === null) {
       return jsonError(request, 'amount must be a non-negative number', 400)
     }
 
-    const quantityRaw = body.quantity === undefined || body.quantity === null || body.quantity === '' ? 1 : num(body.quantity)
-    if (quantityRaw === null || !Number.isInteger(quantityRaw) || quantityRaw < 1 || quantityRaw > 10_000) {
-      return jsonError(request, 'quantity must be a positive integer', 400)
+    let lines: OrderLine[]
+    let amount: number
+
+    if (parsedLines) {
+      lines = parsedLines
+      amount = linesTotal(lines)
+      // The cart and the total are two claims about the same purchase.
+      if (statedAmount !== null && Math.abs(statedAmount - amount) > 0.005) {
+        return jsonError(
+          request,
+          `amount ${statedAmount.toFixed(2)} does not match the items total ${amount.toFixed(2)}`,
+          400
+        )
+      }
+    } else {
+      // Single-product body: the amount is the line total, not the unit price.
+      const productName = str(body.productName ?? body.product, LIMITS.title)
+      if (!productName) return jsonError(request, 'productName or items is required', 400)
+
+      if (statedAmount === null || statedAmount < 0 || statedAmount > 1_000_000) {
+        return jsonError(request, 'amount must be a non-negative number', 400)
+      }
+
+      const quantityRaw =
+        body.quantity === undefined || body.quantity === null || body.quantity === ''
+          ? 1
+          : num(body.quantity)
+      if (quantityRaw === null || !Number.isInteger(quantityRaw) || quantityRaw < 1 || quantityRaw > 10_000) {
+        return jsonError(request, 'quantity must be a positive integer', 400)
+      }
+
+      amount = statedAmount
+      lines = [
+        {
+          name: productName,
+          unitAmount: Math.round((statedAmount / quantityRaw) * 100) / 100,
+          quantity: quantityRaw,
+        },
+      ]
     }
-    const quantity = quantityRaw
+
+    if (amount > 1_000_000) {
+      return jsonError(request, 'amount must be a non-negative number', 400)
+    }
+
+    const totalUnits = lines.reduce((sum, line) => sum + line.quantity, 0)
 
     const currency = currencyCode(body.currency)
     if (!currency) return jsonError(request, 'currency must be a 3-letter ISO code', 400)
@@ -177,6 +301,10 @@ export async function POST(request: Request) {
 
     const payerLabel = fullName(firstName, lastName) || payerEmail || 'Guest'
     const amountLabel = `${amount.toFixed(2)} ${currency}`
+    const summary =
+      lines.length === 1
+        ? `${lines[0].name} x${lines[0].quantity}`
+        : `${totalUnits} boxes across ${lines.length} products`
     const stageId = verified
       ? await getStageIdByName(supabase, orgId, ORDER_STAGE_NAME)
       : await getFirstStageId(supabase, orgId)
@@ -185,11 +313,18 @@ export async function POST(request: Request) {
       return jsonError(request, 'CRM pipeline is not configured yet', 503)
     }
 
+    // The packing list lives in the notes, one line per product, because that
+    // is what whoever fulfils the order actually needs to read.
+    const itemLines = lines.map(
+      (line) =>
+        `  ${line.name} x${line.quantity} — ${(Math.round(line.unitAmount * 100) * line.quantity / 100).toFixed(2)} ${currency}` +
+        (line.quantity > 1 ? ` (${line.unitAmount.toFixed(2)} each)` : '')
+    )
     const notes = [
       orderMarker(paypalOrderId),
-      `Product: ${productName}`,
-      `Quantity: ${quantity}`,
-      `Amount: ${amountLabel}`,
+      'Items:',
+      ...itemLines,
+      `Total: ${amountLabel}`,
       `Payer: ${payerLabel}${payerEmail && payerLabel !== payerEmail ? ` <${payerEmail}>` : ''}`,
       `Status: ${status}`,
       verified
@@ -202,7 +337,7 @@ export async function POST(request: Request) {
       organization_id: orgId,
       contact_id: contactId,
       stage_id: stageId,
-      title: `${titlePrefix}: ${productName} x${quantity}`.slice(0, LIMITS.title),
+      title: orderTitle(titlePrefix, lines, totalUnits).slice(0, LIMITS.title),
       amount,
       close_date: new Date().toISOString().slice(0, 10),
       notes,
@@ -229,13 +364,15 @@ export async function POST(request: Request) {
       title: verified
         ? `PayPal order ${paypalOrderId} captured`
         : `PayPal order ${paypalOrderId} reported (unverified)`,
-      description: `${productName} x${quantity} — ${amountLabel} ${verified ? 'paid by' : 'reported by'} ${payerLabel}`,
+      description: `${summary} — ${amountLabel} ${verified ? 'paid by' : 'reported by'} ${payerLabel}`,
       status: 'completed',
       completedAt: new Date().toISOString(),
       metadata: {
         paypalOrderId,
-        productName,
-        quantity,
+        items: lines,
+        // Kept so anything reading the old shape still finds something sensible.
+        productName: lines.length === 1 ? lines[0].name : summary,
+        quantity: totalUnits,
         amount,
         currency,
         payerEmail,

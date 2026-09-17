@@ -119,7 +119,7 @@ or by an allow-listed browser `Origin`.
 | --- | --- |
 | `POST /admin/api/v1/ingest/lead` | Contact form |
 | `POST /admin/api/v1/ingest/newsletter` | Newsletter signup |
-| `POST /admin/api/v1/ingest/order` | PayPal order capture |
+| `POST /admin/api/v1/ingest/order` | PayPal order capture (cart: `items[{name, unitAmount, quantity}]`) |
 | `POST /admin/api/v1/ingest/booking` | Booking requests |
 | `POST /admin/api/v1/ingest/voice-call` | AI voice agent call logs |
 

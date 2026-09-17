@@ -176,7 +176,12 @@
      order to PayPal and to the CRM, not just the picture on screen. */
   function orderName() {
     if (!currentProduct) return '';
-    return currentProduct.name + (currentVariant ? ' \u2014 ' + currentVariant.label : '');
+    return currentProduct.name + (currentVariant ? ' — ' + currentVariant.label : '');
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   function openModal(productName) {
@@ -227,7 +232,8 @@
     }
 
     renderContents(product);
-    mountCheckout();
+    document.getElementById('productModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
   }
 
   /* The tea is the one line that differs between the colourways. */
@@ -253,88 +259,274 @@
 
   }
 
-  function mountCheckout() {
-    document.getElementById('productModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
+  /* ─── Cart ───
+     Someone sending gifts is rarely sending one, so the shop has to let them
+     keep shopping. The cart lives in this browser's localStorage: it is one
+     shopper's own basket, we never read it back, and it survives a reload or
+     a walk over to the About page.
 
-    // Render PayPal buttons
-    var container = document.getElementById('paypal-button-container');
-    container.innerHTML = '';
+     Only identity and quantity are stored. Price, photograph and contents are
+     read from the catalogue on every render, so a cart left open for a month
+     cannot check out at last month's price, and a box we have withdrawn
+     quietly drops out instead of being sold. */
+  var CART_KEY = 'ob_cart_v1';
+  var MAX_QTY = 20;
+  var MAX_LINES = 20;
+  var cart = [];
+  var paypalMounted = false;
 
-    if (typeof paypalSDK !== 'undefined') {
-      paypalSDK.Buttons({
-        style: {
-          layout: 'vertical',
-          color: 'gold',
-          shape: 'pill',
-          label: 'pay',
-          height: 45
-        },
-        createOrder: function(data, actions) {
-          var qty = parseInt(document.getElementById('modalQty').value) || 1;
-          return actions.order.create({
-            purchase_units: [{
-              description: orderName() + ' Gift Box',
-              amount: {
-                value: (currentProduct.price * qty).toFixed(2),
-                currency_code: 'USD',
-                breakdown: {
-                  item_total: { value: (currentProduct.price * qty).toFixed(2), currency_code: 'USD' }
-                }
-              },
-              items: [{
-                name: orderName(),
-                unit_amount: { value: currentProduct.price.toFixed(2), currency_code: 'USD' },
-                quantity: String(qty),
-                category: 'PHYSICAL_GOODS'
-              }]
-            }]
-          });
-        },
-        onApprove: function(data, actions) {
-          return actions.order.capture().then(function(details) {
-            closeModal();
-            // Guest checkout / some funding sources return a payer without a name object.
-            var payer = (details && details.payer) || {};
-            var given = (payer.name && payer.name.given_name) || '';
-            showToast('Order confirmed! Thank you' + (given ? ', ' + given : '') + '.', 'success');
-
-            // Record the order in the OccasionsBox CRM (payment itself already succeeded)
-            if (CRM_CONFIG.enabled && CRM_CONFIG.apiUrl) {
-              var qty = parseInt(document.getElementById('modalQty').value) || 1;
-              var payerName = [payer.name && payer.name.given_name, payer.name && payer.name.surname]
-                .filter(Boolean).join(' ');
-              fetch(CRM_CONFIG.apiUrl + '/order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  productName: orderName(),
-                  amount: currentProduct.price * qty,
-                  quantity: qty,
-                  currency: 'USD',
-                  paypalOrderId: data.orderID,
-                  payerEmail: payer.email_address || '',
-                  payerName: payerName,
-                  status: 'paid'
-                })
-              })
-              .then(function(res) {
-                if (!res.ok) throw new Error('CRM order ingest failed: HTTP ' + res.status);
-              })
-              .catch(function(err) {
-                console.error('Order recorded by PayPal but not by the CRM:', err);
-                showToast('Order received — we\'ll confirm by email', 'success');
-              });
-            }
-          });
-        },
-        onError: function(err) {
-          showToast('Payment error. Please try again.', 'error');
-        }
-      }).render('#paypal-button-container');
-    } else {
-      container.innerHTML = '<p style="text-align:center;color:var(--muted);font-size:14px">Payment loading...</p>';
+  function readStoredCart() {
+    try {
+      var raw = window.localStorage.getItem(CART_KEY);
+      if (!raw) return [];
+      var parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter(function(line) {
+        return line && typeof line.name === 'string' &&
+               typeof line.qty === 'number' && isFinite(line.qty) && line.qty >= 1;
+      }).slice(0, MAX_LINES).map(function(line) {
+        return {
+          name: line.name,
+          variant: typeof line.variant === 'string' ? line.variant : '',
+          qty: Math.min(Math.round(line.qty), MAX_QTY)
+        };
+      });
+    } catch (e) {
+      // Private browsing, blocked storage, corrupted JSON — start empty.
+      return [];
     }
+  }
+
+  function saveCart() {
+    try {
+      window.localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    } catch (e) {
+      // The cart still works for this page view; it just will not survive.
+    }
+  }
+
+  function lineLabel(line) {
+    return line.name + (line.variant ? ' — ' + line.variant : '');
+  }
+
+  /* The catalogue is the source of truth. A stored line that no longer
+     matches a product, or a colourway we no longer carry, is dropped rather
+     than guessed at. */
+  function resolveCart() {
+    var out = [];
+    cart.forEach(function(line) {
+      var product = allProducts.find(function(p) { return p.name === line.name; });
+      if (!product) return;
+      var variant = null;
+      if (product.variants && product.variants.length) {
+        variant = product.variants.find(function(v) { return v.label === line.variant; }) || null;
+        if (!variant) return;
+      }
+      out.push({
+        line: line,
+        label: lineLabel(line),
+        price: product.price,
+        img: (variant && variant.img) || product.img
+      });
+    });
+    return out;
+  }
+
+  /* Money adds up in cents. 132.00 * 3 in floats does not. */
+  function subtotalCents(resolved) {
+    return resolved.reduce(function(sum, r) {
+      return sum + Math.round(r.price * 100) * r.line.qty;
+    }, 0);
+  }
+
+  function money(cents) {
+    return '$' + (cents / 100).toFixed(2);
+  }
+
+  function cartUnits(resolved) {
+    return resolved.reduce(function(n, r) { return n + r.line.qty; }, 0);
+  }
+
+  function addToCart(product, variant, qty) {
+    var variantLabel = variant ? variant.label : '';
+    var existing = cart.find(function(l) {
+      return l.name === product.name && (l.variant || '') === variantLabel;
+    });
+    if (existing) {
+      existing.qty = Math.min(existing.qty + qty, MAX_QTY);
+    } else {
+      if (cart.length >= MAX_LINES) {
+        showToast('That is as many different boxes as the cart holds. Email Collaborate@occasionsbox.com and we will quote the whole order.', 'error');
+        return false;
+      }
+      cart.push({ name: product.name, variant: variantLabel, qty: Math.min(qty, MAX_QTY) });
+    }
+    saveCart();
+    renderCart();
+    return true;
+  }
+
+  function renderCart() {
+    var resolved = resolveCart();
+    var units = cartUnits(resolved);
+    var overlay = document.getElementById('cartOverlay');
+
+    var navCount = document.getElementById('navCartCount');
+    if (navCount) {
+      navCount.textContent = String(units);
+      // A bubble reading "0" is noise; the bag on its own says the same thing.
+      navCount.hidden = units === 0;
+    }
+    var navCart = document.getElementById('navCart');
+    // On the shop page the cart stays in reach even when empty; elsewhere an
+    // empty cart is a control with nothing behind it, so it stays out of view.
+    if (navCart) navCart.hidden = units === 0 && !overlay;
+
+    var list = document.getElementById('cartItems');
+    if (!list) return;
+
+    list.innerHTML = resolved.map(function(r, i) {
+      var label = escapeHtml(r.label);
+      return '<li class="cart-item" data-line="' + i + '">' +
+        '<img class="cart-item-img" src="' + escapeHtml(r.img) + '" alt="" loading="lazy">' +
+        '<div class="cart-item-main">' +
+          '<div class="cart-item-name">' + label + '</div>' +
+          '<div class="cart-item-unit">' + money(Math.round(r.price * 100)) + ' each</div>' +
+          '<div class="cart-item-controls">' +
+            '<button type="button" class="cart-step" data-act="dec" aria-label="One fewer ' + label + '">&minus;</button>' +
+            '<span class="cart-item-qty">' + r.line.qty + '</span>' +
+            '<button type="button" class="cart-step" data-act="inc" aria-label="One more ' + label + '">+</button>' +
+            '<button type="button" class="cart-remove" data-act="remove">Remove</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="cart-item-total">' + money(Math.round(r.price * 100) * r.line.qty) + '</div>' +
+      '</li>';
+    }).join('');
+
+    var empty = document.getElementById('cartEmpty');
+    var foot = document.getElementById('cartFoot');
+    if (empty) empty.hidden = resolved.length > 0;
+    if (foot) foot.hidden = resolved.length === 0;
+
+    var subtotal = document.getElementById('cartSubtotal');
+    if (subtotal) subtotal.textContent = money(subtotalCents(resolved));
+  }
+
+  function openCart() {
+    var overlay = document.getElementById('cartOverlay');
+    if (!overlay) return;
+    renderCart();
+    overlay.hidden = false;
+    requestAnimationFrame(function() { overlay.classList.add('open'); });
+    document.body.style.overflow = 'hidden';
+    mountCheckout();
+    var close = document.getElementById('cartClose');
+    if (close) close.focus();
+  }
+
+  function closeCart() {
+    var overlay = document.getElementById('cartOverlay');
+    if (!overlay || overlay.hidden) return;
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(function() {
+      if (!overlay.classList.contains('open')) overlay.hidden = true;
+    }, 260);
+  }
+
+  /* PayPal is told the whole cart, one item per line, with an item_total that
+     matches the sum — so the payer's receipt lists what they actually bought
+     and the CRM can reconcile against it line for line. */
+  function mountCheckout() {
+    var container = document.getElementById('paypal-button-container');
+    if (!container || paypalMounted) return;
+
+    if (typeof paypalSDK === 'undefined') {
+      container.innerHTML = '<p class="cart-loading">Payment loading&hellip;</p>';
+      return; // Not marked mounted: the next open retries.
+    }
+
+    paypalMounted = true;
+    container.innerHTML = '';
+    paypalSDK.Buttons({
+      style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'pay', height: 45 },
+      createOrder: function(data, actions) {
+        var resolved = resolveCart();
+        var total = (subtotalCents(resolved) / 100).toFixed(2);
+        var units = cartUnits(resolved);
+        var description = resolved.length === 1
+          ? resolved[0].label + ' Gift Box'
+          : 'Occasions Box — ' + units + ' gift boxes';
+        return actions.order.create({
+          purchase_units: [{
+            description: description.slice(0, 127),
+            amount: {
+              value: total,
+              currency_code: 'USD',
+              breakdown: { item_total: { value: total, currency_code: 'USD' } }
+            },
+            items: resolved.map(function(r) {
+              return {
+                name: r.label.slice(0, 127),
+                unit_amount: { value: r.price.toFixed(2), currency_code: 'USD' },
+                quantity: String(r.line.qty),
+                category: 'PHYSICAL_GOODS'
+              };
+            })
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        // Snapshot before capture: the cart is emptied on success, and what we
+        // report to the CRM has to be what was actually paid for.
+        var resolved = resolveCart();
+        var cents = subtotalCents(resolved);
+        return actions.order.capture().then(function(details) {
+          closeCart();
+          // Guest checkout / some funding sources return a payer without a name object.
+          var payer = (details && details.payer) || {};
+          var given = (payer.name && payer.name.given_name) || '';
+          showToast('Order confirmed! Thank you' + (given ? ', ' + given : '') + '.', 'success');
+          cart = [];
+          saveCart();
+          renderCart();
+          recordOrder(data.orderID, payer, resolved, cents);
+        });
+      },
+      onError: function(err) {
+        showToast('Payment error. Please try again.', 'error');
+      }
+    }).render('#paypal-button-container');
+  }
+
+  /* Payment has already succeeded by the time this runs, so a CRM failure is
+     reported to us and softened for the buyer, never treated as a failed sale. */
+  function recordOrder(paypalOrderId, payer, resolved, cents) {
+    if (!CRM_CONFIG.enabled || !CRM_CONFIG.apiUrl) return;
+    var payerName = [payer.name && payer.name.given_name, payer.name && payer.name.surname]
+      .filter(Boolean).join(' ');
+    fetch(CRM_CONFIG.apiUrl + '/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: resolved.map(function(r) {
+          return { name: r.label, unitAmount: r.price, quantity: r.line.qty };
+        }),
+        amount: cents / 100,
+        currency: 'USD',
+        paypalOrderId: paypalOrderId,
+        payerEmail: payer.email_address || '',
+        payerName: payerName,
+        status: 'paid'
+      })
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('CRM order ingest failed: HTTP ' + res.status);
+    })
+    .catch(function(err) {
+      console.error('Order recorded by PayPal but not by the CRM:', err);
+      showToast('Order received — we\'ll confirm by email', 'success');
+    });
   }
 
   window.closeModal = function() {
@@ -348,9 +540,12 @@
     if (e.target === this) closeModal();
   });
 
-  // Close modal on Escape key
+  // Escape closes whichever is on top.
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeModal();
+    if (e.key !== 'Escape') return;
+    var overlay = document.getElementById('cartOverlay');
+    if (overlay && !overlay.hidden) { closeCart(); return; }
+    closeModal();
   });
 
   // Wire all "View Details" buttons in the shop grid
@@ -360,6 +555,66 @@
       openModal(name);
     });
   });
+
+  var modalAdd = document.getElementById('modalAdd');
+  if (modalAdd) modalAdd.addEventListener('click', function() {
+    if (!currentProduct) return;
+    var qty = parseInt(document.getElementById('modalQty').value, 10);
+    if (!qty || qty < 1) qty = 1;
+    if (qty > MAX_QTY) qty = MAX_QTY;
+    if (!addToCart(currentProduct, currentVariant, qty)) return;
+    closeModal();
+    if (document.getElementById('cartOverlay')) {
+      openCart();
+    } else {
+      showToast(orderName() + ' added to your cart.', 'success');
+    }
+  });
+
+  var cartItemsEl = document.getElementById('cartItems');
+  if (cartItemsEl) cartItemsEl.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    var row = btn.closest('.cart-item');
+    if (!row) return;
+    var resolved = resolveCart();
+    var entry = resolved[parseInt(row.dataset.line, 10)];
+    if (!entry) return;
+    var act = btn.dataset.act;
+    if (act === 'inc') {
+      entry.line.qty = Math.min(entry.line.qty + 1, MAX_QTY);
+    } else if (act === 'dec') {
+      entry.line.qty -= 1;
+    }
+    if (act === 'remove' || entry.line.qty < 1) {
+      cart = cart.filter(function(l) { return l !== entry.line; });
+    }
+    saveCart();
+    renderCart();
+  });
+
+  var cartCloseEl = document.getElementById('cartClose');
+  if (cartCloseEl) cartCloseEl.addEventListener('click', closeCart);
+
+  var cartContinueEl = document.getElementById('cartContinue');
+  if (cartContinueEl) cartContinueEl.addEventListener('click', closeCart);
+
+  var cartOverlayEl = document.getElementById('cartOverlay');
+  if (cartOverlayEl) cartOverlayEl.addEventListener('click', function(e) {
+    if (e.target === this) closeCart();
+  });
+
+  var navCartEl = document.getElementById('navCart');
+  if (navCartEl) navCartEl.addEventListener('click', function(e) {
+    // Where there is no drawer on this page, the link goes to the shop.
+    if (!document.getElementById('cartOverlay')) return;
+    e.preventDefault();
+    openCart();
+  });
+
+  cart = readStoredCart();
+  renderCart();
+  if (cartOverlayEl && window.location.hash === '#cart') openCart();
 
   /* ─── Contact Form → CRM Lead ─── */
   var contactFormEl = document.getElementById('contactForm');
