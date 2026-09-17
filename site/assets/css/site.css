@@ -1135,6 +1135,10 @@ body.page-concierge #concierge { padding-top: 64px; }
 .concierge-toggle-btn.active {
   background: var(--gold); color: #fff; border-color: var(--gold);
 }
+/* The label was hard-coded gold, which disappeared against the gold pill the
+   moment its own button became the active one. */
+.concierge-toggle-btn span { font-size: 10px; color: var(--gold); }
+.concierge-toggle-btn.active span { color: #fff; opacity: 0.8; }
 .concierge-billing {
   max-width: 560px; margin: 0 auto 36px; text-align: center;
   font-size: 14px; line-height: 1.6; color: var(--muted);
