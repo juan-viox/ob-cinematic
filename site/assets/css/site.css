@@ -596,8 +596,8 @@ footer {
 }
 .footer-grid {
   max-width: 1100px; margin: 0 auto;
-  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 40px;
+  display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr;
+  gap: 40px 32px;
 }
 .footer-brand p {
   font-size: 14px; color: rgba(255,255,255,0.5);
@@ -669,6 +669,42 @@ footer {
   #about, #contact { padding: 80px 16px; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+}
+
+/* ═══════════════════════════════════════════
+   LEGAL / POLICY PAGES
+   ═══════════════════════════════════════════ */
+.legal {
+  max-width: 720px; margin: 0 auto;
+  padding: 8px 24px 100px;
+}
+.legal-updated {
+  font-family: var(--sans); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 40px;
+}
+.legal-intro {
+  font-size: 17px; line-height: 1.75; color: var(--text-light);
+  padding-bottom: 8px;
+}
+.legal h2 {
+  font-family: var(--serif); font-size: 23px; font-weight: 400;
+  letter-spacing: -0.01em; color: var(--text);
+  margin: 44px 0 14px;
+}
+.legal h2:first-of-type { margin-top: 8px; }
+.legal p {
+  font-size: 15.5px; line-height: 1.75; color: var(--muted);
+  margin-bottom: 14px;
+}
+.legal a {
+  color: var(--gold); border-bottom: 1px solid rgba(197,165,90,0.35);
+  transition: border-color 0.2s;
+}
+.legal a:hover { border-bottom-color: var(--gold); }
+@media (max-width: 600px) {
+  .legal { padding: 8px 20px 72px; }
+  .legal h2 { font-size: 21px; margin-top: 36px; }
 }
 
 /* ═══════════════════════════════════════════

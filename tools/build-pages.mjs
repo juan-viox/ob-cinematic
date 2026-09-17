@@ -91,6 +91,28 @@ const PAGES = [
     },
     sections: ['contact', 'newsletter'],
   },
+  {
+    slug: 'shipping-returns', url: '/shipping-returns', nav: '',
+    title: 'Shipping & Returns | Occasions Box',
+    desc: 'How Occasions Box ships, what local hand delivery covers, and what happens if a gift arrives damaged. All sales are final.',
+    header: {
+      eyebrow: 'Policies',
+      h1: 'Shipping &amp; Returns',
+      p: 'How your gifts get there, what it costs, and what we do when something goes wrong.',
+    },
+    sections: ['shipping-returns'],
+  },
+  {
+    slug: 'terms-and-conditions', url: '/terms-and-conditions', nav: '',
+    title: 'Terms & Conditions | Occasions Box',
+    desc: 'The terms that govern orders placed with Occasions Box, including custom and corporate gifting.',
+    header: {
+      eyebrow: 'Policies',
+      h1: 'Terms &amp; Conditions',
+      p: 'The agreement behind every order, in plain language.',
+    },
+    sections: ['terms'],
+  },
 ];
 
 const navFor = (page) => {
