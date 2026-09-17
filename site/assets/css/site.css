@@ -423,18 +423,18 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 .process-header { text-align: center; margin-bottom: 72px; }
 .process-figure {
   max-width: 860px; margin: 0 auto 72px;
-  border-radius: 4px; overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.10);
-  background: var(--bg);
 }
 .process-figure img {
   display: block; width: 100%; height: auto;
   aspect-ratio: 3 / 2; object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.10);
 }
 .process-figure figcaption {
-  font-family: var(--sans); font-size: 13px; line-height: 1.6;
-  letter-spacing: 0.02em; color: var(--text-light);
-  text-align: center; padding: 16px 20px;
+  font-family: var(--sans); font-size: 13.5px; line-height: 1.75;
+  color: var(--text-light); text-align: center;
+  max-width: 640px; margin: 40px auto 0;
+  padding-top: 26px; border-top: 1px solid var(--border);
 }
 .process-rail {
   list-style: none;
