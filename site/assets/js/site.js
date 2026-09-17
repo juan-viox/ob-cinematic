@@ -236,6 +236,16 @@
   }
 
   /* ─── Product Modal + PayPal ─── */
+  /* What is actually inside each box. The live site lists this per product
+     and the rebuild had replaced it with one generic sentence repeated 22
+     times, which is the whole argument for the price. Boxes not yet listed
+     here fall back to that sentence until their contents are supplied. */
+  var PRODUCT_CONTENTS = {
+    "Love You": ["<b>Leather Wristlet</b> | Camel", "<b>Twin Sparrow</b> | \u201cLove You\u201d script keychain", "<b>Ramona &amp; Ruth</b> | Soft blush slim notebook", "<b>Vinoos</b> | Vegan wine gummies, 13 units | no alcohol, gluten, fat, nuts, gelatine or lactose", "<b>P.F. Candle Co.</b> | Soy candle, 7.2oz | Sunbloom", "<b>OB</b> | Mini signature matches, white tip", "<b>OB</b> | Gold ballpoint pen", "Occasions Box keepsake box | 11\u2033 &times; 8.66\u2033 &times; 4.33\u2033", "A handwritten card of your choice"],
+    "Just Peachy": ["<b>Towel</b> | Hand-loomed Turkish hand or face towel | coral and white", "<b>Uber Star</b> | Reusable glass travel coffee cup, 12oz | silicone sleeve and matching lid in blush pink", "<b>OB Bath Sponge</b> | Fee sea sponge", "<b>Candlefolk</b> | Gold travel candle, 4oz | Juniper &amp; Mint", "<b>Fruition Chocolate Works</b> | Vanilla bean toasted white | Dominican chocolate, 38% cocoa", "<b>OB</b> | Mimi matches, red tip", "Occasions Box keepsake box | 11\u2033 &times; 8.66\u2033 &times; 4.33\u2033", "A handwritten card of your choice"],
+    "Host's Delight - Rose": ["<b>Madeira Housewares</b> | Teak edge-grain chop block, 8\u2033 &times; 8\u2033 &times; 1.25\u2033", "<b>OB x Beautea Studio</b> | Organic rose mint loose-leaf tea", "<b>The Bee Box</b> | Mini specialty honey jar, 4oz | USDA certified organic", "<b>Three Blue Birds</b> | Swedish dishcloths, 2 count | absorbs 20&times; its weight, replaces 17 rolls of paper towels | 70% FSC cellulose, 30% organic cotton", "<b>OB Coffee Scoop</b> | 304 stainless measuring scoop with bag clip", "<b>OB</b> | Wooden honey dipper", "Occasions Box keepsake box | 11\u2033 &times; 8.66\u2033 &times; 4.33\u2033", "A handwritten card of your choice"]
+  };
+
   var allProducts = [
     {name:'Love You', price:150, img: '/assets/img/OB0_7441-750w.jpg'},
     {name:'Just Peachy', price:132, img: '/assets/img/OB0_7537-750w.jpg'},
@@ -273,6 +283,21 @@
     document.getElementById('modalName').textContent = product.name;
     document.getElementById('modalPrice').textContent = '$' + product.price.toFixed(2);
     document.getElementById('modalQty').value = 1;
+
+    var contents = PRODUCT_CONTENTS[product.name];
+    var list = document.getElementById('modalContents');
+    var desc = document.getElementById('modalDesc');
+    if (list) {
+      if (contents && contents.length) {
+        list.innerHTML = '<div class="modal-contents-title">Box includes</div><ul>' +
+          contents.map(function(item) { return '<li>' + item + '</li>'; }).join('') + '</ul>';
+        list.hidden = false;
+        if (desc) desc.hidden = true;
+      } else {
+        list.hidden = true;
+        if (desc) desc.hidden = false;
+      }
+    }
 
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';

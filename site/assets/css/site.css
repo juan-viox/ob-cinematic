@@ -999,8 +999,27 @@ footer {
   text-align: center; margin: 56px auto 0; max-width: 540px;
 }
 
-/* Design and delivery are a real share of a job's margin; a buyer meets
-   them here rather than on the invoice. */
+.modal-contents { margin: 4px 0 20px; }
+.modal-contents-title {
+  font-family: var(--sans); font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+}
+.modal-contents ul { list-style: none; padding: 0; margin: 0; }
+.modal-contents li {
+  font-family: var(--sans); font-size: 13.5px; line-height: 1.6;
+  color: var(--text-light); padding: 7px 0 7px 16px;
+  border-bottom: 1px solid var(--border); position: relative;
+}
+.modal-contents li:last-child { border-bottom: 0; }
+.modal-contents li::before {
+  content: ''; position: absolute; left: 0; top: 15px;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+}
+.modal-contents li b { color: var(--text); font-weight: 500; }
+
+/* Design and delivery are quoted per project: design is often set low to win
+   an account and delivery tracks distance, so publishing a figure for either
+   would anchor the wrong way. The buyer still learns they exist. */
 .pricing-addons {
   max-width: 1040px; margin: 40px auto 0; text-align: center;
 }
