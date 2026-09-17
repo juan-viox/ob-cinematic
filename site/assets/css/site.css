@@ -918,8 +918,8 @@ footer {
 #pricing { padding: 120px 24px; background: var(--bg); }
 .pricing-header { text-align: center; margin-bottom: 56px; max-width: 600px; margin-left: auto; margin-right: auto; }
 .pricing-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 18px; max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 20px; max-width: 880px; margin: 0 auto;
 }
 .pricing-card {
   background: var(--bg); border: 1px solid var(--border);
@@ -998,6 +998,25 @@ footer {
   font-family: var(--sans); font-size: 14px; color: var(--text-light);
   text-align: center; margin: 56px auto 0; max-width: 540px;
 }
+
+/* Design and delivery are a real share of a job's margin; a buyer meets
+   them here rather than on the invoice. */
+.pricing-addons {
+  max-width: 1040px; margin: 40px auto 0; text-align: center;
+}
+.pa-title {
+  font-family: var(--sans); font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 18px;
+}
+.pa-items {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 40px;
+}
+.pa-item {
+  display: flex; align-items: baseline; gap: 10px;
+  font-family: var(--sans); font-size: 14px;
+}
+.pa-name { color: var(--text-light); }
+.pa-price { color: var(--text); }
 
 /* ═══════════════════════════════════════════
    HOW WE START + ENQUIRY FORM
