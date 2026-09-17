@@ -184,13 +184,72 @@
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  /* A photograph of an open box shows what is inside it; a photograph of the
+     closed box shows what arrives on the doorstep. Buyers want both, so a
+     product may carry several images. `images` is a list of paths, or of
+     {src, alt} where the alt says what the shot actually shows ("the box
+     closed, ribboned"). One image and the strip stays out of the way. */
+  function normaliseImages(list, label) {
+    return (list || []).map(function(entry, i) {
+      var src = typeof entry === 'string' ? entry : (entry && entry.src) || '';
+      var alt = typeof entry === 'string' ? '' : (entry && entry.alt) || '';
+      return {
+        src: src,
+        alt: alt ? label + ' — ' + alt : (i === 0 ? label + ' gift box' : label + ' gift box, another view')
+      };
+    }).filter(function(img) { return img.src; });
+  }
+
+  /* A colourway carries its own photographs where it has them; otherwise the
+     product's own set stands in. */
+  function galleryFor(product, variant) {
+    var label = product.name + (variant ? ' \u2014 ' + variant.label : '');
+    if (variant && variant.images) return normaliseImages(variant.images, label);
+    if (variant && variant.img) return normaliseImages([variant.img], label);
+    if (product.images) return normaliseImages(product.images, label);
+    return normaliseImages([product.img], label);
+  }
+
+  function renderGallery(product) {
+    var images = galleryFor(product, currentVariant);
+    var main = document.getElementById('modalImg');
+    var strip = document.getElementById('modalThumbs');
+    if (!main || !images.length) return;
+
+    var show = function(i) {
+      main.src = images[i].src;
+      main.alt = images[i].alt;
+      if (!strip) return;
+      strip.querySelectorAll('.modal-thumb').forEach(function(t, j) {
+        t.classList.toggle('active', j === i);
+        t.setAttribute('aria-current', j === i ? 'true' : 'false');
+      });
+    };
+
+    if (strip) {
+      if (images.length > 1) {
+        strip.innerHTML = images.map(function(img, i) {
+          return '<button type="button" class="modal-thumb' + (i === 0 ? ' active' : '') + '" data-img="' + i +
+                 '" aria-label="Show ' + escapeHtml(img.alt) + '"><img src="' + escapeHtml(img.src) +
+                 '" alt="" loading="lazy"></button>';
+        }).join('');
+        strip.hidden = false;
+        strip.querySelectorAll('.modal-thumb').forEach(function(btn) {
+          btn.addEventListener('click', function() { show(parseInt(this.dataset.img, 10)); });
+        });
+      } else {
+        strip.hidden = true;
+        strip.innerHTML = '';
+      }
+    }
+    show(0);
+  }
+
   function openModal(productName) {
     var product = allProducts.find(function(p) { return p.name === productName; });
     if (!product) return;
     currentProduct = product;
 
-    document.getElementById('modalImg').src = product.img;
-    document.getElementById('modalImg').alt = product.name;
     document.getElementById('modalName').textContent = product.name;
     document.getElementById('modalPrice').textContent = '$' + product.price.toFixed(2);
     document.getElementById('modalQty').value = 1;
@@ -220,8 +279,7 @@
             vwrap.querySelectorAll('.modal-variant').forEach(function(b) {
               b.classList.toggle('active', b === btn);
             });
-            document.getElementById('modalImg').src = v.img;
-            document.getElementById('modalImg').alt = orderName();
+            renderGallery(product);
             renderContents(product);
           });
         });
@@ -231,6 +289,7 @@
       }
     }
 
+    renderGallery(product);
     renderContents(product);
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -549,8 +608,10 @@
   });
 
   // Wire all "View Details" buttons in the shop grid
-  document.querySelectorAll('.shop-card-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
+  /* The photograph is the thing people reach for, so it opens the box as
+     readily as the button does. The button stays for the keyboard. */
+  document.querySelectorAll('.shop-card-btn, .shop-card-img').forEach(function(el) {
+    el.addEventListener('click', function() {
       var name = this.closest('.shop-card').querySelector('.shop-card-name').textContent;
       openModal(name);
     });

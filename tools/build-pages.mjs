@@ -141,8 +141,10 @@ function render(page) {
   const body = page.sections.map(section).join('\n\n');
   const extras = [page.modal ? MODAL : '', page.cart ? CART : '', WIDGETS].filter(Boolean).join('\n\n');
   const paypal = page.paypal
-    ? '\n<!-- SANDBOX — replace client-id=sb with the live PayPal client ID before launch -->\n' +
-      '<script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&intent=capture" data-namespace="paypalSDK"></script>\n'
+    ? '\n<!-- SANDBOX — replace client-id=sb with the live PayPal client ID before launch.\n' +
+      '     enable-funding=venmo puts the Venmo button beside PayPal for eligible US\n' +
+      '     buyers; it does nothing under the sandbox client id. -->\n' +
+      '<script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&intent=capture&enable-funding=venmo" data-namespace="paypalSDK"></script>\n'
     : '';
 
   return `<!DOCTYPE html>
