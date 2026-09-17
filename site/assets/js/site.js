@@ -141,32 +141,32 @@
      here fall back to that sentence until their contents are supplied. */
   var PRODUCT_CONTENTS = {
     "Love You": ["<b>Leather Wristlet</b> | Camel", "<b>Twin Sparrow</b> | \u201cLove You\u201d script keychain", "<b>Ramona &amp; Ruth</b> | Soft blush slim notebook", "<b>Vinoos</b> | Vegan wine gummies, 13 units | no alcohol, gluten, fat, nuts, gelatine or lactose", "<b>P.F. Candle Co.</b> | Soy candle, 7.2oz | Sunbloom", "<b>OB</b> | Mini signature matches, white tip", "<b>OB</b> | Gold ballpoint pen", "Occasions Box keepsake box | 11\u2033 &times; 8.66\u2033 &times; 4.33\u2033", "A handwritten card of your choice"],
-    "Just Peachy": ["<b>Towel</b> | Hand-loomed Turkish hand or face towel | coral and white", "<b>Uber Star</b> | Reusable glass travel coffee cup, 12oz | silicone sleeve and matching lid in blush pink", "<b>OB Bath Sponge</b> | Fee sea sponge", "<b>Candlefolk</b> | Gold travel candle, 4oz | Juniper &amp; Mint", "<b>Fruition Chocolate Works</b> | Vanilla bean toasted white | Dominican chocolate, 38% cocoa", "<b>OB</b> | Mimi matches, red tip", "Occasions Box keepsake box | 11\u2033 &times; 8.66\u2033 &times; 4.33\u2033", "A handwritten card of your choice"],
+    "Peaches & Cream": ["<b>Towel</b> | Hand-loomed Turkish hand or face towel | coral and white", "<b>Uber Star</b> | Reusable glass travel coffee cup, 12oz | silicone sleeve and matching lid in blush pink", "<b>OB Bath Sponge</b> | Fee sea sponge", "<b>Candlefolk</b> | Gold travel candle, 4oz | Juniper &amp; Mint", "<b>Fruition Chocolate Works</b> | Vanilla bean toasted white | Dominican chocolate, 38% cocoa", "<b>OB</b> | Mimi matches, red tip", "Occasions Box keepsake box | 11\u2033 &times; 8.66\u2033 &times; 4.33\u2033", "A handwritten card of your choice"],
     "Host's Delight - Rose": ["<b>Madeira Housewares</b> | Teak edge-grain chop block, 8\u2033 &times; 8\u2033 &times; 1.25\u2033", "<b>OB x Beautea Studio</b> | Organic rose mint loose-leaf tea", "<b>The Bee Box</b> | Mini specialty honey jar, 4oz | USDA certified organic", "<b>Three Blue Birds</b> | Swedish dishcloths, 2 count | absorbs 20&times; its weight, replaces 17 rolls of paper towels | 70% FSC cellulose, 30% organic cotton", "<b>OB Coffee Scoop</b> | 304 stainless measuring scoop with bag clip", "<b>OB</b> | Wooden honey dipper", "Occasions Box keepsake box | 11\u2033 &times; 8.66\u2033 &times; 4.33\u2033", "A handwritten card of your choice"]
   };
 
   var allProducts = [
     {name:'Love You', price:150, img: '/assets/img/OB0_7441-750w.jpg'},
-    {name:'Just Peachy', price:132, img: '/assets/img/OB0_7537-750w.jpg'},
-    {name:'Long Weekend', price:120, img: '/assets/img/OB0_7721-750w.jpg'},
+    {name:'Peaches & Cream', price:132, img: '/assets/img/OB0_7537-750w.jpg'},
+    {name:'Spa Weekend', price:120, img: '/assets/img/OB0_7721-750w.jpg'},
     {name:'Coffee Lover', price:145, img: '/assets/img/OB0_7584-750w.jpg'},
-    {name:'Zen', price:145, img: '/assets/img/OB0_7512-750w.jpg'},
-    {name:'The Hostess', price:175, img: '/assets/img/0B0_5612-750w.jpg'},
+    {name:'The Reset', price:145, img: '/assets/img/OB0_7512-750w.jpg'},
+    {name:'The Dinner Party', price:175, img: '/assets/img/0B0_5612-750w.jpg'},
     {name:"Host's Delight - Rose", price:105, img: '/assets/img/0B0_5453-750w.jpg'},
-    {name:'Nightcap Essentials', price:120, img: '/assets/img/0B0_5067-750w.jpg'},
+    {name:'The Nightcap', price:120, img: '/assets/img/0B0_5067-750w.jpg'},
     {name:'Lemonade', price:120, img: '/assets/img/0B0_5827-750w.jpg'},
-    {name:'Sunshine', price:105, img: '/assets/img/0B0_5699-750w.jpg'},
+    {name:'Bright Side', price:105, img: '/assets/img/0B0_5699-750w.jpg'},
     {name:'Cheers', price:145, img: '/assets/img/0B0_4910-750w.jpg'},
-    {name:'Renewed Deluxe', price:150, img: '/assets/img/0B0_5137-750w.jpg'},
+    {name:'Everyday Luxe', price:150, img: '/assets/img/0B0_5137-750w.jpg'},
     {name:'Welcome Home', price:125, img: '/assets/img/0B0_5183-750w.jpg'},
-    {name:'Home Sweet Home', price:170, img: '/assets/img/0B0_4712-750w.jpg'},
-    {name:'Manly', price:150, img: '/assets/img/_MG_1812-750w.jpg'},
+    {name:'The New Keys', price:170, img: '/assets/img/0B0_4712-750w.jpg'},
+    {name:'The Valet', price:150, img: '/assets/img/_MG_1812-750w.jpg'},
     {name:'Goodnight', price:130, img: '/assets/img/ob_1471-750w.jpg'},
     {name:"Host's Delight - Green", price:105, img: '/assets/img/OB_0299-750w.jpg'},
-    {name:'Celebrate', price:120, img: '/assets/img/0B0_2489-750w.jpg'},
-    {name:'NightTime Ritual', price:150, img: '/assets/img/_MG_1792-750w.jpg'},
+    {name:'Uncorked', price:120, img: '/assets/img/0B0_2489-750w.jpg'},
+    {name:'The Wind Down', price:150, img: '/assets/img/_MG_1792-750w.jpg'},
     {name:'Mini Spa Day', price:115, img: '/assets/img/IMG_9325-750w.jpg'},
-    {name:'Housewarming', price:110, img: '/assets/img/ob_6944-750w.jpg'},
+    {name:'First Night In', price:110, img: '/assets/img/ob_6944-750w.jpg'},
     {name:'Afternoon Tea', price:128, img: '/assets/img/IMG_9730-750w.jpg'}
   ];
 
