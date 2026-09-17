@@ -849,6 +849,12 @@ footer {
 /* Design and delivery are quoted per project: design is often set low to win
    an account and delivery tracks distance, so publishing a figure for either
    would anchor the wrong way. The buyer still learns they exist. */
+/* Bounds what "local" and "white-glove" commit us to, directly under the
+   delivery add-on rather than in fine print somewhere else. */
+.pa-note {
+  max-width: 560px; margin: 20px auto 0; text-align: center;
+  font-size: 12.5px; line-height: 1.6; color: var(--muted);
+}
 .pricing-addons {
   max-width: 1040px; margin: 40px auto 0; text-align: center;
 }
