@@ -73,7 +73,8 @@
         shopFilters.forEach(function(b) { b.classList.toggle('active', b === btn); });
         var shown = 0;
         shopCards.forEach(function(card) {
-          var match = want === 'all' || card.dataset.occasion === want;
+          var tags = (card.dataset.occasion || '').split(' ');
+          var match = want === 'all' || tags.indexOf(want) !== -1;
           card.hidden = !match;
           /* Cards below the fold are still parked at opacity 0 waiting on their
              scroll reveal. Filtering can bring one into view without the

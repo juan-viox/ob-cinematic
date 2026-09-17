@@ -306,25 +306,27 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
    site, but the catalog sits between $105 and $175, so three of its five
    bands would return nothing. Occasion is how people shop for a gift. */
 .shop-filters {
-  display: flex; flex-wrap: wrap; justify-content: center;
-  gap: 10px; margin: 0 auto 48px; max-width: 900px;
+  display: flex; flex-wrap: nowrap; justify-content: center;
+  gap: 10px; margin: 0 auto 48px;
 }
 .shop-filter {
-  font-family: var(--sans); font-size: 12.5px; font-weight: 500;
-  letter-spacing: 0.04em;
-  padding: 9px 18px; border-radius: 100px;
+  font-family: var(--sans); font-size: 15px; font-weight: 500;
+  letter-spacing: 0.03em;
+  padding: 10px 20px; border-radius: 100px;
   border: 1px solid var(--border); background: var(--bg); color: var(--muted);
   cursor: pointer; transition: all 0.2s; white-space: nowrap;
 }
 .shop-filter:hover { border-color: var(--gold); color: var(--text); }
-.shop-filter span { opacity: 0.55; margin-left: 5px; font-size: 11px; }
 .shop-filter.active {
   background: var(--gold); border-color: var(--gold); color: #fff;
 }
-.shop-filter.active span { opacity: 0.8; }
 .shop-filter:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .shop-empty {
   text-align: center; color: var(--muted); font-size: 15px; margin-bottom: 48px;
+}
+@media (max-width: 1080px) {
+  .shop-filter { font-size: 14px; padding: 9px 16px; letter-spacing: 0; }
+  .shop-filters { gap: 8px; }
 }
 /* On a phone the chips scroll sideways rather than stacking into a wall. */
 @media (max-width: 640px) {
