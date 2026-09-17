@@ -349,6 +349,10 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   background: var(--bg); border: 1px solid var(--border);
   transition: all 0.3s ease; cursor: pointer;
 }
+.modal-sub {
+  font-family: var(--sans); font-size: 12px; line-height: 1.6;
+  color: var(--muted); margin: 14px 0 0;
+}
 .shop-badge {
   position: absolute; top: 14px; left: 14px; z-index: 2;
   background: var(--gold); color: #fff;
