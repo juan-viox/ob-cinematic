@@ -1225,7 +1225,10 @@ footer {
   border-radius: 4px; overflow: hidden;
   box-shadow: 0 30px 80px rgba(0,0,0,0.10);
 }
-.cb-figure img { display: block; width: 100%; height: 440px; object-fit: cover; }
+.cb-figure img {
+  display: block; width: 100%; height: auto;
+  aspect-ratio: 616 / 600; object-fit: cover;
+}
 .cb-intro h3 {
   font-family: var(--serif); font-weight: 400; font-size: 27px;
   color: var(--text); margin: 0 0 16px; line-height: 1.25;
