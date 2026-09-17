@@ -1257,7 +1257,7 @@ body.page-concierge #concierge { padding-top: 64px; }
 
 .concierge-includes {
   max-width: 1100px; margin: 56px auto 0;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  display: grid; grid-template-columns: repeat(5, 1fr);
   gap: 16px;
 }
 .concierge-include {
@@ -1270,12 +1270,23 @@ body.page-concierge #concierge { padding-top: 64px; }
   color: var(--text); margin-bottom: 4px;
 }
 .concierge-include .desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+/* The sixth item was orphaning a row of its own, so it sits under the five
+   as a line rather than a card. */
+.concierge-footnote {
+  max-width: 1100px; margin: 22px auto 0;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--sans); font-size: 13px; line-height: 1.6;
+  color: var(--muted); text-align: center;
+}
+.concierge-footnote svg { color: var(--gold); flex-shrink: 0; }
+.concierge-footnote b { color: var(--text); font-weight: 500; }
 
 @media (max-width: 768px) {
   .pricing-grid { grid-template-columns: 1fr 1fr; }
   .pricing-card.featured { transform: scale(1); }
   .concierge-grid { grid-template-columns: 1fr; max-width: 400px; }
   .concierge-includes { grid-template-columns: 1fr 1fr; }
+  .concierge-footnote { flex-direction: column; gap: 6px; }
 }
 @media (max-width: 480px) {
   .pricing-grid { grid-template-columns: 1fr; max-width: 340px; margin: 0 auto; }
@@ -1357,6 +1368,10 @@ body.page-concierge #concierge { padding-top: 64px; }
 /* Current page in the nav */
 .nav-links a.active { color: var(--gold); }
 .mobile-menu a.active { color: var(--gold); }
+
+@media (max-width: 1040px) and (min-width: 769px) {
+  .concierge-includes { grid-template-columns: repeat(3, 1fr); }
+}
 
 /* The nav carries six items plus a CTA. Below 1024 they crowd the wordmark,
    so the hamburger takes over there rather than at the old 768. */
