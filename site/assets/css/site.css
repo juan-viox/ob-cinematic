@@ -648,31 +648,24 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   gap: 48px 64px; max-width: 1000px; margin: 0 auto;
 }
 .client-logo {
-  font-weight: 700; color: #3a3a3a;
-  opacity: 0.7; transition: opacity 0.3s;
-  line-height: 1.1; text-align: center;
-  flex-shrink: 0;
+  flex-shrink: 0; width: auto;
+  opacity: 0.72; transition: opacity 0.3s;
+  filter: saturate(0.9);
 }
-.client-logo:hover { opacity: 1; }
+.client-logo:hover { opacity: 1; filter: none; }
 
-/* Individual logo styles to match their real branding */
-.cl-onyx { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; letter-spacing: 0.08em; color: #8b7a4a; }
-.cl-onyx span { display: block; font-size: 11px; font-weight: 400; letter-spacing: 0.35em; color: #8b7a4a; }
-.cl-heisenberg { font-family: Arial, sans-serif; font-size: 16px; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; color: #2c3e5a; }
-.cl-heisenberg span { display: block; font-size: 10px; font-weight: 400; letter-spacing: 0.2em; color: #2c3e5a; }
-.cl-viox { font-family: Arial, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 0.03em; }
-.cl-viox b { color: #3b82f6; }
-.cl-viox span { color: #3a3a3a; }
-.cl-ch5 { font-family: Arial, sans-serif; font-size: 36px; font-weight: 900; color: #555; }
-.cl-superior { font-family: Georgia, serif; font-size: 12px; font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase; color: #6b6b6b; }
-.cl-superior b { font-size: 22px; display: block; margin-bottom: 2px; color: #8b7a4a; font-family: Georgia, serif; }
-.cl-nw { font-family: Arial, sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #2a2a2a; }
-.cl-nw span { display: block; font-size: 9px; font-weight: 400; letter-spacing: 0.15em; color: #c0392b; }
-.cl-hulu { font-family: Arial, sans-serif; font-size: 32px; font-weight: 900; color: #1ce783; letter-spacing: -0.02em; }
-.cl-adfero { font-family: Arial, sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1a1a; }
-.cl-kr { font-family: Georgia, serif; font-size: 32px; font-weight: 400; color: #1a1a1a; letter-spacing: -0.02em; }
-.cl-kr span { display: block; font-size: 10px; font-weight: 400; letter-spacing: 0.25em; text-transform: uppercase; color: #1a1a1a; }
-.cl-chubb { font-family: Arial, sans-serif; font-size: 26px; font-weight: 900; letter-spacing: 0.15em; text-transform: uppercase; color: #1a1a1a; }
+/* Heights are set per mark, not shared: a bold wide wordmark at the same
+   height as a badge with fine internal type shouts over the whole row. */
+.cl-onyx       { height: 44px; }
+.cl-heisenberg { height: 60px; }
+.cl-viox       { height: 44px; }
+.cl-ch5        { height: 46px; }
+.cl-superior   { height: 46px; }
+.cl-nw         { height: 58px; }
+.cl-hulu       { height: 30px; }
+.cl-adfero     { height: 26px; }
+.cl-kr         { height: 50px; }
+.cl-chubb      { height: 24px; }
 
 @media (max-width: 768px) {
   .clients-grid { gap: 32px 40px; }
