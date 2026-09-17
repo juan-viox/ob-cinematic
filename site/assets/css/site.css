@@ -659,7 +659,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
    ═══════════════════════════════════════════ */
 #newsletter {
   padding: 100px 24px; text-align: center;
-  background: var(--bg);
+  background: var(--bg-alt); border-top: 1px solid var(--border);
 }
 .newsletter-inner { max-width: 520px; margin: 0 auto; }
 .newsletter-form {
@@ -1104,7 +1104,8 @@ footer {
 /* ═══════════════════════════════════════════
    HOW WE START + ENQUIRY FORM
    ═══════════════════════════════════════════ */
-#how-we-start { padding: 64px 24px 24px; max-width: 1000px; margin: 0 auto; }
+#how-we-start { padding: 88px 24px; background: var(--bg-alt); }
+.hws-inner { max-width: 1000px; margin: 0 auto; }
 .hws-header { text-align: center; margin-bottom: 44px; }
 .hws-header .section-label { font-size: 13px; }
 .hws-steps {
