@@ -76,7 +76,7 @@ export default function PortalGalleryPage() {
           </p>
         </div>
 
-        {/* Placeholder — MVP */}
+        {/* Placeholder for the MVP */}
         <div
           className="portal-card text-center py-20"
           style={{ maxWidth: 540, margin: '0 auto' }}

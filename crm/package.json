@@ -4,10 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/check-no-em-dash.mjs",
     "build": "next build",
+    "check:dashes": "node scripts/check-no-em-dash.mjs",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed:build": "node scripts/build-seed.mjs",
+    "sql:bundle": "node scripts/build-seed.mjs && node scripts/build-setup-all.mjs",
+    "team:bootstrap": "node scripts/bootstrap-team.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

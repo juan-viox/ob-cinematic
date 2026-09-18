@@ -141,7 +141,7 @@ body {
 }
 
 /* ============================================
-   TRANSITIONS — Smooth everything
+   TRANSITIONS: Smooth everything
    ============================================ */
 a, button, input, textarea, select, [role="button"] {
   transition: all var(--transition-fast);
@@ -513,7 +513,7 @@ select {
 }
 
 /* ============================================
-   STAT CARD — Dashboard
+   STAT CARD: Dashboard
    ============================================ */
 .stat-card {
   background: var(--surface);
@@ -1232,7 +1232,7 @@ label {
 }
 
 /* ============================================
-   LIGHT THEME — Selection & Scrollbar
+   LIGHT THEME: Selection & Scrollbar
    ============================================ */
 [data-theme="light"] ::selection {
   background: rgba(108, 92, 231, 0.2);
@@ -1271,7 +1271,7 @@ label {
   background: rgba(108, 92, 231, 0.12);
 }
 
-/* Theme transition — smooth color changes */
+/* Theme transition, smooth color changes */
 html,
 html body,
 html .glass,
@@ -1287,7 +1287,7 @@ html .kanban-card {
 }
 
 /* ============================================
-   PORTAL THEME — DreamersJoy Floral Studio
+   PORTAL THEME: DreamersJoy Floral Studio
    ============================================ */
 [data-theme="portal"] {
   --bg: #FAFAF8;

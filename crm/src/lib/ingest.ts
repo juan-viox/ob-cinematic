@@ -165,6 +165,10 @@ export function requestOrigin(request: Request): { origin: string; host: string 
 }
 
 /** Constant-time-ish string comparison to avoid trivial timing leaks on the key. */
+export function safeEqualStrings(a: string, b: string): boolean {
+  return safeEqual(a, b)
+}
+
 function safeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false
   let diff = 0
@@ -462,7 +466,7 @@ function isBlank(v: string | null | undefined): boolean {
  *
  * Trusted (api-key) callers overwrite name/phone/email/company/title with
  * whatever they send. Untrusted (origin) callers can only fill blank fields
- * and never touch phone/email of an existing contact — otherwise anyone who
+ * and never touch phone/email of an existing contact; otherwise anyone who
  * knows a client's email could rewrite that client's record with one POST.
  */
 export async function upsertContact(

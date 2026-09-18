@@ -25,19 +25,33 @@ import {
   CheckSquare,
   BarChart3,
   UsersRound,
+  Megaphone,
+  FileText,
+  ShoppingBag,
+  CalendarHeart,
+  Package,
+  Receipt,
+  Mail,
 } from 'lucide-react'
 import Avatar from '@/components/shared/Avatar'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/outreach', label: 'Outreach', icon: Megaphone },
   { href: '/leads', label: 'Leads', icon: UserPlus },
   { href: '/contacts', label: 'Contacts', icon: Users },
   { href: '/companies', label: 'Companies', icon: Building2 },
   { href: '/deals', label: 'Pipeline', icon: Kanban },
+  { href: '/proposals', label: 'Proposals', icon: FileText },
+  { href: '/orders', label: 'Orders', icon: ShoppingBag },
+  { href: '/occasions', label: 'Gifting calendar', icon: CalendarHeart },
+  { href: '/catalogue', label: 'Catalogue', icon: Package },
+  { href: '/invoices', label: 'Invoices', icon: Receipt },
   { href: '/activities', label: 'Activities', icon: Activity },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/calendar', label: 'Calendar', icon: CalendarDays },
+  { href: '/emails', label: 'Emails', icon: Mail },
   { href: '/automations', label: 'Automations', icon: Zap },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
   { href: '/sites', label: 'Sites', icon: Globe },

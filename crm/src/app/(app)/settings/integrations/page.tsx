@@ -17,7 +17,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: 'blotato',
     name: 'Blotato',
-    description: 'Social media management — publish to Instagram, Facebook, LinkedIn, X, and TikTok from VioX CRM',
+    description: 'Social media management: publish to Instagram, Facebook, LinkedIn, X, and TikTok from VioX CRM',
     keyPlaceholder: 'blotato_...',
     docsUrl: 'https://blotato.com',
     icon: '📱',
@@ -29,7 +29,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: 'stripe',
     name: 'Stripe',
-    description: 'Payment processing — invoicing, workshop payments, and subscription billing',
+    description: 'Payment processing: invoicing, workshop payments, and subscription billing',
     keyPlaceholder: 'sk_live_...',
     docsUrl: 'https://dashboard.stripe.com/apikeys',
     icon: '💳',
@@ -42,7 +42,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: 'twilio',
     name: 'Twilio',
-    description: 'Phone integration — powers AI voice agents on cinematic sites',
+    description: 'Phone integration: powers the AI voice agents on cinematic sites',
     keyPlaceholder: 'AC...',
     docsUrl: 'https://console.twilio.com/',
     icon: '📞',
@@ -54,7 +54,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: 'resend',
     name: 'Resend',
-    description: 'Email delivery — transactional emails, campaigns, and automated follow-ups',
+    description: 'Email delivery: transactional emails, campaigns, and automated follow-ups',
     keyPlaceholder: 're_...',
     docsUrl: 'https://resend.com/api-keys',
     icon: '✉️',

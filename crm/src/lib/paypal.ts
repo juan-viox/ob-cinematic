@@ -8,9 +8,17 @@
  * requires status COMPLETED plus a matching amount/currency; the payer email
  * is taken from PayPal's response, not from the request body.
  *
- * PAYPAL_ENV selects the API host: 'live' → api-m.paypal.com,
- * anything else (default) → api-m.sandbox.paypal.com (the site currently
- * uses client-id=sb, i.e. the sandbox).
+ * PAYPAL_ENV selects the API host: 'live' or 'production' → api-m.paypal.com,
+ * anything else, INCLUDING UNSET → api-m.sandbox.paypal.com.
+ *
+ * Set it deliberately. The shop loads the PayPal SDK with a real client id
+ * (site/shop.html and every site/shop/*.html use client-id=BAAxKYq3MeBz…, not
+ * the `sb` sandbox placeholder), so if that id belongs to a live PayPal app,
+ * leaving PAYPAL_ENV unset points verification at the sandbox and every real
+ * order fails to verify and lands as "Unverified order: …". Confirm which
+ * account issued that client id in the PayPal dashboard, then set this to
+ * match. An earlier version of this comment claimed the site used client-id=sb;
+ * it does not.
  */
 
 export interface PayPalConfig {
@@ -27,6 +35,9 @@ export interface PayPalVerifiedOrder {
   payerEmail: string | null
   payerGivenName: string | null
   payerSurname: string | null
+  /** Where PayPal says the order ships, when the buyer gave an address. */
+  shipToName: string | null
+  shipToAddress: Record<string, unknown> | null
 }
 
 export type PayPalVerification =
@@ -109,6 +120,7 @@ export async function fetchPayPalOrder(config: PayPalConfig, orderId: string): P
   const amountObj = (units[0]?.amount ?? null) as { value?: unknown; currency_code?: unknown } | null
   const amountValue = amountObj ? Number(readString(amountObj.value)) : NaN
   const payer = (json.payer ?? null) as { email_address?: unknown; name?: { given_name?: unknown; surname?: unknown } } | null
+  const shipping = (units[0]?.shipping ?? null) as { name?: { full_name?: unknown }; address?: unknown } | null
 
   return {
     ok: true,
@@ -120,6 +132,8 @@ export async function fetchPayPalOrder(config: PayPalConfig, orderId: string): P
       payerEmail: payer ? readString(payer.email_address)?.toLowerCase() ?? null : null,
       payerGivenName: payer?.name ? readString(payer.name.given_name) : null,
       payerSurname: payer?.name ? readString(payer.name.surname) : null,
+      shipToName: shipping?.name ? readString(shipping.name.full_name) : null,
+      shipToAddress: shipping?.address && typeof shipping.address === 'object' ? (shipping.address as Record<string, unknown>) : null,
     },
   }
 }

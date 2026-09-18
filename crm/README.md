@@ -29,6 +29,8 @@ host-agnostic (relative `Location` headers that include the base path).
    4. `supabase/migrations/004_custom_fields.sql`
    5. `supabase/migrations/005_notifications.sql`
    6. `supabase/migrations/006_occasionsbox.sql`
+   7. `supabase/migrations/007_catalogue_occasions_proposals.sql`
+   8. `supabase/seed/occasionsbox_catalogue.sql`
 3. Copy the Project URL, anon key and service role key from
    **Settings → API**.
 
@@ -40,9 +42,19 @@ host-agnostic (relative `Location` headers that include the base path).
    commits that do not touch `crm/`.)
 3. Paste the environment variables from `.env.example`:
    `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-   `SUPABASE_SERVICE_ROLE_KEY`, `SITE_API_KEY`, and optionally
-   `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `ALLOWED_ORIGINS`,
-   `NEXT_PUBLIC_APP_URL`.
+   `SUPABASE_SERVICE_ROLE_KEY`, `SITE_API_KEY` (only Olivia's five tools need
+   this one — the website forms authorise by `Origin`), and
+   `ELEVENLABS_WEBHOOK_SECRET` (without it every one of her conversations is
+   rejected with a 503 and nothing is filed). Optionally `RESEND_API_KEY`,
+   `RESEND_FROM_EMAIL`, `ALLOWED_ORIGINS`, `NEXT_PUBLIC_APP_URL` (if set it
+   **must** end in `/admin`), `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET` and
+   `PAYPAL_ENV`. Never set `NEXT_PUBLIC_BASE_PATH`: it is hard-coded in
+   `next.config.ts` and injected at build time.
+
+   Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are
+   checked by the middleware. Miss `SUPABASE_SERVICE_ROLE_KEY` and the app
+   looks configured, then throws `supabaseKey is required.` — every
+   authenticated API route and the public proposal page return 500.
 4. Deploy. The build succeeds even before the variables are pasted; until
    they exist the app serves a "not configured yet" page.
 
@@ -58,12 +70,39 @@ In Supabase **Authentication → URL Configuration**:
 
 ### 4. First account and team
 
+Either let Sarah sign up and invite Kari, or create both accounts in one go:
+
+```bash
+cd crm
+cp .env.example .env.local     # fill in the Supabase values
+npm run team:bootstrap         # invites Sarah (owner) and Kari (admin)
+```
+
+`scripts/bootstrap-team.mjs` creates the organisation and the pipeline, then
+sends each person a Supabase invite so they set their own password. Nobody's
+password is ever typed into the repo. Change who is on the team by passing
+them as arguments:
+
+```bash
+node scripts/bootstrap-team.mjs sarah@occasionsbox.com:owner:"Sarah De Jesus" \
+                                kari@occasionsbox.com:admin:"Kari Aragon"
+```
+
+Only one person can be the `owner`; the database enforces it. Re-running is
+safe, and `--update-roles` is needed to change an existing person's role.
+
+By hand instead:
+
 1. Visit `/admin/signup` and create the first account. The **first signup
    becomes the owner** and creates the `occasionsbox` organisation with the
    default deal stages from `src/crm.config.ts`.
 2. Accounts are invite-only after that. Invite teammates from
    **Settings → Team** (roles: `admin`, `member`). Invited users receive an
-   email that lands on `/admin/auth/callback`.
+   email that lands on `/admin/auth/callback`, which signs them in directly —
+   it never asks them to choose a password, and the CRM has no set-password,
+   reset-password or forgot-password page. An invited person therefore has no
+   password, and on every later visit signs in with **Send Magic Link** on
+   `/admin/login` rather than the email-and-password box.
 3. **Turn off public sign-ups** once the owner account exists: Supabase
    dashboard → Authentication → Providers → Email → disable
    **Enable Sign Ups** (or Authentication → Settings → "Allow new users to
@@ -161,3 +200,81 @@ crm/
 - **Automations** — workflow triggers and actions
 - **Client Portal** — branded portal for clients
 - **Reports** — revenue, pipeline, activity and source analytics
+
+
+## What the CRM runs on
+
+`supabase/migrations/007_catalogue_occasions_proposals.sql` turns the CRM from
+a contact list into the place the business is run from:
+
+| Table | What it holds |
+| --- | --- |
+| `products` (extended) | The catalogue: every gift box, corporate tier, concierge plan, add-on and service, with its SKU, price, photograph, contents, cost and stock |
+| `inventory_items`, `product_components` | What is inside each box, as countable stock with a bill of materials, so "are we short of the gold matches?" has an answer |
+| `inventory_movements` | Every stock change with a reason and an audit trail. A trigger keeps the counts in step; stock is never edited directly |
+| `occasions` | The gifting calendar: 27 occasions with the date rule (fixed, nth weekday, last full week), the lead time, talking points and suggested boxes |
+| `client_occasions` | The dates we are holding for each client, with status from planned to delivered |
+| `proposals`, `proposal_items` | Quotes, with a public token so a client can read and approve one from a link |
+| `orders`, `order_items` | Every purchase: the website cart, and later an accepted proposal. Line items link back to the catalogue and take stock off the shelf |
+| `document_counters` | Sequential proposal and order numbers that stay unique under concurrent writes |
+
+### The catalogue is generated, not typed
+
+`scripts/build-seed.mjs` reads `site/assets/js/site.js` and `site/shop.html`,
+the marketing site's own catalogue, and writes
+`supabase/seed/occasionsbox_catalogue.sql`: 21 boxes with their real prices,
+photographs, contents and occasion tags, plus the tiers, plans, add-ons, 91
+inventory components with a 158-line bill of materials, the gifting calendar
+and six outreach email templates.
+
+```bash
+npm run sql:bundle     # regenerate the seed AND supabase/setup-all.sql
+```
+
+Re-running the seed against a live database refreshes names, prices, contents
+and photographs, and never touches stock, costs, reorder points or whether
+something is active. Change a price on the website, run this, and the CRM
+agrees with the shop again.
+
+## The voice agent (Olivia)
+
+Olivia is an ElevenLabs agent on the phone number `(551) 246-0028` and in the
+widget on the marketing site. She reaches the CRM through five webhook tools,
+each authenticated with `SITE_API_KEY` as the `x-api-key` header:
+
+| Tool | Endpoint | What it does |
+| --- | --- | --- |
+| `search_catalogue` | `POST /admin/api/v1/agent/catalogue` | Ranked catalogue search, so she quotes real boxes at real prices |
+| `find_customer` | `POST /admin/api/v1/agent/customer` | Recognises a caller by phone or email, with their orders, open deals and upcoming dates |
+| `create_opportunity` | `POST /admin/api/v1/agent/opportunity` | Contact + deal + follow-up task + a date on the gifting calendar |
+| `request_callback` | `POST /admin/api/v1/agent/callback` | A call task at the time the caller asked for |
+| `upcoming_occasions` | `POST /admin/api/v1/agent/occasions` | What is coming up and the approve-by date for each |
+
+Unlike the ingest routes, the agent routes never accept an `Origin` as
+authorisation: they read and write customer data, so only a caller holding the
+API key gets in.
+
+Every conversation is filed in the CRM by the post-call webhook at
+`POST /admin/api/v1/elevenlabs/post-call`, verified against
+`ELEVENLABS_WEBHOOK_SECRET` (HMAC-SHA256 over `<timestamp>.<body>`, 30 minute
+window) and idempotent on the conversation id. Configure it in the ElevenLabs
+dashboard under Settings → Webhooks → Post-call.
+
+Olivia's knowledge base is kept in `tools/elevenlabs/olivia-knowledge-base.txt`
+at the repository root. It is generated from the live catalogue; when prices or
+boxes change, regenerate it and paste it into the ElevenLabs knowledge base
+document.
+
+## Proposals
+
+A proposal is drafted at `/admin/proposals/new`, optionally from a date on the
+gifting calendar, and carries catalogue line items, a discount, shipping, tax
+and the standard terms. Sending it emails the client a link to
+`/admin/p/<token>`, where they read it and press Approve. That token is 48 hex
+characters generated by the database and is the only credential, exactly like a
+PDF in an inbox: it reveals nothing else, and the route never accepts an id.
+
+An approval writes back: the proposal is marked accepted, the calendar date
+moves to approved, and an urgent task appears for the team to start sourcing.
+The first open is recorded too, so the team can tell "not read yet" from
+"read and thinking about it".
