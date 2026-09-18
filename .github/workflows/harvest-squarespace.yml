@@ -20,6 +20,12 @@ name: Harvest Squarespace galleries
 #   site/assets/img/*.jpg           the photographs themselves
 
 on:
+  # A GitHub App token cannot POST to the dispatches endpoint, so pushing a
+  # change to this workflow or its script is how the run actually starts.
+  push:
+    paths:
+      - '.github/workflows/harvest-squarespace.yml'
+      - '.github/scripts/harvest-squarespace.mjs'
   workflow_dispatch:
     inputs:
       limit:
