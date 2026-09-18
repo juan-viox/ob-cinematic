@@ -158,6 +158,46 @@ function loadShareTargets() {
 }
 const SHARE_TARGETS = loadShareTargets();
 
+/* The twenty one card messages, from site.js so the modal and the product
+   page can never offer a different set. */
+function loadCardMessages() {
+  const js = read('site/assets/js/site.js');
+  const start = js.indexOf('var CARD_MESSAGES = [');
+  if (start === -1) throw new Error('site.js: CARD_MESSAGES not found');
+  const open = js.indexOf('[', start);
+  const end = js.indexOf('\n  ];', open);
+  if (end === -1) throw new Error('site.js: end of CARD_MESSAGES not found');
+  const list = new Function(`return ${js.slice(open, end + 4)}`)();
+  if (!Array.isArray(list) || !list.length) throw new Error('site.js: CARD_MESSAGES parsed to nothing');
+  return list;
+}
+const CARD_MESSAGES = loadCardMessages();
+
+/* The blank card is not a message, so it is not in CARD_MESSAGES, but it is
+   an option in every picker. Taking it from site.js rather than repeating the
+   words here is what keeps the product page and the modal offering the same
+   list; they were already one option apart before this was read. */
+function loadBlankCard() {
+  const js = read('site/assets/js/site.js');
+  const m = js.match(/var BLANK_CARD = '([^']+)';/);
+  if (!m) throw new Error('site.js: BLANK_CARD not found');
+  return m[1];
+}
+const BLANK_CARD = loadBlankCard();
+const CARD_OPTIONS = CARD_MESSAGES.concat([BLANK_CARD]);
+
+const cardPicker = () => `
+      <div class="ob-card-pick">
+        <label for="pdCard">Your handwritten card</label>
+        <select id="pdCard"><option value="">Choose your card</option>${
+          CARD_OPTIONS.map((m) => `<option value="${esc(m)}">${esc(m)}</option>`).join('')
+        }</select>
+        <label for="pdCardMsg">Your message</label>
+        <textarea id="pdCardMsg" rows="2" maxlength="240"
+                  placeholder="We will write this inside, by hand. Leave it blank for just the card."></textarea>
+        <p class="ob-card-hint">Every box includes a 5x7 card, handwritten by us.</p>
+      </div>`;
+
 /* The modal builds its share links in the browser, so it has to slugify a box
    name to the same string this file does or every share link 404s. That is
    two copies of one rule in two languages, which is exactly the kind of thing
@@ -179,6 +219,41 @@ function assertSlugsAgree() {
   }
 }
 assertSlugsAgree();
+
+/* The product page renders its card picker here; the modal renders its own in
+   the browser from cardOptionsHtml(). Two renderers, one list, and they were
+   already one option apart the first time this was written: the product page
+   offered the twenty one printed cards and the modal also offered the blank
+   one. So the build runs site.js's own renderer and compares. */
+function assertCardPickersAgree() {
+  const js = read('site/assets/js/site.js');
+  const m = js.match(/function cardOptionsHtml\(selected\) \{[\s\S]*?\n  \}/);
+  if (!m) throw new Error('site.js: cardOptionsHtml not found');
+  const theirs = new Function('CARD_MESSAGES', 'BLANK_CARD', 'escapeHtml',
+    `return ${m[0].replace('function cardOptionsHtml', 'function')}`
+  /* esc, not an identity stub: the product page escapes its option values,
+     so an identity stub here reports "Mr &amp; Mrs" against "Mr & Mrs" and
+     fails a picker that is actually identical. */
+  )(CARD_MESSAGES, BLANK_CARD, esc);
+
+  const values = [...theirs('').matchAll(/<option value="([^"]*)"/g)]
+    .map((r) => r[1]).filter(Boolean);
+  /* Read what cardPicker() actually renders, not the list it is supposed to
+     read from. The first version of this compared CARD_OPTIONS to site.js and
+     passed while cardPicker() was still mapping CARD_MESSAGES, which is the
+     bug it was written to catch. */
+  const mine = [...cardPicker().matchAll(/<option value="([^"]*)"/g)]
+    .map((r) => r[1]).filter(Boolean);
+  const same = values.length === mine.length && values.every((v, i) => v === mine[i]);
+  if (!same) {
+    throw new Error(
+      'The product page and the modal offer different cards.\n' +
+      `  build-pages (${mine.length}): ${mine.join(' | ')}\n` +
+      `  site.js     (${values.length}): ${values.join(' | ')}`
+    );
+  }
+}
+assertCardPickersAgree();
 
 /* Built here rather than in the browser so the links are in the HTML a
    crawler sees, and so they still work with JavaScript switched off. */
@@ -621,6 +696,8 @@ ${contents.map((item) => `          <li>${item}</li>`).join('\n')}
       <div class="pd-price">$${p.price.toFixed(2)}</div>${storyBlock}${variantBlock}${bodyBlock}${cautionBlock}
       <p class="pd-sub">Contents are sourced from small makers in small batches. If one sells out or changes a product, we substitute something of equal or greater value in keeping with the box. Photographs show a representative selection.</p>
 
+${cardPicker()}
+
       <div class="pd-buy">
         <div class="pd-qty">
           <label for="pdQty">Qty</label>
@@ -629,7 +706,7 @@ ${contents.map((item) => `          <li>${item}</li>`).join('\n')}
         <button type="button" class="pd-add" id="pdAdd">Add to Cart</button>
       </div>${shareRow(`${SITE}${productUrl(p)}`, `${p.name} from Occasions Box`, `${SITE}${p.img}`)}
 
-      <p class="pd-ship">Free gift wrapping &middot; Handwritten note included &middot; Ships nationwide</p>
+      <p class="pd-ship">The box is the wrapping &middot; Handwritten 5x7 note included &middot; Ships nationwide</p>
     </div>
   </div>
 

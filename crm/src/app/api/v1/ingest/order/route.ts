@@ -38,6 +38,11 @@ const MAX_LINES = 50
 interface OrderLine {
   name: string
   variant: string | null
+  /** Which printed 5x7 card the buyer chose, or the blank one. */
+  card: string | null
+  /** What they asked to be handwritten inside it. Named to match OrderLine
+   *  in lib/orders, because `lines` is handed to createOrder unchanged. */
+  cardMessage: string | null
   unitAmount: number
   quantity: number
 }
@@ -96,7 +101,14 @@ function parseLines(v: unknown): OrderLine[] | string | null {
       return `items[${i}].quantity must be a positive integer`
     }
 
-    lines.push({ name, variant: str(row.variant, LIMITS.name), unitAmount, quantity: qtyRaw })
+    lines.push({
+      name,
+      variant: str(row.variant, LIMITS.name),
+      card: str(row.card, LIMITS.name),
+      cardMessage: str(row.message ?? row.cardMessage, LIMITS.title),
+      unitAmount,
+      quantity: qtyRaw,
+    })
   }
   return lines
 }
@@ -238,6 +250,8 @@ export async function POST(request: Request) {
         {
           name: productName,
           variant: str(body.variant, LIMITS.name),
+          card: str(body.card, LIMITS.name),
+          cardMessage: str(body.message ?? body.cardMessage, LIMITS.title),
           unitAmount: Math.round((statedAmount / quantityRaw) * 100) / 100,
           quantity: quantityRaw,
         },

@@ -1369,15 +1369,20 @@ footer {
 .products-cta a:hover { background: var(--gold); color: #fff; }
 
 .peek-grid {
-  max-width: 1200px; margin: 0 auto;
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px;
+  max-width: 1320px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
 }
 .peek-card { display: block; text-decoration: none; }
 .peek-img {
   border-radius: 2px; overflow: hidden; background: var(--bg-alt);
 }
+/* The photographs are 750 by 500. A fixed 340px height in a 279px column
+   cropped a third off each side of a landscape photograph of a wide box, so
+   the box was the part being thrown away. 3:2 is the shape they were shot in,
+   which means nothing is cropped at all. */
 .peek-img img {
-  display: block; width: 100%; height: 340px; object-fit: cover;
+  display: block; width: 100%; height: auto; aspect-ratio: 3 / 2;
+  object-fit: cover;
   transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .peek-card:hover .peek-img img { transform: scale(1.04); }
@@ -2408,4 +2413,62 @@ body.lightbox-open { overflow: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
   .shop-pin { transition: opacity 0.2s ease; transform: none; }
+}
+
+/* ═══ The handwritten card ═══
+   Offered on the product page, in the modal and again in the cart, because
+   the choice is often made after the box is. */
+.ob-card-pick {
+  display: flex; flex-direction: column; gap: 7px;
+  margin: 20px 0; padding: 16px;
+  background: var(--gold-bg); border-left: 2px solid var(--gold);
+  border-radius: 0 4px 4px 0;
+}
+.ob-card-pick label {
+  font-family: var(--sans); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+}
+.ob-card-pick select,
+.ob-card-pick textarea,
+.cart-item-card select,
+.cart-item-card textarea {
+  font-family: var(--sans); font-size: 13.5px; color: var(--text);
+  padding: 9px 11px; border: 1px solid var(--border); border-radius: 4px;
+  background: #fff; width: 100%; box-sizing: border-box;
+}
+.ob-card-pick textarea, .cart-item-card textarea { resize: vertical; line-height: 1.5; }
+.ob-card-pick select:focus-visible, .ob-card-pick textarea:focus-visible,
+.cart-item-card select:focus-visible, .cart-item-card textarea:focus-visible {
+  outline: 2px solid var(--gold); outline-offset: 1px; border-color: var(--gold);
+}
+.ob-card-hint {
+  font-family: var(--sans); font-size: 11.5px; color: var(--muted); margin: 2px 0 0;
+}
+
+/* In the cart, tighter, and it says so when it is still empty. */
+.cart-item-card {
+  display: flex; flex-direction: column; gap: 5px; margin-top: 10px;
+  padding-top: 10px; border-top: 1px dashed var(--border);
+}
+.cart-item-card label {
+  font-family: var(--sans); font-size: 9.5px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+}
+.cart-item-card.needs-card select {
+  border-color: #b4472e; background: #fdf6f4;
+}
+.cart-item-card.needs-card > label:first-child { color: #b4472e; }
+
+.cart-card-warning {
+  font-family: var(--sans); font-size: 12.5px; line-height: 1.5;
+  color: #b4472e; margin: 0 0 12px;
+  padding: 10px 12px; background: #fdf6f4;
+  border-left: 2px solid #b4472e; border-radius: 0 4px 4px 0;
+}
+.cart-card-warning[hidden] { display: none; }
+
+/* Dimmed and unclickable while a box still has no card. onClick refuses it
+   as well, so removing this class in the inspector buys nothing. */
+#paypal-button-container.is-blocked {
+  opacity: 0.4; pointer-events: none; filter: grayscale(0.6);
 }

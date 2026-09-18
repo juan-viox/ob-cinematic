@@ -304,6 +304,65 @@
     show(0);
   }
 
+  /* ─── The handwritten card ───
+     Every box ships with a 5x7 card, handwritten, and the buyer picks which
+     one. The contents list has promised "a complimentary handwritten card of
+     your choice" all along without ever offering the choice, so the choice
+     was being made for them somewhere off the website.
+
+     The card is chosen per box, not per order: someone sending three boxes to
+     three people wants three different cards. It travels with the cart line
+     the same way a colourway does, through to PayPal and into the CRM order,
+     so whoever packs the box can read what to write without asking.
+
+     This is the list Occasions Box actually has printed. Adding one here puts
+     it on all twenty one product pages and in the modal. */
+  var CARD_MESSAGES = [
+    "Thank You", "Welcome Baby", "Welcome Home", "Thinking of You", "XO",
+    "Happy Mother's Day", "Happy Father's Day", "I Love You", "Congrats",
+    "Happy Holidays", "Mr & Mrs", "You're Extraordinary", "Happy Home",
+    "Happy Birthday", "Merry Everything", "Grateful For You", "Feliz Navidad",
+    "Happy Graduation", "Cheers", "Get Well Soon", "Just Say Yes"
+  ];
+
+  /* Not every gift wants a printed sentiment on the front. The blank card
+     carries only the Occasions Box mark on the back, and whatever the buyer
+     writes goes inside it. */
+  var BLANK_CARD = 'Blank card, our logo on the back';
+
+  /* The message the buyer wants written inside, in their words. Long enough
+     for a real note, short enough to fit a 5x7 card in handwriting. */
+  var MAX_MESSAGE = 240;
+
+  function isValidCard(value) {
+    return value === BLANK_CARD || CARD_MESSAGES.indexOf(value) !== -1;
+  }
+
+  function cleanMessage(value) {
+    if (typeof value !== 'string') return '';
+    return value.replace(/\s+/g, ' ').trim().slice(0, MAX_MESSAGE);
+  }
+
+  /* Reads whichever card picker is on this page. Returns empty strings when
+     there is none, which the cart then asks for before checkout. */
+  function readCardPicker(selectId, messageId) {
+    var sel = document.getElementById(selectId);
+    var msg = document.getElementById(messageId);
+    return {
+      card: sel && isValidCard(sel.value) ? sel.value : '',
+      message: msg ? cleanMessage(msg.value) : ''
+    };
+  }
+
+  function cardOptionsHtml(selected) {
+    var opts = CARD_MESSAGES.concat([BLANK_CARD]);
+    return '<option value="">Choose your card</option>' +
+      opts.map(function(m) {
+        return '<option value="' + escapeHtml(m) + '"' +
+               (m === selected ? ' selected' : '') + '>' + escapeHtml(m) + '</option>';
+      }).join('');
+  }
+
   /* ─── Sharing ───
      Someone who has just found the right gift for a friend is one tap away
      from telling three more people, which is the cheapest reach this shop
@@ -525,6 +584,11 @@
       }
     }
 
+    var modalCard = document.getElementById('modalCard');
+    if (modalCard) modalCard.innerHTML = cardOptionsHtml('');
+    var modalCardMsg = document.getElementById('modalCardMsg');
+    if (modalCardMsg) modalCardMsg.value = '';
+
     renderGallery(product);
     renderContents(product);
     renderShare(product);
@@ -593,9 +657,14 @@
         return line && typeof line.name === 'string' &&
                typeof line.qty === 'number' && isFinite(line.qty) && line.qty >= 1;
       }).slice(0, MAX_LINES).map(function(line) {
+        /* A card we no longer print is dropped rather than carried into an
+           order nobody can fulfil. */
+        var card = typeof line.card === 'string' && isValidCard(line.card) ? line.card : '';
         return {
           name: line.name,
           variant: typeof line.variant === 'string' ? line.variant : '',
+          card: card,
+          message: cleanMessage(line.message),
           qty: Math.min(Math.round(line.qty), MAX_QTY)
         };
       });
@@ -651,14 +720,27 @@
     return '$' + (cents / 100).toFixed(2);
   }
 
+  /* Sarah cannot pack a box without knowing which card goes in it, and
+     chasing the buyer by email after the fact loses a day on a gift that is
+     usually already late. So the card is required, and checkout waits. */
+  function linesMissingCard(resolved) {
+    return resolved.filter(function(r) { return !r.line.card; });
+  }
+
   function cartUnits(resolved) {
     return resolved.reduce(function(n, r) { return n + r.line.qty; }, 0);
   }
 
-  function addToCart(product, variant, qty) {
+  function addToCart(product, variant, qty, card, message) {
     var variantLabel = variant ? variant.label : '';
+    var cardLabel = isValidCard(card) ? card : '';
+    var note = cleanMessage(message);
+    /* Same box, same colourway, same card and the same words is one line. Any
+       of those different and it is a different gift going to a different
+       person, so it gets its own line. */
     var existing = cart.find(function(l) {
-      return l.name === product.name && (l.variant || '') === variantLabel;
+      return l.name === product.name && (l.variant || '') === variantLabel &&
+             (l.card || '') === cardLabel && (l.message || '') === note;
     });
     if (existing) {
       existing.qty = Math.min(existing.qty + qty, MAX_QTY);
@@ -667,7 +749,8 @@
         showToast('That is as many different boxes as the cart holds. Email Collaborate@occasionsbox.com and we will quote the whole order.', 'error');
         return false;
       }
-      cart.push({ name: product.name, variant: variantLabel, qty: Math.min(qty, MAX_QTY) });
+      cart.push({ name: product.name, variant: variantLabel, card: cardLabel,
+                  message: note, qty: Math.min(qty, MAX_QTY) });
     }
     saveCart();
     renderCart();
@@ -706,6 +789,16 @@
             '<button type="button" class="cart-step" data-act="inc" aria-label="One more ' + label + '">+</button>' +
             '<button type="button" class="cart-remove" data-act="remove">Remove</button>' +
           '</div>' +
+          '<div class="cart-item-card' + (r.line.card ? '' : ' needs-card') + '">' +
+            '<label for="cartCard' + i + '">Card</label>' +
+            '<select id="cartCard' + i + '" class="cart-card-select" data-act="card">' +
+              cardOptionsHtml(r.line.card || '') +
+            '</select>' +
+            '<label for="cartMsg' + i + '">Your message</label>' +
+            '<textarea id="cartMsg' + i + '" class="cart-msg" data-act="msg" rows="2" ' +
+              'maxlength="' + MAX_MESSAGE + '" placeholder="We will write this inside, by hand. Leave it blank for just the card.">' +
+              escapeHtml(r.line.message || '') + '</textarea>' +
+          '</div>' +
         '</div>' +
         '<div class="cart-item-total">' + money(Math.round(r.price * 100) * r.line.qty) + '</div>' +
       '</li>';
@@ -718,6 +811,17 @@
 
     var subtotal = document.getElementById('cartSubtotal');
     if (subtotal) subtotal.textContent = money(subtotalCents(resolved));
+
+    var missing = linesMissingCard(resolved);
+    var warn = document.getElementById('cartCardWarning');
+    if (warn) {
+      warn.textContent = missing.length === 1
+        ? 'Choose a card for ' + missing[0].label + ' before checking out.'
+        : 'Choose a card for each of your ' + missing.length + ' boxes before checking out.';
+      warn.hidden = missing.length === 0;
+    }
+    var pay = document.getElementById('paypal-button-container');
+    if (pay) pay.classList.toggle('is-blocked', missing.length > 0);
   }
 
   function openCart() {
@@ -758,6 +862,16 @@
     container.innerHTML = '';
     paypalSDK.Buttons({
       style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'pay', height: 45 },
+      /* Dimming the container is the visible half. This is the half that
+         holds when someone deletes the class in the inspector. */
+      onClick: function(data, actions) {
+        var missing = linesMissingCard(resolveCart());
+        if (!missing.length) return actions.resolve();
+        showToast('Choose a card for every box first. Each one is handwritten.', 'error');
+        var first = document.querySelector('.cart-item-card.needs-card .cart-card-select');
+        if (first) first.focus();
+        return actions.reject();
+      },
       createOrder: function(data, actions) {
         var resolved = resolveCart();
         var total = (subtotalCents(resolved) / 100).toFixed(2);
@@ -774,8 +888,11 @@
               breakdown: { item_total: { value: total, currency_code: 'USD' } }
             },
             items: resolved.map(function(r) {
+              var note = [r.line.card, r.line.message && '"' + r.line.message + '"']
+                .filter(Boolean).join(' - ');
               return {
                 name: r.label.slice(0, 127),
+                description: note.slice(0, 127),
                 unit_amount: { value: r.price.toFixed(2), currency_code: 'USD' },
                 quantity: String(r.line.qty),
                 category: 'PHYSICAL_GOODS'
@@ -820,7 +937,14 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         items: resolved.map(function(r) {
-          return { name: r.line.name, variant: r.line.variant || '', unitAmount: r.price, quantity: r.line.qty };
+          return {
+            name: r.line.name,
+            variant: r.line.variant || '',
+            card: r.line.card || '',
+            message: r.line.message || '',
+            unitAmount: r.price,
+            quantity: r.line.qty
+          };
         }),
         amount: cents / 100,
         currency: 'USD',
@@ -998,7 +1122,8 @@
       var qty = parseInt(document.getElementById('pdQty').value, 10);
       if (!qty || qty < 1) qty = 1;
       if (qty > MAX_QTY) qty = MAX_QTY;
-      if (!addToCart(pdProduct, currentVariant, qty)) return;
+      var pick = readCardPicker('pdCard', 'pdCardMsg');
+      if (!addToCart(pdProduct, currentVariant, qty, pick.card, pick.message)) return;
       if (document.getElementById('cartOverlay')) {
         openCart();
       } else {
@@ -1013,7 +1138,8 @@
     var qty = parseInt(document.getElementById('modalQty').value, 10);
     if (!qty || qty < 1) qty = 1;
     if (qty > MAX_QTY) qty = MAX_QTY;
-    if (!addToCart(currentProduct, currentVariant, qty)) return;
+    var pick = readCardPicker('modalCard', 'modalCardMsg');
+    if (!addToCart(currentProduct, currentVariant, qty, pick.card, pick.message)) return;
     closeModal();
     if (document.getElementById('cartOverlay')) {
       openCart();
@@ -1032,6 +1158,7 @@
     var entry = resolved[parseInt(row.dataset.line, 10)];
     if (!entry) return;
     var act = btn.dataset.act;
+    if (act === 'card' || act === 'msg') return; // handled on change, below
     if (act === 'inc') {
       entry.line.qty = Math.min(entry.line.qty + 1, MAX_QTY);
     } else if (act === 'dec') {
@@ -1040,6 +1167,36 @@
     if (act === 'remove' || entry.line.qty < 1) {
       cart = cart.filter(function(l) { return l !== entry.line; });
     }
+    saveCart();
+    renderCart();
+  });
+
+  /* Choosing the card in the cart, for anyone who added the box before
+     deciding, or who is sending the same box to two people. */
+  if (cartItemsEl) cartItemsEl.addEventListener('change', function(e) {
+    var field = e.target.closest('.cart-card-select, .cart-msg');
+    if (!field) return;
+    var row = field.closest('.cart-item');
+    if (!row) return;
+    var resolved = resolveCart();
+    var entry = resolved[parseInt(row.dataset.line, 10)];
+    if (!entry) return;
+    if (field.classList.contains('cart-msg')) entry.line.message = cleanMessage(field.value);
+    else entry.line.card = isValidCard(field.value) ? field.value : '';
+
+    /* Changing a card can make two lines identical. Fold them together rather
+       than leaving the same box listed twice with the same card. */
+    var merged = [];
+    cart.forEach(function(line) {
+      var twin = merged.find(function(m) {
+        return m.name === line.name && (m.variant || '') === (line.variant || '') &&
+               (m.card || '') === (line.card || '');
+      });
+      if (twin) twin.qty = Math.min(twin.qty + line.qty, MAX_QTY);
+      else merged.push(line);
+    });
+    cart = merged;
+
     saveCart();
     renderCart();
   });

@@ -194,6 +194,17 @@ export default function OrdersClient({ orders: initial }: { orders: Order[] }) {
                               {i.description}
                               {i.variant && <span style={{ color: 'var(--muted)' }}> · {i.variant}</span>}
                               {!i.sku && <span className="badge badge-neutral text-[10px] ml-2">not in catalogue</span>}
+                              {(i.card || i.card_message) && (
+                                <div className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--muted)' }}>
+                                  <span className="uppercase tracking-wider text-[10px]">Card</span>{' '}
+                                  {i.card || 'not chosen'}
+                                  {i.card_message && (
+                                    <div className="mt-0.5 italic" style={{ color: 'var(--text)' }}>
+                                      &ldquo;{i.card_message}&rdquo;
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </td>
                             <td className="py-1.5 text-right tabular-nums" style={{ color: 'var(--muted)' }}>×{i.quantity}</td>
                             <td className="py-1.5 text-right tabular-nums font-medium">{formatCurrency(Number(i.total))}</td>

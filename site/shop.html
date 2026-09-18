@@ -1003,6 +1003,14 @@
       <p class="modal-caution" id="modalCaution" hidden></p>
       <p class="modal-sub">Contents are sourced from small makers in small batches. If one sells out or changes a product, we substitute something of equal or greater value in keeping with the box. Photographs show a representative selection.</p>
       <div class="modal-variants" id="modalVariants" hidden></div>
+      <div class="ob-card-pick">
+        <label for="modalCard">Your handwritten card</label>
+        <select id="modalCard"></select>
+        <label for="modalCardMsg">Your message</label>
+        <textarea id="modalCardMsg" rows="2" maxlength="240"
+                  placeholder="We will write this inside, by hand. Leave it blank for just the card."></textarea>
+        <p class="ob-card-hint">Every box includes a 5x7 card, handwritten by us.</p>
+      </div>
       <div class="modal-qty">
         <label for="modalQty">Qty</label>
         <input type="number" id="modalQty" value="1" min="1" max="20">
@@ -1011,8 +1019,8 @@
       <div class="share-row" id="modalShare" hidden></div>
       <div class="modal-divider"></div>
       <div class="modal-details">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#c5a55a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Free gift wrapping &nbsp;&middot;&nbsp;
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#c5a55a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Handwritten note included &nbsp;&middot;&nbsp;
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#c5a55a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> The box is the wrapping &nbsp;&middot;&nbsp;
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#c5a55a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Handwritten 5x7 note included &nbsp;&middot;&nbsp;
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#c5a55a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg> Ships nationwide
       </div>
     </div>
@@ -1037,7 +1045,8 @@
         <span>Subtotal</span>
         <b id="cartSubtotal">$0.00</b>
       </div>
-      <p class="cart-note">Card, PayPal or Venmo. Shipping is calculated at checkout; gift wrapping and a handwritten note are included with every box.</p>
+      <p class="cart-note">Card, PayPal or Venmo. Shipping is calculated at checkout. Every box arrives gift ready with a handwritten 5x7 note inside.</p>
+      <p class="cart-card-warning" id="cartCardWarning" role="status" hidden></p>
       <div id="paypal-button-container"></div>
       <button type="button" class="cart-continue" id="cartContinue">Continue shopping</button>
     </footer>

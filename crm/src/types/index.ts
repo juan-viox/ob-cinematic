@@ -468,6 +468,10 @@ export interface OrderItem {
   sku?: string | null
   description: string
   variant?: string | null
+  /** Which printed 5x7 card, or the blank one. */
+  card?: string | null
+  /** What the buyer asked to be handwritten inside it. */
+  card_message?: string | null
   quantity: number
   unit_price: number
   total: number
