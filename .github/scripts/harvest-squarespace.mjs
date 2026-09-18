@@ -37,6 +37,21 @@ function targets() {
   return [...seen.entries()].map(([slug, sources]) => ({ slug, sources }));
 }
 
+/* What each old slug has that its siblings do not: hostsdelightgreen and
+   hostsdelightrose share "hostsdelight", so they tag as green and rose. Falls
+   back to a position when they share nothing useful. */
+function tagger(sources) {
+  let prefix = 0;
+  if (sources.length > 1) {
+    const [first, ...rest] = sources;
+    while (prefix < first.length && rest.every((s) => s[prefix] === first[prefix])) prefix++;
+  }
+  return (source) => {
+    const tail = source.slice(prefix).replace(/[^a-z0-9]+/gi, '').toLowerCase();
+    return tail || `p${sources.indexOf(source) + 1}`;
+  };
+}
+
 const FETCH_TIMEOUT = 20_000;
 
 async function get(url, asJson) {
@@ -78,38 +93,68 @@ let ok = 0, failed = 0;
 for (const [n, t] of targets().entries()) {
   if (LIMIT && n >= LIMIT) { console.log(`Stopping after ${LIMIT} (limit set).`); break; }
 
-  let found = null;
+  /* Every source, not just the first that answers. Host's Delight has one old
+     page per colourway, and stopping at the first meant the rose box was never
+     fetched while the green one filled its gallery. */
+  const hits = [];
   console.log(`[${n + 1}] ${t.slug} ...`);
   for (const source of t.sources) {
     const url = `${SITE}/shop/${source}`;
+    let parsed = null;
     try {
-      const data = await get(`${url}?format=json-pretty`, true);
-      const parsed = fromJson(data);
-      if (parsed && parsed.images.length) { found = { ...parsed, source }; break; }
-      console.log(`::warning::${t.slug}: json had no gallery at ${source}`);
+      parsed = fromJson(await get(`${url}?format=json-pretty`, true));
+      if (!parsed || !parsed.images.length) {
+        console.log(`::warning::${t.slug}: json had no gallery at ${source}`);
+        parsed = null;
+      }
     } catch (e) {
       console.log(`::warning::${t.slug}: json fetch failed at ${source} (${e.message}), trying html`);
     }
-    try {
-      const parsed = fromHtml(await get(url, false));
-      if (parsed.images.length) { found = { ...parsed, source }; break; }
-    } catch (e) {
-      console.log(`::warning::${t.slug}: html fetch failed at ${source} (${e.message})`);
+    if (!parsed) {
+      try {
+        const html = fromHtml(await get(url, false));
+        if (html.images.length) parsed = html;
+      } catch (e) {
+        console.log(`::warning::${t.slug}: html fetch failed at ${source} (${e.message})`);
+      }
     }
+    if (parsed && parsed.images.length) hits.push({ ...parsed, source });
   }
 
-  if (!found) {
+  if (!hits.length) {
     console.log(`::error::${t.slug}: nothing found at ${t.sources.join(', ')}`);
     failed++;
     results[t.slug] = { sources: t.sources, images: [], body: '', error: 'not found' };
     continue;
   }
 
-  const files = found.images.map((u, i) => `${t.slug}-${i + 1}-1500w.jpg`);
-  found.images.forEach((u, i) => manifestLines.push(`${files[i]}\t${sized(u, 1500)}`));
-  results[t.slug] = { source: found.source, body: found.body, images: found.images, files };
-  console.log(`${t.slug.padEnd(20)} ${String(found.images.length).padStart(2)} photographs` +
-              (found.body ? `, ${found.body.length} chars of copy` : ', no copy'));
+  /* A box with one source keeps its existing file names. A box with several
+     tags each set with what its old slug does not share with the others, so
+     hostsdelightgreen and hostsdelightrose become green and rose. */
+  const tagFor = tagger(t.sources);
+  const bySource = {};
+  const allImages = [];
+  const allFiles = [];
+  for (const hit of hits) {
+    const tag = hits.length > 1 ? `-${tagFor(hit.source)}` : '';
+    const files = hit.images.map((u, i) => `${t.slug}${tag}-${i + 1}-1500w.jpg`);
+    hit.images.forEach((u, i) => manifestLines.push(`${files[i]}\t${sized(u, 1500)}`));
+    bySource[hit.source] = { tag: tag.replace(/^-/, ''), body: hit.body, images: hit.images, files };
+    allImages.push(...hit.images);
+    allFiles.push(...files);
+  }
+
+  const lead = hits[0];
+  results[t.slug] = {
+    source: lead.source,
+    body: hits.map((h) => h.body).find(Boolean) || '',
+    images: allImages,
+    files: allFiles,
+    ...(hits.length > 1 ? { bySource } : {}),
+  };
+  console.log(`${t.slug.padEnd(20)} ${String(allImages.length).padStart(2)} photographs` +
+              (hits.length > 1 ? ` across ${hits.length} pages` : '') +
+              (results[t.slug].body ? `, ${results[t.slug].body.length} chars of copy` : ', no copy'));
   ok++;
 }
 
