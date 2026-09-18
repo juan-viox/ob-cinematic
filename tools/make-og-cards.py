@@ -26,7 +26,7 @@ CARDS = {
     "shop":            ("site/assets/img/0B0_5067-750w.jpg",         0.50),
     "custom-gifting":  ("tools/og-sources/branded-run.jpg",          0.50),
     "concierge":       ("site/assets/img/0B0_4910-750w.jpg",         0.50),
-    "about":           ("tools/og-sources/in-hand.jpg",              0.33),
+    "about":           ("tools/og-sources/in-hand.jpg",              0.62),
     "contact":         ("site/assets/img/0B0_5183-750w.jpg",         0.50),
 }
 

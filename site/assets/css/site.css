@@ -236,7 +236,14 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   border-radius: 16px; overflow: hidden;
   box-shadow: 0 20px 60px rgba(0,0,0,0.06);
 }
-.about-image img { width: 100%; height: 400px; object-fit: cover; }
+/* Follow the file's own shape rather than a fixed height. At the desktop
+   column width this renders identically to the old 400px, but it stops the
+   narrower and the stacked breakpoints cropping an already-cropped photo a
+   second time and cutting the box out of its own picture. */
+.about-image img {
+  display: block; width: 100%; height: auto;
+  aspect-ratio: 1300 / 1005; object-fit: cover;
+}
 .about-services {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 12px; margin-top: 24px;
