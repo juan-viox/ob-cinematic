@@ -606,6 +606,11 @@
     return out.slice(0, 4);
   }
 
+  /* Six boxes are called "The Something" and do not want a second article. */
+  function theName(name) {
+    return /^the\s/i.test(name) ? name : 'The ' + name;
+  }
+
   function renderMore(product) {
     var wrap = document.getElementById("modalMore");
     if (!wrap) return;
@@ -621,8 +626,8 @@
       related.map(function(r) {
         return "<button type=\"button\" class=\"modal-more-card\" data-more=\"" +
                escapeHtml(r.name) + "\">" +
-               "<img src=\"" + r.img + "\" loading=\"lazy\" alt=\"The " +
-               escapeHtml(r.name) + " gift box\">" +
+               "<img src=\"" + r.img + "\" loading=\"lazy\" alt=\"" +
+               escapeHtml(theName(r.name)) + " gift box\">" +
                "<span class=\"modal-more-name\">" + escapeHtml(r.name) + "</span>" +
                "<span class=\"modal-more-price\">$" + r.price.toFixed(2) + "</span>" +
                "</button>";

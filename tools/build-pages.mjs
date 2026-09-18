@@ -77,7 +77,7 @@ const ogFor = (page) => page.post
   ? [`/assets/og/journal/${page.post.slug}.jpg`, page.post.imageAlt]
   : page.product
   ? [`/assets/og/products/${slugify(page.product.name)}.jpg`,
-     `The ${page.product.name} gift box from Occasions Box`]
+     `${theName(page.product.name)} gift box from Occasions Box`]
   : (OG[page.slug] || OG_DEFAULT);
 
 /* The shop grid is static HTML, so a crawler already sees 21 boxes. What it
@@ -530,6 +530,12 @@ function ldGraph(page) {
   return { '@context': 'https://schema.org', '@graph': graph };
 }
 
+/* Six of the boxes are called "The Something", so the article is already
+   there and a second one reads as a stutter in the alt text. */
+function theName(name) {
+  return /^the\s/i.test(name) ? name : `The ${name}`;
+}
+
 function slugify(s) {
   /* Drop the apostrophe rather than turn it into a separator, so Host's
      Delight is hosts-delight and not host-s-delight. */
@@ -715,7 +721,7 @@ ${contents.map((item) => `          <li>${item}</li>`).join('\n')}
   <div class="pd-grid">
     <figure class="pd-gallery">
       <img id="pdImg" src="${img}" width="${w}" height="${h}" fetchpriority="high"
-           alt="The ${p.name} gift box from Occasions Box">${thumbs}
+           alt="${theName(p.name)} gift box from Occasions Box">${thumbs}
     </figure>
 
     <div class="pd-body">
@@ -744,7 +750,7 @@ ${cardPicker()}
 ${related.map((r) => {
   const rs = jpegSize(`site${r.img}`);
   return `      <a class="pd-more-card" href="${productUrl(r)}">
-        <img src="${r.img}" width="${rs.w}" height="${rs.h}" loading="lazy" alt="The ${r.name} gift box">
+        <img src="${r.img}" width="${rs.w}" height="${rs.h}" loading="lazy" alt="${theName(r.name)} gift box">
         <span class="pd-more-name">${r.name}</span>
         <span class="pd-more-price">$${r.price.toFixed(2)}</span>
       </a>`;
