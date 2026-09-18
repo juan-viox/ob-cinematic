@@ -1,7 +1,7 @@
 -- OccasionsBox CRM — complete schema and catalogue, in one file.
 --
 -- Paste this whole file into the Supabase SQL Editor of a NEW, EMPTY project
--- and run it once. It is the 7 migrations in supabase/migrations/ followed by
+-- and run it once. It is the 9 migrations in supabase/migrations/ followed by
 -- the catalogue seed in supabase/seed/, concatenated in their required order.
 --
 -- Do NOT run this against a project that already has the CRM schema: section 1
@@ -1383,7 +1383,7 @@ CREATE TABLE IF NOT EXISTS proposals (
   total decimal(12,2) NOT NULL DEFAULT 0,
   -- The share link. 48 hex chars of entropy; a client reads and accepts the
   -- proposal at /p/<token> with nothing else.
-  public_token text NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(24), 'hex'),
+  public_token text NOT NULL UNIQUE DEFAULT encode(extensions.gen_random_bytes(24), 'hex'),
   sent_at timestamptz,
   viewed_at timestamptz,
   accepted_at timestamptz,
@@ -1598,6 +1598,175 @@ END $$;
 
 -- The number generator runs as the definer; members call it through RPC.
 GRANT EXECUTE ON FUNCTION next_document_number(uuid, text, text) TO authenticated;
+
+
+-- ═══════════════════════════════════════════════════════════════
+-- migrations/008_function_hardening.sql
+-- ═══════════════════════════════════════════════════════════════
+
+-- OccasionsBox CRM — Migration 008: function hardening
+-- Run AFTER 007_catalogue_occasions_proposals.sql. Idempotent; re-run freely.
+--
+-- Raised by Supabase's database linter against the live project:
+--
+--   1. function_search_path_mutable (10 functions). A SECURITY DEFINER function
+--      with a caller-controlled search_path can be made to resolve an
+--      unqualified name to an object the caller planted, and then runs it with
+--      the definer's privileges. Pinning search_path closes that. The
+--      SECURITY INVOKER ones are pinned too: same class of bug, and it costs
+--      nothing. pg_temp goes last so a temp object can never shadow a real one.
+--
+--   2. next_document_number is EXECUTE-able by anon. It writes — every call
+--      increments a counter — so an anonymous caller who learned an
+--      organisation's uuid could burn proposal and order numbers and leave
+--      gaps in the sequence. Only signed-in members and the service role
+--      need it.
+--
+-- get_user_org_id, get_user_role and is_super_admin stay callable by anon on
+-- purpose: RLS policy expressions are evaluated as the querying role, so
+-- revoking EXECUTE would turn "no rows" into an error for anon-role queries.
+-- All three only read auth.uid(), which is NULL for anon, so they return NULL.
+
+DO $$
+DECLARE f record;
+BEGIN
+  FOR f IN
+    SELECT p.oid::regprocedure AS sig
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname IN (
+        'update_updated_at', 'get_user_org_id', 'get_user_role', 'is_super_admin',
+        'seed_deal_stages', 'set_organization_id_default', 'documents_sync_columns',
+        'profiles_guard_role_change', 'apply_inventory_movement', 'next_document_number'
+      )
+  LOOP
+    EXECUTE format('ALTER FUNCTION %s SET search_path = public, extensions, pg_temp', f.sig);
+  END LOOP;
+END $$;
+
+-- Writable, so signed-in members only.
+DO $$ BEGIN
+  IF to_regprocedure('public.next_document_number(uuid, text, text)') IS NOT NULL THEN
+    REVOKE EXECUTE ON FUNCTION next_document_number(uuid, text, text) FROM PUBLIC;
+    REVOKE EXECUTE ON FUNCTION next_document_number(uuid, text, text) FROM anon;
+    GRANT EXECUTE ON FUNCTION next_document_number(uuid, text, text) TO authenticated;
+    GRANT EXECUTE ON FUNCTION next_document_number(uuid, text, text) TO service_role;
+  END IF;
+END $$;
+
+
+-- ═══════════════════════════════════════════════════════════════
+-- migrations/009_rls_initplan_and_indexes.sql
+-- ═══════════════════════════════════════════════════════════════
+
+-- OccasionsBox CRM — Migration 009: RLS evaluation cost and two missing indexes
+-- Run AFTER 008_function_hardening.sql. Idempotent; re-run freely.
+--
+-- From Supabase's performance linter against the live project:
+--
+--   1. auth_rls_initplan (8 policies). A bare auth.uid() inside a policy is
+--      re-evaluated once per candidate row; wrapped as (SELECT auth.uid()) the
+--      planner hoists it into an InitPlan and evaluates it once per query.
+--      Semantics are identical — this is Supabase's documented idiom — so every
+--      policy below is reproduced verbatim apart from that wrapping.
+--
+--   2. unindexed_foreign_keys. Most of the 30 it lists are nullable link
+--      columns on tables that will hold thousands of rows, not millions, and an
+--      index on each would cost more on write than it ever saves on read. Two
+--      are worth having: organization_id on inventory_movements and
+--      product_components. Both are the RLS predicate column on a table that
+--      grows without bound (a movement per stock change, a row per component
+--      per box), and neither had a covering index — every other org-scoped
+--      table already leads an index with organization_id.
+--
+-- Deliberately not addressed: multiple_permissive_policies on profiles UPDATE.
+-- profiles_update and profiles_admin_update are permissive and OR together by
+-- design, which is why 006 repeats the caller/target conditions in both. The
+-- duplication is the safety property, not an oversight.
+
+-- ═══════════════════════════════════════════
+-- 1. NOTIFICATIONS
+-- ═══════════════════════════════════════════
+DROP POLICY IF EXISTS "Users can read own notifications" ON notifications;
+CREATE POLICY "Users can read own notifications"
+  ON notifications FOR SELECT
+  USING ((SELECT auth.uid()) = user_id);
+
+DROP POLICY IF EXISTS "Users can update own notifications" ON notifications;
+CREATE POLICY "Users can update own notifications"
+  ON notifications FOR UPDATE
+  USING ((SELECT auth.uid()) = user_id);
+
+-- ═══════════════════════════════════════════
+-- 2. PORTAL USERS
+-- ═══════════════════════════════════════════
+DROP POLICY IF EXISTS portal_select ON portal_users;
+CREATE POLICY portal_select ON portal_users FOR SELECT
+  USING (
+    organization_id = get_user_org_id()
+    OR user_id = (SELECT auth.uid())
+    OR is_super_admin()
+  );
+
+DROP POLICY IF EXISTS portal_update ON portal_users;
+CREATE POLICY portal_update ON portal_users FOR UPDATE
+  USING (
+    organization_id = get_user_org_id()
+    OR user_id = (SELECT auth.uid())
+    OR is_super_admin()
+  );
+
+-- ═══════════════════════════════════════════
+-- 3. SUPER ADMINS
+-- ═══════════════════════════════════════════
+DROP POLICY IF EXISTS sa_select ON super_admins;
+CREATE POLICY sa_select ON super_admins FOR SELECT
+  USING (user_id = (SELECT auth.uid()) OR is_super_admin());
+
+-- ═══════════════════════════════════════════
+-- 4. PROFILES
+-- ═══════════════════════════════════════════
+-- Self-update: may not change role or organization_id (see 006 §9a).
+DROP POLICY IF EXISTS profiles_update ON profiles;
+CREATE POLICY profiles_update ON profiles FOR UPDATE
+  USING (id = (SELECT auth.uid()))
+  WITH CHECK (
+    id = (SELECT auth.uid())
+    AND role = get_user_role()
+    AND organization_id = get_user_org_id()
+  );
+
+-- Owners/admins may re-role another member, never the owner and never self.
+DROP POLICY IF EXISTS profiles_admin_update ON profiles;
+CREATE POLICY profiles_admin_update ON profiles FOR UPDATE
+  USING (
+    organization_id = get_user_org_id()
+    AND get_user_role() IN ('owner', 'admin')
+    AND role <> 'owner'
+    AND id <> (SELECT auth.uid())
+  )
+  WITH CHECK (
+    organization_id = get_user_org_id()
+    AND get_user_role() IN ('owner', 'admin')
+    AND role IN ('admin', 'member')
+    AND id <> (SELECT auth.uid())
+  );
+
+DROP POLICY IF EXISTS profiles_admin_delete ON profiles;
+CREATE POLICY profiles_admin_delete ON profiles FOR DELETE
+  USING (
+    organization_id = get_user_org_id()
+    AND get_user_role() IN ('owner', 'admin')
+    AND role <> 'owner'
+    AND id <> (SELECT auth.uid())
+  );
+
+-- ═══════════════════════════════════════════
+-- 5. THE TWO INDEXES WORTH ADDING
+-- ═══════════════════════════════════════════
+CREATE INDEX IF NOT EXISTS idx_inventory_movements_org ON inventory_movements(organization_id);
+CREATE INDEX IF NOT EXISTS idx_product_components_org ON product_components(organization_id);
 
 
 -- ═══════════════════════════════════════════════════════════════

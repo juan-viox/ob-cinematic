@@ -226,7 +226,7 @@ CREATE TABLE IF NOT EXISTS proposals (
   total decimal(12,2) NOT NULL DEFAULT 0,
   -- The share link. 48 hex chars of entropy; a client reads and accepts the
   -- proposal at /p/<token> with nothing else.
-  public_token text NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(24), 'hex'),
+  public_token text NOT NULL UNIQUE DEFAULT encode(extensions.gen_random_bytes(24), 'hex'),
   sent_at timestamptz,
   viewed_at timestamptz,
   accepted_at timestamptz,
