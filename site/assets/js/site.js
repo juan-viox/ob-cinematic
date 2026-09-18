@@ -1073,6 +1073,48 @@
     /* Clicking the card opens the box. Saving it must not. */
     pin.addEventListener('click', function(e) { e.stopPropagation(); });
     frame.appendChild(pin);
+
+    /* ─── Quick view ───
+       The whole card already opens the box, but nothing on it said so. A bar
+       across the foot of the photograph on hover does, and it is the one
+       affordance the View Details button was carrying before the grid gave
+       its room back to the photographs. */
+    var quick = document.createElement('button');
+    quick.type = 'button';
+    quick.className = 'shop-quickview';
+    quick.textContent = 'Quick view';
+    quick.setAttribute('aria-label', 'Quick view of ' + nameEl.textContent);
+    quick.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openModal(nameEl.textContent);
+    });
+    frame.appendChild(quick);
+
+    /* ─── Paging the photographs on the card ───
+       A box with several shots can be flicked through without opening it,
+       which is how somebody scanning twenty one boxes decides which one to
+       open. One photograph and the arrows never appear. */
+    var product = allProducts.find(function(pr) { return pr.name === nameEl.textContent; });
+    var shots = product ? galleryFor(product, null) : [];
+    if (shots.length > 1) {
+      var at = 0;
+      var step = function(by, e) {
+        e.stopPropagation();
+        at = (at + by + shots.length) % shots.length;
+        img.src = shots[at].src;
+        img.alt = shots[at].alt;
+      };
+      ['prev', 'next'].forEach(function(dir) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'shop-page shop-page-' + dir;
+        b.innerHTML = dir === 'prev' ? '&lsaquo;' : '&rsaquo;';
+        b.setAttribute('aria-label', (dir === 'prev' ? 'Previous' : 'Next') +
+          ' photograph of ' + nameEl.textContent);
+        b.addEventListener('click', function(e) { step(dir === 'prev' ? -1 : 1, e); });
+        frame.appendChild(b);
+      });
+    }
   });
 
   /* The photograph is a real link to the box's own page, which is what a

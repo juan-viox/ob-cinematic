@@ -173,6 +173,20 @@ function loadCardMessages() {
 }
 const CARD_MESSAGES = loadCardMessages();
 
+/* The shop grid tags every card with the occasions it suits. Reading them here
+   lets a product page offer boxes for the same occasion rather than whichever
+   four happen to sit next to it in the catalogue. */
+function loadOccasions() {
+  const shop = read('tools/sections/shop.html');
+  const re = /class="shop-card[^"]*"[^>]*data-occasion="([^"]*)"[\s\S]*?href="\/shop\/([a-z0-9-]+)"/g;
+  const map = new Map();
+  let m;
+  while ((m = re.exec(shop))) map.set(m[2], m[1].split(/\s+/).filter(Boolean));
+  if (!map.size) throw new Error('tools/sections/shop.html: no cards with data-occasion');
+  return map;
+}
+const OCCASIONS = loadOccasions();
+
 /* The blank card is not a message, so it is not in CARD_MESSAGES, but it is
    an option in every picker. Taking it from site.js rather than repeating the
    words here is what keeps the product page and the modal offering the same
@@ -642,7 +656,17 @@ function productBody(p) {
   const img = p.img;
   const { w, h } = jpegSize(`site${img}`);
   const i = PRODUCTS.indexOf(p);
-  const related = [1, 2, 3, 4].map((k) => PRODUCTS[(i + k) % PRODUCTS.length]);
+  /* Somebody on a box that is nearly right wants the next nearest box, not
+     the next one along in the catalogue. Boxes sharing an occasion tag come
+     first, most tags in common first; the cyclic neighbours fill any gap so
+     there are always four. */
+  const mine = new Set(OCCASIONS.get(slugify(p.name)) || []);
+  const shared = (q) => (OCCASIONS.get(slugify(q.name)) || []).filter((t) => mine.has(t)).length;
+  const byOccasion = PRODUCTS
+    .filter((q) => q !== p && shared(q) > 0)
+    .sort((a, b) => shared(b) - shared(a) || PRODUCTS.indexOf(a) - PRODUCTS.indexOf(b));
+  const neighbours = [1, 2, 3, 4].map((k) => PRODUCTS[(i + k) % PRODUCTS.length]);
+  const related = [...new Set([...byOccasion, ...neighbours])].filter((q) => q !== p).slice(0, 4);
 
   const variantBlock = variants.length ? `
       <div class="pd-variants">
@@ -704,14 +728,15 @@ ${cardPicker()}
           <input type="number" id="pdQty" value="1" min="1" max="20">
         </div>
         <button type="button" class="pd-add" id="pdAdd">Add to Cart</button>
-      </div>${shareRow(`${SITE}${productUrl(p)}`, `${p.name} from Occasions Box`, `${SITE}${p.img}`)}
+      </div>
+      <div class="pd-share-label">Share the box</div>${shareRow(`${SITE}${productUrl(p)}`, `${p.name} from Occasions Box`, `${SITE}${p.img}`)}
 
       <p class="pd-ship">The box is the wrapping &middot; Handwritten 5x7 note included &middot; Ships nationwide</p>
     </div>
   </div>
 
   <section class="pd-more">
-    <h2 class="pd-more-title">More boxes</h2>
+    <h2 class="pd-more-title">More beautiful boxes to consider</h2>
     <div class="pd-more-grid">
 ${related.map((r) => {
   const rs = jpegSize(`site${r.img}`);
