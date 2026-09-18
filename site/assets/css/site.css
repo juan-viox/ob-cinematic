@@ -348,8 +348,9 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   .shop-filter { font-size: 14px; padding: 9px 16px; letter-spacing: 0; }
   .shop-filters { gap: 8px; }
 }
-/* On a phone the chips scroll sideways rather than stacking into a wall. */
-@media (max-width: 640px) {
+/* Below the width where all eight chips fit on one centred line, the row
+   scrolls sideways inside itself rather than pushing the page wider. */
+@media (max-width: 1080px) {
   .shop-filters {
     flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start;
     padding: 2px 20px 8px; margin-bottom: 32px;
@@ -937,10 +938,10 @@ footer {
 .modal-overlay.active { opacity: 1; pointer-events: all; }
 .modal {
   background: var(--bg); border-radius: 20px;
-  max-width: 880px; width: 100%;
+  max-width: 1180px; width: 100%;
   max-height: 90vh; overflow-y: auto;
   box-shadow: 0 40px 80px rgba(0,0,0,0.15);
-  display: grid; grid-template-columns: 1fr 1fr;
+  display: grid; grid-template-columns: 1.15fr 1fr;
   position: relative;
 }
 .modal-close {
@@ -960,7 +961,7 @@ footer {
 .modal-gallery { display: grid; grid-template-rows: auto auto; }
 .modal-img {
   display: block; width: 100%; height: auto;
-  aspect-ratio: 5 / 4; object-fit: contain; object-position: center;
+  aspect-ratio: 4 / 3; object-fit: contain; object-position: center;
 }
 /* Only shown once a box has more than one photograph. */
 .modal-thumbs {
@@ -993,7 +994,7 @@ footer {
   color: var(--text); margin: 0 0 14px;
 }
 .modal-more-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
 }
 .modal-more-card {
   display: block; width: 100%; padding: 0; cursor: pointer; text-align: left;
