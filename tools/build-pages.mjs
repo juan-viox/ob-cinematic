@@ -32,6 +32,7 @@ const SITE = 'https://occasionsbox.com';
 const BIZ = {
   name: 'Occasions Box',
   legalName: 'Occasions Box LLC',
+  founded: '2017',
   phone: '+1-551-246-0028',
   email: 'Hello@occasionsbox.com',
   locality: 'Fort Lee',
@@ -162,6 +163,7 @@ function ldGraph(page) {
     '@id': ORG_ID,
     name: BIZ.name,
     legalName: BIZ.legalName,
+    foundingDate: BIZ.founded,
     url: `${SITE}/`,
     logo: { '@type': 'ImageObject', url: `${SITE}/assets/ob-logo-gold.png`, width: 1718, height: 341 },
     image: `${SITE}${OG_DEFAULT[0]}`,
