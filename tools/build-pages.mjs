@@ -32,7 +32,7 @@ const SITE = 'https://occasionsbox.com';
 const BIZ = {
   name: 'Occasions Box',
   legalName: 'Occasions Box LLC',
-  phone: '+1-551-245-7492',
+  phone: '+1-551-246-0028',
   email: 'Hello@occasionsbox.com',
   locality: 'Fort Lee',
   region: 'NJ',

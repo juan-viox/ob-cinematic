@@ -4,7 +4,7 @@ const crmConfig = {
   slug: 'occasionsbox',
   tagline: 'Elevated Corporate & Closing Gifting',
   website: 'https://occasionsbox.com',
-  phone: '(551) 245-7492',
+  phone: '(551) 246-0028',
   email: 'Hello@occasionsbox.com',
   address: 'Bergen County, NJ',
   instagram: '@occasionsbox',
