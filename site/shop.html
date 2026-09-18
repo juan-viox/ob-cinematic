@@ -991,9 +991,16 @@
 <div class="modal-overlay" id="productModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">&times;</button>
-    <div class="modal-gallery">
-      <img class="modal-img" id="modalImg" src="" alt="">
-      <div class="modal-thumbs" id="modalThumbs" hidden></div>
+    <!-- One element, so the left column cannot split into two tracks and
+         open a gap between the thumbnails and the boxes below them. -->
+    <div class="modal-side">
+      <div class="modal-gallery">
+        <img class="modal-img" id="modalImg" src="" alt="">
+        <div class="modal-thumbs" id="modalThumbs" hidden></div>
+      </div>
+      <!-- Filled by renderMore(); the gallery runs out long before the form
+           on the right does, and this is what was left blank. -->
+      <aside class="modal-more" id="modalMore" hidden></aside>
     </div>
     <div class="modal-body">
       <div class="modal-name" id="modalName"></div>
