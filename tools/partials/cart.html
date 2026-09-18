@@ -1,0 +1,24 @@
+<!-- ═══ CART DRAWER ═══ -->
+<div class="cart-overlay" id="cartOverlay" hidden>
+  <aside class="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+    <header class="cart-head">
+      <h2 class="cart-title" id="cartTitle">Your Cart</h2>
+      <button type="button" class="cart-close" id="cartClose" aria-label="Close cart">&times;</button>
+    </header>
+
+    <div class="cart-body">
+      <p class="cart-empty" id="cartEmpty">Your cart is empty. Every box is packed, ribboned and ready to send; add one and it ships.</p>
+      <ul class="cart-items" id="cartItems"></ul>
+    </div>
+
+    <footer class="cart-foot" id="cartFoot" hidden>
+      <div class="cart-total">
+        <span>Subtotal</span>
+        <b id="cartSubtotal">$0.00</b>
+      </div>
+      <p class="cart-note">Card, PayPal or Venmo. Shipping is calculated at checkout; gift wrapping and a handwritten note are included with every box.</p>
+      <div id="paypal-button-container"></div>
+      <button type="button" class="cart-continue" id="cartContinue">Continue shopping</button>
+    </footer>
+  </aside>
+</div>

@@ -1,11 +1,179 @@
 {
   "buildCommand": "",
   "outputDirectory": "site",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- site vercel.json || exit 1",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/about-us-1",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/gifting-concierge",
+      "destination": "/concierge",
+      "permanent": true
+    },
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/about-us",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/about-full",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/about-the-founders",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/shop-1",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/shop/9atx29xjh0e92wmmv3e3m43p3yjvg8",
+      "destination": "/shop/the-valet",
+      "permanent": true
+    },
+    {
+      "source": "/shop/afternoontea",
+      "destination": "/shop/afternoon-tea",
+      "permanent": true
+    },
+    {
+      "source": "/shop/all-about-mom-mini-spa-day",
+      "destination": "/shop/mini-spa-day",
+      "permanent": true
+    },
+    {
+      "source": "/shop/fathers-day-design-1",
+      "destination": "/shop/the-wind-down",
+      "permanent": true
+    },
+    {
+      "source": "/shop/holidaycheer",
+      "destination": "/shop/cheers",
+      "permanent": true
+    },
+    {
+      "source": "/shop/holidaycheer-fl4g2",
+      "destination": "/shop/bright-side",
+      "permanent": true
+    },
+    {
+      "source": "/shop/homesweethome",
+      "destination": "/shop/the-new-keys",
+      "permanent": true
+    },
+    {
+      "source": "/shop/homesweethome-54yty",
+      "destination": "/shop/the-reset",
+      "permanent": true
+    },
+    {
+      "source": "/shop/homesweethome-6edcx",
+      "destination": "/shop/the-nightcap",
+      "permanent": true
+    },
+    {
+      "source": "/shop/homesweethome-wtkzr",
+      "destination": "/shop/the-dinner-party",
+      "permanent": true
+    },
+    {
+      "source": "/shop/hostsdelightgreen",
+      "destination": "/shop/hosts-delight",
+      "permanent": true
+    },
+    {
+      "source": "/shop/hostsdelightrose",
+      "destination": "/shop/hosts-delight",
+      "permanent": true
+    },
+    {
+      "source": "/shop/hostsdelightrose-3twe4",
+      "destination": "/shop/love-you",
+      "permanent": true
+    },
+    {
+      "source": "/shop/hostsdelightrose-3twe4-8ypsl",
+      "destination": "/shop/coffee-lover",
+      "permanent": true
+    },
+    {
+      "source": "/shop/hostsdelightrose-3twe4-8ypsl-fh6fj",
+      "destination": "/shop/peaches-cream",
+      "permanent": true
+    },
+    {
+      "source": "/shop/hostsdelightrose-3twe4-8ypsl-fh6fj-zezsa-fdxca",
+      "destination": "/shop/spa-weekend",
+      "permanent": true
+    },
+    {
+      "source": "/shop/hostsdelightrose-hlkac",
+      "destination": "/shop/lemonade",
+      "permanent": true
+    },
+    {
+      "source": "/shop/housewarming",
+      "destination": "/shop/first-night-in",
+      "permanent": true
+    },
+    {
+      "source": "/shop/reneweddeluxe",
+      "destination": "/shop/everyday-luxe",
+      "permanent": true
+    },
+    {
+      "source": "/shop/vk67sa943ybywq4etwlkvw6wmlcmku",
+      "destination": "/shop/uncorked",
+      "permanent": true
+    },
+    {
+      "source": "/shop/welcomehome",
+      "destination": "/shop/welcome-home",
+      "permanent": true
+    },
+    {
+      "source": "/shop/besweetdeluxe2",
+      "destination": "/shop",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/admin",
+      "destination": "https://ob-crm-vio-x-bergsify.vercel.app/admin"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "https://ob-crm-vio-x-bergsify.vercel.app/admin/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
       ]
     }
   ]
