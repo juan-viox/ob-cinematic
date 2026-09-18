@@ -311,7 +311,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 /* ═══════════════════════════════════════════
    SECTION 5B: SHOP GRID / ALL PRODUCTS
    ═══════════════════════════════════════════ */
-#shop { padding: 120px 24px; max-width: 1200px; margin: 0 auto; }
+#shop { padding: 120px 24px; max-width: 1440px; margin: 0 auto; }
 .shop-header { text-align: center; margin-bottom: 56px; }
 .shop-filters {
   display: flex; justify-content: center; gap: 8px;
@@ -364,14 +364,16 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 }
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px 16px;
 }
 .shop-card {
   position: relative;
-  border-radius: 16px; overflow: hidden;
-  background: var(--bg); border: 1px solid var(--border);
-  transition: all 0.3s ease; cursor: pointer;
+  transition: transform 0.3s ease; cursor: pointer;
+}
+.shop-card-frame {
+  position: relative; overflow: hidden; border-radius: 2px;
+  background: var(--border);
 }
 .modal-variants { margin: 16px 0 0; }
 .modal-variants-label {
@@ -408,17 +410,17 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   padding: 5px 12px; border-radius: 100px; white-space: nowrap;
   box-shadow: 0 2px 8px rgba(26,26,26,0.18);
 }
-.shop-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 48px rgba(197,165,90,0.12);
-  border-color: var(--gold);
+.shop-card:hover .shop-card-frame {
+  box-shadow: 0 14px 40px rgba(26,26,26,0.16);
 }
+.shop-card:hover .shop-card-name { color: var(--gold-dark); }
+.shop-card-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .shop-card-img {
   width: 100%; aspect-ratio: 1; object-fit: cover;
   transition: transform 0.4s ease;
 }
 .shop-card:hover .shop-card-img { transform: scale(1.04); }
-.shop-card-body { padding: 20px; }
+.shop-card-body { padding: 12px 2px 0; }
 .shop-card-name {
   font-family: var(--serif); font-size: 18px; font-weight: 400;
   color: var(--text); margin-bottom: 4px;
@@ -427,16 +429,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   font-family: var(--sans); font-size: 14px; color: var(--gold);
   font-weight: 500;
 }
-.shop-card-btn {
-  display: block; width: 100%; margin-top: 12px;
-  padding: 10px; border-radius: 8px;
-  background: var(--gold-bg); color: var(--gold);
-  font-family: var(--sans); font-size: 12px; font-weight: 500;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  text-align: center; border: none; cursor: pointer;
-  transition: all 0.2s;
-}
-.shop-card-btn:hover { background: var(--gold); color: #fff; }
+.shop-card-btn { display: none; }
 
 /* ═══════════════════════════════════════════
    SECTION 6: HOW IT WORKS / PROCESS RAIL
@@ -2382,4 +2375,37 @@ body.lightbox-open { overflow: hidden; }
 .pd-story {
   font-size: 15.5px; color: var(--text); line-height: 1.68;
   margin: 0 0 22px; max-width: 58ch;
+}
+
+/* ═══ Save to Pinterest, on the shop grid ═══
+   Pinterest is where gift buyers actually browse, and a pin of a box carries
+   its photograph, its price and a link back. The old Squarespace shop put a
+   Save button on every listing and the rebuild lost it.
+
+   Top right, because the CLIENT FAVORITE badge already owns the top left. */
+.shop-pin {
+  position: absolute; top: 12px; right: 12px; z-index: 3;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px 7px 11px; border-radius: 100px;
+  background: #e60023; color: #fff;
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  line-height: 1; letter-spacing: 0.02em; text-decoration: none;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+  opacity: 0; transform: translateY(-4px); pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+.shop-card:hover .shop-pin,
+.shop-card:focus-within .shop-pin {
+  opacity: 1; transform: none; pointer-events: auto;
+}
+.shop-pin:hover { background: #ad081b; }
+.shop-pin:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.shop-pin svg { width: 14px; height: 14px; fill: currentColor; }
+
+/* A touch screen has no hover, so the button would never appear. */
+@media (hover: none) {
+  .shop-pin { opacity: 1; transform: none; pointer-events: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop-pin { transition: opacity 0.2s ease; transform: none; }
 }

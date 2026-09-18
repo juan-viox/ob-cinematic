@@ -180,13 +180,13 @@
     "The Reset": "A box about starting again. A self-care planner to lay out the week, an insulated bottle to keep beside it, wildflower facial steam for the evening, and a deep grey candle for the quiet part of it.",
     "The Dinner Party": "Everything the table needs except the guests. Three gold-plated cheese knives, leather coasters, a linen sun tea towel and a host book, finished with almond cookies for the board.",
     "Host's Delight": "The thank-you for whoever had everyone over. A teak edge-grain chopping block, organic loose-leaf tea, and a jar of the Bee Box's honey with a wooden dipper. Choose rose mint or chamomile.",
-    "The Nightcap": "For the hour after the plates are cleared. An antiqued gold pineapple corkscrew, leather coasters, a soy candle and almond cookies, which is most of what a good nightcap asks for.",
+    "The Nightcap": "For the hour after the plates are cleared. An antique rose gold pineapple corkscrew, leather coasters, a soy candle and almond cookies, which is most of what a good nightcap asks for.",
     "Lemonade": "For when life hands them a great deal at once. A teak edge-grain chopping block, lavender Earl Grey and Mocha Java coffee, and Swedish dishcloths that outlast seventeen rolls of paper towels.",
     "Bright Side": "Small and yellow and meant to land on a hard day. A yellow tin Candlefish candle, brown butter milk chocolate and a wildflower facial steam, which is a good deal of comfort for a small box.",
     "Cheers": "For the promotion, the closing, the yes. Faceted crystal champagne glasses and a gold double-hinged corkscrew, a gold tin candle and wine gummies, in a keepsake wooden box.",
     "Everyday Luxe": "The small luxuries someone would never think to buy themselves. A silk charmeuse scrunchie and a compact mirror from Odeme, a lip scrub from Sara Happ, and wine gummies.",
     "Welcome Home": "The first box through a new door. A teak edge-grain chopping block and an oatmeal linen tea towel for the kitchen, Earl Grey and a gold coffee scoop, and a sandalwood rose candle for the first evening.",
-    "The New Keys": "The housewarming box in full. A teak chopping block, leather coasters and a gold pineapple corkscrew for the first night hosting, then a beechwood serving spoon and a Home Sweet Home key tag to keep.",
+    "The New Keys": "The housewarming box in full. A teak chopping block, leather coasters and an antique rose gold pineapple corkscrew for the first night hosting, then a beechwood serving spoon and a Home Sweet Home key tag to keep.",
     "The Valet": "For the top of the dresser and the drive in. A personalised leather valet tray for whatever comes out of his pockets, a triple-insulated travel mug, a stainless cigar cutter and 77% dark chocolate.",
     "Goodnight": "A box that only asks them to stop. A padded silk eye mask, organic full leaf tea and a soy candle, with a lip scrub and wine gummies for the way there.",
     "Uncorked": "Four things and a bottle, which is all an evening really needs. A gold-plated signature corkscrew, leather coasters, a moulded metal Candlefish candle and fleur de sel dark chocolate.",
@@ -909,6 +909,46 @@
       var name = this.closest('.shop-card').querySelector('.shop-card-name').textContent;
       openModal(name);
     });
+  });
+
+  /* ─── Save to Pinterest, and a card that is clickable all over ───
+     The button under each card was a third way to do what clicking the
+     photograph already did, and it was the tallest piece of white space in
+     the grid, so it is gone and the name and price open the box instead.
+
+     The Save button is built here rather than written into all twenty one
+     cards, and it reuses the Pinterest entry in SHARE_TARGETS so the pin a
+     shopper saves from the grid matches the one they would get from the box's
+     own page. */
+  var pinTarget = SHARE_TARGETS.filter(function(t) { return t.name === 'Pinterest'; })[0];
+
+  document.querySelectorAll('.shop-card').forEach(function(card) {
+    var body = card.querySelector('.shop-card-body');
+    var nameEl = card.querySelector('.shop-card-name');
+    if (body && nameEl) {
+      body.addEventListener('click', function() { openModal(nameEl.textContent); });
+    }
+
+    var frame = card.querySelector('.shop-card-frame');
+    var link = card.querySelector('.shop-card-link');
+    var img = card.querySelector('.shop-card-img');
+    if (!pinTarget || !frame || !link || !img || !nameEl) return;
+
+    /* .href and .src read back absolute, which is what Pinterest needs. */
+    var pin = document.createElement('a');
+    pin.className = 'shop-pin';
+    pin.href = pinTarget.href
+      .replace('{url}', encodeURIComponent(link.href))
+      .replace('{image}', encodeURIComponent(img.src))
+      .replace('{title}', encodeURIComponent(nameEl.textContent + ' from Occasions Box'));
+    pin.target = '_blank';
+    pin.rel = 'noopener noreferrer';
+    pin.setAttribute('aria-label', 'Save ' + nameEl.textContent + ' to Pinterest');
+    pin.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' +
+      pinTarget.icon + '"/></svg>Save';
+    /* Clicking the card opens the box. Saving it must not. */
+    pin.addEventListener('click', function(e) { e.stopPropagation(); });
+    frame.appendChild(pin);
   });
 
   /* The photograph is a real link to the box's own page, which is what a
