@@ -11,7 +11,7 @@
  * The output is committed; Vercel serves site/ directly with no build step,
  * so edit the partials and re-run this rather than editing site/*.html.
  */
-import { readFileSync, writeFileSync, statSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, statSync, mkdirSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -67,7 +67,8 @@ const OG = {
   contact: ['/assets/og/contact.jpg',
     'An open Occasions Box with an olive wood board, a gold spoon and a soy candle'],
 };
-const ogFor = (page) => page.product
+const ogFor = (page) => page.post ? [page.post.image, page.post.imageAlt]
+  : page.product
   ? [`/assets/og/products/${slugify(page.product.name)}.jpg`,
      `The ${page.product.name} gift box from Occasions Box`]
   : (OG[page.slug] || OG_DEFAULT);
@@ -214,6 +215,8 @@ function ldGraph(page) {
   if (page.url !== '/') {
     const trail = page.product
       ? [['Home', `${SITE}/`], ['Shop', `${SITE}/shop`], [page.product.name, canonical]]
+      : page.post
+      ? [['Home', `${SITE}/`], ['Journal', `${SITE}/journal`], [page.post.title, canonical]]
       : [['Home', `${SITE}/`], [page.title.split(' | ')[0], canonical]];
     webpage.breadcrumb = { '@id': `${canonical}#breadcrumb` };
     graph.push({
@@ -222,6 +225,23 @@ function ldGraph(page) {
       itemListElement: trail.map(([name, item], n) => (
         { '@type': 'ListItem', position: n + 1, name, item })),
     });
+  }
+
+  if (page.post) {
+    graph.push({
+      '@type': 'BlogPosting',
+      '@id': `${canonical}#post`,
+      headline: page.post.title,
+      description: page.post.summary,
+      image: SITE + page.post.image,
+      datePublished: page.post.date,
+      dateModified: page.post.date,
+      inLanguage: 'en-US',
+      mainEntityOfPage: { '@id': `${canonical}#webpage` },
+      author: { '@id': ORG_ID },
+      publisher: { '@id': ORG_ID },
+    });
+    webpage.mainEntity = { '@id': `${canonical}#post` };
   }
 
   if (page.product) {
@@ -345,7 +365,7 @@ function slugify(s) {
 }
 
 const NAV = partial('nav');
-const FOOTER = partial('footer');
+const FOOTER_RAW = partial('footer');
 const MODAL = partial('modal');
 const CART = partial('cart');
 const WIDGETS = partial('widgets');
@@ -548,6 +568,132 @@ const PRODUCT_PAGES = PRODUCTS.map((p) => ({
   paypal: true,
 }));
 
+/* ── Journal ───────────────────────────────────────────────────────────────
+   One file per post in tools/posts/, each opening with a metadata comment.
+   Adding a post is writing that one file: the post page, the index, the share
+   meta, the structured data and the sitemap all follow from it.
+
+   With no posts the section does not exist at all — no page, no link, no
+   sitemap entry. An empty index is a thin page, and a thin page is worse for
+   the site than no page. */
+function loadPosts() {
+  let files;
+  try {
+    files = readdirSync(join(ROOT, 'tools/posts')).filter((f) => f.endsWith('.html'));
+  } catch { return []; }
+
+  const posts = files.map((file) => {
+    const raw = read(`tools/posts/${file}`);
+    const head = /^\s*<!--([\s\S]*?)-->/.exec(raw);
+    if (!head) throw new Error(`tools/posts/${file}: missing the metadata comment`);
+    const meta = {};
+    for (const line of head[1].split('\n')) {
+      const m = /^\s*([a-zA-Z]+)\s*:\s*(.+?)\s*$/.exec(line);
+      if (m) meta[m[1]] = m[2];
+    }
+    for (const key of ['title', 'date', 'summary', 'image', 'imageAlt']) {
+      if (!meta[key]) throw new Error(`tools/posts/${file}: no ${key} in the metadata comment`);
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(meta.date)) {
+      throw new Error(`tools/posts/${file}: date must be YYYY-MM-DD, got ${meta.date}`);
+    }
+    return { ...meta, slug: file.replace(/\.html$/, ''), body: raw.slice(head[0].length).trim() };
+  });
+
+  /* Newest first, which is what a reader and a crawler both expect. */
+  return posts.sort((a, b) => b.date.localeCompare(a.date));
+}
+const POSTS = loadPosts();
+
+const readable = (iso) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  const month = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+                 'August', 'September', 'October', 'November', 'December'][m - 1];
+  return `${month} ${d}, ${y}`;
+};
+
+function postCard(post) {
+  const { w, h } = jpegSize(`site${post.image}`);
+  return `      <a class="jr-card" href="/journal/${post.slug}">
+        <img src="${post.image}" width="${w}" height="${h}" loading="lazy" alt="${esc(post.imageAlt)}">
+        <time class="jr-card-date" datetime="${post.date}">${readable(post.date)}</time>
+        <h2 class="jr-card-title">${post.title}</h2>
+        <p class="jr-card-summary">${post.summary}</p>
+        <span class="jr-card-more">Read on</span>
+      </a>`;
+}
+
+function journalIndexBody() {
+  return `<!-- ═══ JOURNAL INDEX ═══ -->
+<section class="jr-index">
+  <div class="jr-grid">
+${POSTS.map(postCard).join('\n')}
+  </div>
+</section>
+`;
+}
+
+function postBody(post) {
+  const { w, h } = jpegSize(`site${post.image}`);
+  const others = POSTS.filter((o) => o.slug !== post.slug).slice(0, 3);
+  return `<!-- ═══ JOURNAL POST: ${post.title} ═══ -->
+<article class="jr-post">
+  <nav class="jr-crumb" aria-label="Breadcrumb">
+    <a href="/">Home</a> <span aria-hidden="true">&rsaquo;</span>
+    <a href="/journal">Journal</a> <span aria-hidden="true">&rsaquo;</span>
+    <span aria-current="page">${post.title}</span>
+  </nav>
+
+  <header class="jr-post-head">
+    <time class="jr-post-date" datetime="${post.date}">${readable(post.date)}</time>
+    <h1 class="jr-post-title">${post.title}</h1>
+    <p class="jr-post-standfirst">${post.summary}</p>
+  </header>
+
+  <figure class="jr-post-figure">
+    <img src="${post.image}" width="${w}" height="${h}" fetchpriority="high" alt="${esc(post.imageAlt)}">
+  </figure>
+
+  <div class="jr-post-body">
+${post.body}
+  </div>
+
+  <div class="jr-post-foot">
+    <p class="jr-post-cta">Looking for a gift like the ones above?
+      <a href="/shop">See the boxes</a> or <a href="/contact">tell us about the occasion</a>.</p>
+  </div>
+${others.length ? `
+  <section class="jr-more">
+    <h2 class="jr-more-title">More from the journal</h2>
+    <div class="jr-grid">
+${others.map(postCard).join('\n')}
+    </div>
+  </section>` : ''}
+</article>
+`;
+}
+
+const JOURNAL_PAGES = POSTS.length ? [
+  {
+    slug: 'journal', url: '/journal', nav: 'journal',
+    title: 'Journal | Occasions Box',
+    desc: 'Notes on gifting well: what to send, when to send it, and how to make '
+        + 'it land. From the Occasions Box studio in Fort Lee, New Jersey.',
+    header: {
+      eyebrow: 'Journal',
+      h1: 'Notes on Gifting Well',
+      p: 'What to send, when to send it, and how to make it land.',
+    },
+    sections: [], html: journalIndexBody(), journalIndex: true,
+  },
+  ...POSTS.map((post) => ({
+    slug: `journal/${post.slug}`, url: `/journal/${post.slug}`, nav: 'journal',
+    title: `${post.title} | Occasions Box`,
+    desc: post.summary,
+    sections: [], html: postBody(post), post,
+  })),
+] : [];
+
 const navFor = (page) => {
   const mark = (which) => (page.nav === which ? ' class="active"' : '');
   return NAV
@@ -575,6 +721,8 @@ function render(page) {
   const [ogImage, ogAlt] = ogFor(page);
   const body = page.html || page.sections.map(section).join('\n\n');
   const extras = [page.modal ? MODAL : '', page.cart ? CART : '', WIDGETS].filter(Boolean).join('\n\n');
+  const FOOTER = FOOTER_RAW.replace('{{JOURNAL_LINK}}',
+    POSTS.length ? '\n      <a href="/journal">Journal</a>' : '');
   const paypal = page.paypal
     ? '\n<!-- SANDBOX — replace client-id=sb with the live PayPal client ID before launch.\n' +
       '     enable-funding=venmo puts the Venmo button beside PayPal for eligible US\n' +
@@ -652,14 +800,15 @@ function assertCommentsBalanced(slug, html) {
 }
 
 mkdirSync(join(ROOT, 'site/shop'), { recursive: true });
+if (POSTS.length) mkdirSync(join(ROOT, 'site/journal'), { recursive: true });
 
 let n = 0;
-for (const page of [...PAGES, ...PRODUCT_PAGES]) {
+for (const page of [...PAGES, ...PRODUCT_PAGES, ...JOURNAL_PAGES]) {
   const out = `site/${page.slug}.html`;
   const html = render(page);
   assertCommentsBalanced(page.slug, html);
   writeFileSync(join(ROOT, out), html, 'utf8');
-  console.log(`${out.padEnd(34)} ${page.url.padEnd(26)} ${page.product ? 'product' : page.sections.join(', ')}`);
+  console.log(`${out.padEnd(34)} ${page.url.padEnd(26)} ${page.product ? 'product' : page.post ? 'journal post' : page.journalIndex ? 'journal index' : page.sections.join(', ')}`);
   n++;
 }
 console.log(`\n${n} pages written.`);
@@ -671,8 +820,9 @@ console.log(`\n${n} pages written.`);
    change"; a sitemap that claims today's date on every page is noise Google
    learns to ignore. */
 const lastModified = (page) => {
-  const files = page.sections.length
-    ? page.sections.map((s) => `tools/sections/${s}.html`)
+  const files = page.sections.length ? page.sections.map((s) => `tools/sections/${s}.html`)
+    : page.post ? [`tools/posts/${page.post.slug}.html`]
+    : page.journalIndex ? POSTS.map((o) => `tools/posts/${o.slug}.html`)
     : ['site/assets/js/site.js'];
   const dates = files.map((file) => {
     /* A fresh clone stamps every file with the checkout time, which would put
@@ -691,8 +841,9 @@ const lastModified = (page) => {
 /* The home page is what we most want crawled; policy pages least. */
 const PRIORITY = { index: '1.0', shop: '0.9', 'custom-gifting': '0.9', concierge: '0.8',
                    about: '0.7', contact: '0.7' };
-const priorityFor = (page) => (page.product ? '0.8' : PRIORITY[page.slug] || '0.3');
-const SITEMAP_PAGES = [...PAGES, ...PRODUCT_PAGES];
+const priorityFor = (page) => (page.product ? '0.8' : page.post ? '0.6'
+  : page.journalIndex ? '0.7' : PRIORITY[page.slug] || '0.3');
+const SITEMAP_PAGES = [...PAGES, ...PRODUCT_PAGES, ...JOURNAL_PAGES];
 
 const sitemap = [
   '<?xml version="1.0" encoding="UTF-8"?>',
