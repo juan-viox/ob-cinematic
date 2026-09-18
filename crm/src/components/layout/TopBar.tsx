@@ -13,12 +13,14 @@ import {
   Handshake,
   Activity,
   Command,
+  FileText,
 } from 'lucide-react'
 import Avatar from '@/components/shared/Avatar'
 import NotificationPanel from '@/components/shared/NotificationPanel'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 
 const quickAddItems = [
+  { label: 'New Proposal', href: '/proposals/new', icon: FileText },
   { label: 'New Contact', href: '/contacts/new', icon: UserPlus },
   { label: 'New Deal', href: '/deals/new', icon: Handshake },
   { label: 'New Lead', href: '/leads/new', icon: UserPlus },

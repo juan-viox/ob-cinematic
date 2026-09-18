@@ -567,7 +567,8 @@
           cart = [];
           saveCart();
           renderCart();
-          recordOrder(data.orderID, payer, resolved, cents);
+          var unit = (details && details.purchase_units && details.purchase_units[0]) || {};
+          recordOrder(data.orderID, payer, resolved, cents, unit.shipping || null);
         });
       },
       onError: function(err) {
@@ -578,22 +579,30 @@
 
   /* Payment has already succeeded by the time this runs, so a CRM failure is
      reported to us and softened for the buyer, never treated as a failed sale. */
-  function recordOrder(paypalOrderId, payer, resolved, cents) {
+  function recordOrder(paypalOrderId, payer, resolved, cents, shipping) {
     if (!CRM_CONFIG.enabled || !CRM_CONFIG.apiUrl) return;
     var payerName = [payer.name && payer.name.given_name, payer.name && payer.name.surname]
       .filter(Boolean).join(' ');
+    var payerPhone = (payer.phone && payer.phone.phone_number && payer.phone.phone_number.national_number) || '';
     fetch(CRM_CONFIG.apiUrl + '/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         items: resolved.map(function(r) {
-          return { name: r.label, unitAmount: r.price, quantity: r.line.qty };
+          return { name: r.line.name, variant: r.line.variant || '', unitAmount: r.price, quantity: r.line.qty };
         }),
         amount: cents / 100,
         currency: 'USD',
         paypalOrderId: paypalOrderId,
         payerEmail: payer.email_address || '',
         payerName: payerName,
+        payerPhone: payerPhone,
+        // Where PayPal says the boxes are going, so the packing slip in the
+        // CRM carries the address without anyone retyping it.
+        shipping: shipping ? {
+          name: (shipping.name && shipping.name.full_name) || '',
+          address: shipping.address || null
+        } : null,
         status: 'paid'
       })
     })

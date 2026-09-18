@@ -165,6 +165,10 @@ export function requestOrigin(request: Request): { origin: string; host: string 
 }
 
 /** Constant-time-ish string comparison to avoid trivial timing leaks on the key. */
+export function safeEqualStrings(a: string, b: string): boolean {
+  return safeEqual(a, b)
+}
+
 function safeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false
   let diff = 0

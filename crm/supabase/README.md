@@ -18,8 +18,15 @@ them one at a time (Dashboard → SQL Editor → New query → paste the file �
 | 4 | `migrations/004_custom_fields.sql` | `custom_field_definitions`, `custom_field_values` (+ RLS) |
 | 5 | `migrations/005_notifications.sql` | `notifications` (+ RLS) |
 | 6 | `migrations/006_occasionsbox.sql` | OccasionsBox alignment: role CHECK (owner/admin/member), extra contact sources, `organization_id` auto-fill trigger, `documents` columns + `documents` storage bucket, team-management policies on `profiles`, drops the VioX stage-seed trigger (stages come from `crm.config.ts`) |
+| 7 | `migrations/007_catalogue_occasions_proposals.sql` | The catalogue on `products`; `inventory_items`, `product_components`, `inventory_movements`; `occasions` + `client_occasions`; `proposals` + `proposal_items`; `orders` + `order_items`; `document_counters` and `next_document_number()`; deal columns for quantity / needed_by / occasion |
+| 8 | `seed/occasionsbox_catalogue.sql` | The catalogue itself: 21 boxes, 3 tiers, 3 services, 3 concierge plans, 8 add-ons, 91 inventory components with their bill of materials, 27 gifting occasions and 6 outreach email templates |
 
-`006_occasionsbox.sql` is idempotent and can be re-run.
+`006`, `007` and the seed are all idempotent and can be re-run. The seed
+refreshes names, prices, contents and photographs and never overwrites stock,
+costs, reorder points or `is_active`, so it is safe against a live database.
+
+Both `007` and the seed are generated into `setup-all.sql` by
+`npm run sql:bundle`; edit the parts, never `setup-all.sql`.
 
 Files that used to live here and must **not** be applied (deleted from the repo):
 

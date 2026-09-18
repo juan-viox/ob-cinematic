@@ -7,7 +7,14 @@ import { NextResponse, type NextRequest } from 'next/server'
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 /** Paths that never require authentication (basePath already stripped by Next) */
-const publicPaths = ['/login', '/signup', '/auth/callback', '/portal-login']
+const publicPaths = ['/login', '/signup', '/auth/callback', '/portal-login', '/p']
+
+/**
+ * API prefixes that authenticate themselves in the handler (site API key,
+ * Origin allowlist, ElevenLabs signature, or a proposal's public token)
+ * instead of with a session cookie.
+ */
+const selfAuthenticatedApi = ['/api/v1/ingest', '/api/v1/agent', '/api/v1/elevenlabs', '/api/v1/public']
 
 const NOT_CONFIGURED_HTML = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>OccasionsBox CRM</title>
@@ -49,8 +56,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request })
   }
 
-  // ── 2. Always allow ingest API routes (API-key / origin auth in the handlers) ──
-  if (pathname.startsWith('/api/v1/ingest')) {
+  // ── 2. Always allow the self-authenticating API routes ──
+  if (selfAuthenticatedApi.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     return NextResponse.next()
   }
 

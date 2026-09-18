@@ -27,6 +27,9 @@ export interface PayPalVerifiedOrder {
   payerEmail: string | null
   payerGivenName: string | null
   payerSurname: string | null
+  /** Where PayPal says the order ships, when the buyer gave an address. */
+  shipToName: string | null
+  shipToAddress: Record<string, unknown> | null
 }
 
 export type PayPalVerification =
@@ -109,6 +112,7 @@ export async function fetchPayPalOrder(config: PayPalConfig, orderId: string): P
   const amountObj = (units[0]?.amount ?? null) as { value?: unknown; currency_code?: unknown } | null
   const amountValue = amountObj ? Number(readString(amountObj.value)) : NaN
   const payer = (json.payer ?? null) as { email_address?: unknown; name?: { given_name?: unknown; surname?: unknown } } | null
+  const shipping = (units[0]?.shipping ?? null) as { name?: { full_name?: unknown }; address?: unknown } | null
 
   return {
     ok: true,
@@ -120,6 +124,8 @@ export async function fetchPayPalOrder(config: PayPalConfig, orderId: string): P
       payerEmail: payer ? readString(payer.email_address)?.toLowerCase() ?? null : null,
       payerGivenName: payer?.name ? readString(payer.name.given_name) : null,
       payerSurname: payer?.name ? readString(payer.name.surname) : null,
+      shipToName: shipping?.name ? readString(shipping.name.full_name) : null,
+      shipToAddress: shipping?.address && typeof shipping.address === 'object' ? (shipping.address as Record<string, unknown>) : null,
     },
   }
 }

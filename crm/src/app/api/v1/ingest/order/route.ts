@@ -14,6 +14,7 @@ import {
   jsonError,
   jsonOk,
   num,
+  phone,
   readJsonBody,
   splitName,
   str,
@@ -21,6 +22,7 @@ import {
 } from '@/lib/ingest'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getPayPalConfig, verifyPayPalOrder } from '@/lib/paypal'
+import { createOrder, formatAddress, normaliseAddress } from '@/lib/orders'
 
 /** Stage a captured (paid) order lands in; falls back to the first stage. */
 const ORDER_STAGE_NAME = 'Approved'
@@ -32,9 +34,10 @@ const PAYPAL_ORDER_ID_RE = /^[A-Za-z0-9_-]{4,64}$/
  *  unreviewed; beyond that it is a malformed or hostile body, not an order. */
 const MAX_LINES = 50
 
-/** One line of an order: a product, its unit price and how many were bought. */
+/** One line of an order: a product, its colourway, unit price and count. */
 interface OrderLine {
   name: string
+  variant: string | null
   unitAmount: number
   quantity: number
 }
@@ -93,9 +96,14 @@ function parseLines(v: unknown): OrderLine[] | string | null {
       return `items[${i}].quantity must be a positive integer`
     }
 
-    lines.push({ name, unitAmount, quantity: qtyRaw })
+    lines.push({ name, variant: str(row.variant, LIMITS.name), unitAmount, quantity: qtyRaw })
   }
   return lines
+}
+
+/** "Host's Delight · Rose" — the colourway is part of what was bought. */
+function lineLabel(line: OrderLine): string {
+  return line.variant ? `${line.name} \u00b7 ${line.variant}` : line.name
 }
 
 /** Money adds up in cents. 105.10 × 3 in floats does not. */
@@ -109,10 +117,10 @@ function linesTotal(lines: OrderLine[]): number {
 
 /** A deal title someone can read in a list view without opening it. */
 function orderTitle(prefix: string, lines: OrderLine[], totalUnits: number): string {
-  if (lines.length === 1) return `${prefix}: ${lines[0].name} x${lines[0].quantity}`
+  if (lines.length === 1) return `${prefix}: ${lineLabel(lines[0])} x${lines[0].quantity}`
   const head = lines
     .slice(0, 2)
-    .map((line) => `${line.name} x${line.quantity}`)
+    .map((line) => `${lineLabel(line)} x${line.quantity}`)
     .join(', ')
   const rest = lines.length - 2
   return `${prefix}: ${totalUnits} boxes — ${head}${rest > 0 ? ` +${rest} more` : ''}`
@@ -229,6 +237,7 @@ export async function POST(request: Request) {
       lines = [
         {
           name: productName,
+          variant: str(body.variant, LIMITS.name),
           unitAmount: Math.round((statedAmount / quantityRaw) * 100) / 100,
           quantity: quantityRaw,
         },
@@ -253,6 +262,10 @@ export async function POST(request: Request) {
       return jsonError(request, 'payerEmail must be a valid email address', 400)
     }
     let payerName = str(body.payerName ?? body.name, LIMITS.name * 2)
+    const payerPhone = phone(body.payerPhone ?? body.phone)
+    const shippingRaw = (body.shipping ?? null) as { name?: unknown; address?: unknown } | null
+    let shipToName = shippingRaw && typeof shippingRaw.name === 'string' ? str(shippingRaw.name, LIMITS.name * 2) : null
+    let shipToAddress = normaliseAddress(shippingRaw?.address)
 
     // Server-side verification (see the trust model above).
     let verified = false
@@ -267,6 +280,10 @@ export async function POST(request: Request) {
       if (verification.order.payerEmail) payerEmail = email(verification.order.payerEmail)
       const paypalName = fullName(verification.order.payerGivenName, verification.order.payerSurname)
       if (paypalName) payerName = str(paypalName, LIMITS.name * 2)
+      // Where PayPal says it ships beats where the browser said it ships.
+      if (verification.order.shipToName) shipToName = str(verification.order.shipToName, LIMITS.name * 2)
+      const paypalAddress = normaliseAddress(verification.order.shipToAddress)
+      if (paypalAddress) shipToAddress = paypalAddress
     } else if (auth.via === 'api_key') {
       verified = true
       verifiedBy = 'api_key'
@@ -303,7 +320,7 @@ export async function POST(request: Request) {
     const amountLabel = `${amount.toFixed(2)} ${currency}`
     const summary =
       lines.length === 1
-        ? `${lines[0].name} x${lines[0].quantity}`
+        ? `${lineLabel(lines[0])} x${lines[0].quantity}`
         : `${totalUnits} boxes across ${lines.length} products`
     const stageId = verified
       ? await getStageIdByName(supabase, orgId, ORDER_STAGE_NAME)
@@ -317,20 +334,22 @@ export async function POST(request: Request) {
     // is what whoever fulfils the order actually needs to read.
     const itemLines = lines.map(
       (line) =>
-        `  ${line.name} x${line.quantity} — ${(Math.round(line.unitAmount * 100) * line.quantity / 100).toFixed(2)} ${currency}` +
+        `  ${lineLabel(line)} x${line.quantity} - ${(Math.round(line.unitAmount * 100) * line.quantity / 100).toFixed(2)} ${currency}` +
         (line.quantity > 1 ? ` (${line.unitAmount.toFixed(2)} each)` : '')
     )
+    const shipLine = formatAddress(shipToAddress)
     const notes = [
       orderMarker(paypalOrderId),
       'Items:',
       ...itemLines,
       `Total: ${amountLabel}`,
       `Payer: ${payerLabel}${payerEmail && payerLabel !== payerEmail ? ` <${payerEmail}>` : ''}`,
+      shipLine ? `Ship to: ${shipToName ? `${shipToName}, ` : ''}${shipLine}` : null,
       `Status: ${status}`,
       verified
         ? `Verified: ${verifiedBy === 'paypal' ? 'PayPal API' : 'trusted API key'}`
-        : 'UNVERIFIED: reported by the website only — confirm this order in PayPal before fulfilling.',
-    ].join('\n')
+        : 'UNVERIFIED: reported by the website only - confirm this order in PayPal before fulfilling.',
+    ].filter(Boolean).join('\n')
 
     const titlePrefix = verified ? 'Order' : 'Unverified order'
     const dealRow: Record<string, unknown> = {
@@ -356,19 +375,46 @@ export async function POST(request: Request) {
     }
     const dealId = deal.id as string
 
+    // The order itself: line items linked to the catalogue, the shipping
+    // address, and a stock movement for every product the team counts.
+    const order = await createOrder(supabase, {
+      orgId,
+      source: 'website',
+      contactId,
+      dealId,
+      paymentStatus: verified ? 'paid' : 'unverified',
+      paymentProvider: 'paypal',
+      paymentReference: paypalOrderId,
+      payerName,
+      payerEmail,
+      payerPhone,
+      shipToName: shipToName ?? payerName,
+      shipToAddress,
+      currency,
+      subtotal: amount,
+      total: amount,
+      verified,
+      verifiedBy,
+      notes,
+      metadata: { via: auth.via, paypalOrderId },
+      lines,
+    })
+
     const activityId = await createActivity(supabase, {
       orgId,
       contactId,
       dealId,
       type: 'note',
       title: verified
-        ? `PayPal order ${paypalOrderId} captured`
-        : `PayPal order ${paypalOrderId} reported (unverified)`,
-      description: `${summary} — ${amountLabel} ${verified ? 'paid by' : 'reported by'} ${payerLabel}`,
+        ? `Order ${order.orderNumber} captured (PayPal ${paypalOrderId})`
+        : `Order ${order.orderNumber} reported, unverified (PayPal ${paypalOrderId})`,
+      description: `${summary} - ${amountLabel} ${verified ? 'paid by' : 'reported by'} ${payerLabel}`,
       status: 'completed',
       completedAt: new Date().toISOString(),
       metadata: {
         paypalOrderId,
+        orderId: order.id,
+        orderNumber: order.orderNumber,
         items: lines,
         // Kept so anything reading the old shape still finds something sensible.
         productName: lines.length === 1 ? lines[0].name : summary,
@@ -377,15 +423,23 @@ export async function POST(request: Request) {
         currency,
         payerEmail,
         payerName,
+        shipTo: shipToAddress,
         status,
         via: auth.via,
         verified,
         verifiedBy,
+        unmatchedLines: order.unmatchedLines,
       },
     })
 
+    if (order.unmatchedLines.length) {
+      console.warn('[ingest:order] lines with no catalogue match:', order.unmatchedLines.join(', '))
+    }
+
     return jsonOk(request, {
       success: true,
+      orderId: order.id,
+      orderNumber: order.orderNumber,
       dealId,
       contactId,
       activityId,

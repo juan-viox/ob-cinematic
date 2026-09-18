@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed:build": "node scripts/build-seed.mjs",
+    "sql:bundle": "node scripts/build-seed.mjs && node scripts/build-setup-all.mjs",
+    "team:bootstrap": "node scripts/bootstrap-team.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
