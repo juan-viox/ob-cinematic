@@ -399,7 +399,7 @@ const PAGES = [
       h1: 'Gifting, Handled End to End',
       p: 'We build custom gift programs for clients, teams and milestones, and our concierge handles them from concept to delivery.',
     },
-    sections: ['howitworks', 'pricing', 'concierge-teaser'],
+    sections: ['occasions', 'howitworks', 'pricing', 'concierge-teaser'],
   },
   {
     slug: 'concierge', url: '/concierge', nav: 'concierge',

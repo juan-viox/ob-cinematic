@@ -1393,7 +1393,7 @@ footer {
    ═══════════════════════════════════════════ */
 .pricing-minimums {
   max-width: 1040px; margin: 48px auto 0;
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px;
   background: var(--border); border: 1px solid var(--border); border-radius: 12px;
   overflow: hidden;
 }
@@ -2213,3 +2213,37 @@ body:not(.home) .nav.scrolled .nav-logo img { height: 38px; }
 .box-link { display: block; transition: transform 0.3s ease, opacity 0.3s ease; }
 .box-link:hover { transform: translateY(-3px); opacity: 0.94; }
 .box-link img { display: block; }
+
+/* ═══════════════════════════════════════════
+   OCCASIONS — /custom-gifting
+   Eight short entries, so the grid stays even at every breakpoint: four
+   across, then two, then one. Each is a heading and one line, not a card,
+   because a border around eight items would fight the pricing table below.
+   ═══════════════════════════════════════════ */
+#occasions { padding: 96px 40px 24px; }
+.occ-inner { max-width: 1100px; margin: 0 auto; }
+.occ-header { text-align: center; margin-bottom: 52px; }
+.occ-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 40px 36px;
+}
+.occ-item h3 {
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--gold-dark); margin: 0 0 10px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.occ-item p {
+  font-family: var(--sans); font-size: 14px; line-height: 1.65;
+  color: var(--text-light); margin: 0;
+}
+
+@media (max-width: 980px) {
+  #occasions { padding: 72px 24px 16px; }
+  .occ-grid { grid-template-columns: repeat(2, 1fr); gap: 32px 28px; }
+  .pricing-minimums { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  #occasions { padding: 56px 16px 8px; }
+  .occ-grid { grid-template-columns: 1fr; gap: 26px; }
+}
