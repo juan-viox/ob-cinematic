@@ -1,0 +1,64 @@
+name: Harvest Squarespace galleries
+
+# The rebuild carried one photograph per box across from the old Squarespace
+# shop. Every one of those product pages has a gallery of six to nine, plus a
+# paragraph of copy above the contents list, and none of it came with.
+#
+# Claude Code cannot reach occasionsbox.com: the sandbox it runs in blocks
+# every host but a short allowlist. A GitHub runner has no such restriction,
+# so the fetching happens here and the result is committed back to the branch,
+# which is the same trick localize-images.yml already uses for the photographs
+# the site does have.
+#
+# Reads the old-to-new slug map straight out of vercel.json, so the list of
+# pages to visit cannot drift from the redirects the site actually serves.
+#
+# Writes:
+#   tools/squarespace-import.json   what was found, per box, for review
+#   site/assets/img/manifest.tsv    appended, so localize-images.yml owns the
+#                                   downloading from here on
+#   site/assets/img/*.jpg           the photographs themselves
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Stop after this many boxes (0 = all). Use 1 for a dry run.
+        type: string
+        default: '0'
+
+permissions:
+  contents: write
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Install ImageMagick
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq imagemagick libmagickcore-6.q16-6-extra \
+            || sudo apt-get install -y -qq imagemagick
+
+      - name: Harvest galleries and copy
+        env:
+          LIMIT: ${{ inputs.limit }}
+        run: node .github/scripts/harvest-squarespace.mjs
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/assets/img tools/squarespace-import.json
+          if git diff --cached --quiet; then
+            echo "Nothing changed; skipping commit."
+            exit 0
+          fi
+          git commit -m "Harvest the Squarespace galleries and product copy"
+          git push origin HEAD:${{ github.ref_name }}

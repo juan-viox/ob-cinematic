@@ -1,0 +1,141 @@
+#!/usr/bin/env node
+/*
+ * Pull every photograph and the product copy off the old Squarespace shop.
+ *
+ * Runs on a GitHub runner because that is the only place in this project's
+ * toolchain that can reach occasionsbox.com. Everything it finds is committed,
+ * so the sandbox can read it afterwards like any other file in the repo.
+ *
+ * Squarespace answers ?format=json-pretty with the page's own data. A product
+ * page carries its gallery in item.items[].assetUrl and its copy in item.body.
+ * When that endpoint is unavailable the HTML is scraped for CDN urls instead,
+ * because a gallery we can only get the hard way still beats no gallery.
+ */
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+
+const SITE = 'https://www.occasionsbox.com';
+const DEST = 'site/assets/img';
+const MANIFEST = `${DEST}/manifest.tsv`;
+const OUT = 'tools/squarespace-import.json';
+const LIMIT = Number(process.env.LIMIT || 0);
+
+/* The redirects are the record of which old page became which box, so they are
+   the list of pages to visit. Reading them here means the two cannot drift. */
+function targets() {
+  const vercel = JSON.parse(readFileSync('vercel.json', 'utf8'));
+  const seen = new Map();
+  for (const r of vercel.redirects || []) {
+    const from = /^\/shop\/([^/]+)$/.exec(r.source || '');
+    const to = /^\/shop\/([^/]+)$/.exec(r.destination || '');
+    if (!from || !to) continue;
+    /* Two old pages point at hosts-delight, one per colourway. Both are worth
+       fetching, so they are kept as separate sources under the same box. */
+    if (!seen.has(to[1])) seen.set(to[1], []);
+    seen.get(to[1]).push(from[1]);
+  }
+  return [...seen.entries()].map(([slug, sources]) => ({ slug, sources }));
+}
+
+async function get(url, asJson) {
+  const res = await fetch(url, {
+    redirect: 'follow',
+    headers: { 'user-agent': 'occasionsbox-migration (+https://github.com/juan-viox/ob-cinematic)' },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return asJson ? res.json() : res.text();
+}
+
+/* Squarespace serves whatever size you ask for off the same asset url. 1500w
+   is enough for the lightbox without making the page heavy. */
+const sized = (u, w) => `${u.split('?')[0]}?format=${w}w`;
+
+function fromJson(data) {
+  const item = data && (data.item || (data.items && data.items[0]));
+  if (!item) return null;
+  const gallery = (item.items || [])
+    .map((i) => i.assetUrl)
+    .filter((u) => typeof u === 'string' && u.startsWith('http'));
+  if (item.assetUrl && !gallery.includes(item.assetUrl)) gallery.unshift(item.assetUrl);
+  return { images: [...new Set(gallery)], body: item.body || item.excerpt || '' };
+}
+
+function fromHtml(html) {
+  const urls = [...html.matchAll(/https:\/\/images\.squarespace-cdn\.com\/content\/v1\/[^"'\\\s?]+/g)]
+    .map((m) => m[0])
+    /* Skip the chrome: logos, favicons and the site's own furniture. */
+    .filter((u) => !/logo|favicon|icon/i.test(u));
+  return { images: [...new Set(urls)], body: '' };
+}
+
+const results = {};
+const manifestLines = [];
+let ok = 0, failed = 0;
+
+for (const [n, t] of targets().entries()) {
+  if (LIMIT && n >= LIMIT) { console.log(`Stopping after ${LIMIT} (limit set).`); break; }
+
+  let found = null;
+  for (const source of t.sources) {
+    const url = `${SITE}/shop/${source}`;
+    try {
+      const data = await get(`${url}?format=json-pretty`, true);
+      const parsed = fromJson(data);
+      if (parsed && parsed.images.length) { found = { ...parsed, source }; break; }
+      console.log(`::warning::${t.slug}: json had no gallery at ${source}`);
+    } catch (e) {
+      console.log(`::warning::${t.slug}: json fetch failed at ${source} (${e.message}), trying html`);
+    }
+    try {
+      const parsed = fromHtml(await get(url, false));
+      if (parsed.images.length) { found = { ...parsed, source }; break; }
+    } catch (e) {
+      console.log(`::warning::${t.slug}: html fetch failed at ${source} (${e.message})`);
+    }
+  }
+
+  if (!found) {
+    console.log(`::error::${t.slug}: nothing found at ${t.sources.join(', ')}`);
+    failed++;
+    results[t.slug] = { sources: t.sources, images: [], body: '', error: 'not found' };
+    continue;
+  }
+
+  const files = found.images.map((u, i) => `${t.slug}-${i + 1}-1500w.jpg`);
+  found.images.forEach((u, i) => manifestLines.push(`${files[i]}\t${sized(u, 1500)}`));
+  results[t.slug] = { source: found.source, body: found.body, images: found.images, files };
+  console.log(`${t.slug.padEnd(20)} ${String(found.images.length).padStart(2)} photographs` +
+              (found.body ? `, ${found.body.length} chars of copy` : ', no copy'));
+  ok++;
+}
+
+writeFileSync(OUT, JSON.stringify(results, null, 2) + '\n');
+
+/* Append only what is new, so re-running does not duplicate manifest rows. */
+const existing = new Set(
+  readFileSync(MANIFEST, 'utf8').split('\n').map((l) => l.split('\t')[0]).filter(Boolean)
+);
+const fresh = manifestLines.filter((l) => !existing.has(l.split('\t')[0]));
+if (fresh.length) {
+  const current = readFileSync(MANIFEST, 'utf8').replace(/\n*$/, '\n');
+  writeFileSync(MANIFEST, current + fresh.join('\n') + '\n');
+}
+console.log(`\n${ok} boxes harvested, ${failed} failed. ${fresh.length} new manifest rows.`);
+
+/* Download what was just added. localize-images.yml does this too, but a push
+   made with GITHUB_TOKEN does not start another workflow, so it happens here. */
+for (const line of fresh) {
+  const [name, url] = line.split('\t');
+  if (existsSync(`${DEST}/${name}`)) continue;
+  try {
+    execFileSync('curl', ['-fL', '--retry', '3', '--retry-delay', '2', '-sS', '-o', '/tmp/dl', url]);
+    execFileSync('convert', ['/tmp/dl[0]', `${DEST}/${name}`]);
+  } catch (e) {
+    console.log(`::error::could not fetch ${name}: ${e.message}`);
+    failed++;
+  }
+}
+console.log('Downloads complete.');
+
+/* A total failure is a failed run; a few missing boxes is a result to read. */
+if (ok === 0) { console.log('::error::nothing was harvested at all'); process.exit(1); }
