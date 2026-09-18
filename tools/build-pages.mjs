@@ -21,7 +21,10 @@ const read = (p) => readFileSync(join(ROOT, p), 'utf8').replace(/\s+$/, '');
 const partial = (n) => read(`tools/partials/${n}.html`);
 const section = (n) => read(`tools/sections/${n}.html`);
 
-const SITE = 'https://www.occasionsbox.com';
+/* The bare domain is the canonical one. www.occasionsbox.com stays
+   registered and 301s here, so a link to either still works and only one
+   of them accumulates credit with a search engine. */
+const SITE = 'https://occasionsbox.com';
 
 /* Every fact below is stated somewhere on the site; nothing here is invented.
    It feeds the JSON-LD that search engines read, so change it here and every
