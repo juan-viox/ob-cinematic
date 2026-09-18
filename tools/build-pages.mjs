@@ -420,7 +420,10 @@ function ldGraph(page) {
       '@type': 'Product',
       '@id': `${canonical}#product`,
       name: p.name,
-      image: [SITE + p.img, SITE + ogPath],
+      /* Google shows a gallery against a product result when the markup
+         offers one. Now that a box has six photographs rather than one, it
+         should be advertising all of them, not just the card shot. */
+      image: [...new Set([...(p.images || [p.img]), ogPath].map((i) => SITE + i))],
       description: page.desc,
       brand: { '@type': 'Brand', name: BIZ.name },
       category: 'Gift Boxes',
