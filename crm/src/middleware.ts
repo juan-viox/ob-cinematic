@@ -16,7 +16,16 @@ const publicPaths = ['/login', '/signup', '/auth/callback', '/portal-login', '/p
  */
 const selfAuthenticatedApi = ['/api/v1/ingest', '/api/v1/agent', '/api/v1/elevenlabs', '/api/v1/public']
 
-const NOT_CONFIGURED_HTML = `<!doctype html>
+/**
+ * Names the variables that are actually missing rather than a fixed list, so
+ * nobody is sent to add something that is already set. The service role key is
+ * reported alongside them even though it does not gate this page: without it
+ * the CRM loads and then fails every write, which is a worse thing to discover
+ * later than a page that says so now.
+ */
+function notConfiguredHtml(missing: string[]) {
+  const items = missing.map((name) => `<li><code>${name}</code></li>`).join('\n')
+  return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>OccasionsBox CRM</title>
 <meta name="robots" content="noindex">
 <style>
@@ -29,16 +38,16 @@ p.note{color:#6b7280;font-size:.925rem}
 </style>
 </head><body>
 <h1>The CRM has no database connection yet</h1>
-<p>Add these to the <code>ob-crm</code> project in Vercel, then redeploy:</p>
+<p>Set ${missing.length === 1 ? 'this' : 'these'} on the <code>ob-crm</code> project in
+Vercel, under Settings, Environment Variables, then redeploy:</p>
 <ul>
-<li><code>NEXT_PUBLIC_SUPABASE_URL</code></li>
-<li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
-<li><code>SUPABASE_SERVICE_ROLE_KEY</code></li>
+${items}
 </ul>
-<p class="note">The first two clear this page. Without the third the CRM loads and then
-fails every save, so add all three together. Both values for the first two are in
-Supabase under Settings, API.</p>
+<p class="note">Both values are in Supabase under Settings, API. The anon key is the
+one marked <code>public</code>; the service role key is the secret one on the same
+page and it must never go in the repository.</p>
 </body></html>`
+}
 
 /** Host-agnostic redirect: relative Location header including the basePath. */
 function redirectTo(path: string) {
@@ -56,7 +65,13 @@ export async function middleware(request: NextRequest) {
 
   // ── 0. Not configured yet (Vercel builds before env vars are pasted) ──
   if (!supabaseUrl || !supabaseAnonKey) {
-    return new NextResponse(NOT_CONFIGURED_HTML, {
+    const missing = [
+      !supabaseUrl && 'NEXT_PUBLIC_SUPABASE_URL',
+      !supabaseAnonKey && 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+      !process.env.SUPABASE_SERVICE_ROLE_KEY && 'SUPABASE_SERVICE_ROLE_KEY',
+    ].filter((name): name is string => typeof name === 'string')
+
+    return new NextResponse(notConfiguredHtml(missing), {
       status: 503,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
