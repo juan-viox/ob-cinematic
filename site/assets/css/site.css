@@ -2283,3 +2283,103 @@ body:not(.home) .nav.scrolled .nav-logo img { height: 38px; }
   #occasions { padding: 56px 16px 8px; }
   .occ-grid { grid-template-columns: 1fr; gap: 26px; }
 }
+
+/* ═══ Lightbox, product thumbnails and sharing ═══ */
+
+/* The photograph is the product, so say it is clickable. */
+.modal-img, .pd-gallery img { cursor: zoom-in; }
+
+.lightbox {
+  position: fixed; inset: 0; z-index: 3000;
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 24px;
+  background: rgba(16,14,12,0.92);
+  opacity: 0; transition: opacity 0.22s ease;
+}
+.lightbox.active { opacity: 1; }
+.lightbox[hidden] { display: none; }
+body.lightbox-open { overflow: hidden; }
+
+.lightbox-figure {
+  margin: 0; display: flex; flex-direction: column; align-items: center; gap: 12px;
+  max-width: min(1100px, 100%); max-height: 100%;
+}
+.lightbox-img {
+  display: block; max-width: 100%; max-height: calc(100vh - 140px);
+  width: auto; height: auto; object-fit: contain;
+  border-radius: 2px; box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  background: #fff;
+}
+.lightbox-caption {
+  color: rgba(255,255,255,0.72); font-size: 0.82rem; letter-spacing: 0.04em;
+  text-align: center; max-width: 60ch;
+}
+.lightbox-close, .lightbox-nav {
+  flex: none; background: rgba(255,255,255,0.08); color: #fff;
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 50%;
+  cursor: pointer; line-height: 1; transition: background 0.18s ease, border-color 0.18s ease;
+}
+.lightbox-close:hover, .lightbox-nav:hover {
+  background: rgba(255,255,255,0.18); border-color: var(--gold);
+}
+.lightbox-close:focus-visible, .lightbox-nav:focus-visible {
+  outline: 2px solid var(--gold); outline-offset: 2px;
+}
+.lightbox-close {
+  position: absolute; top: 18px; right: 18px;
+  width: 42px; height: 42px; font-size: 1.6rem;
+}
+.lightbox-nav { width: 46px; height: 46px; font-size: 2rem; }
+.lightbox-nav[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox { transition: none; }
+}
+@media (max-width: 640px) {
+  .lightbox { padding: 16px 8px; }
+  .lightbox-img { max-height: calc(100vh - 170px); }
+  /* At phone width the arrows sit under the photograph rather than
+     squeezing it between them. */
+  .lightbox { flex-wrap: wrap; }
+  .lightbox-figure { order: -1; flex-basis: 100%; }
+}
+
+/* A box with more than one photograph gets a strip under the main one. */
+.pd-thumbs {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px;
+}
+.pd-thumbs[hidden] { display: none; }
+.pd-thumb {
+  width: 74px; height: 74px; padding: 0; overflow: hidden; cursor: pointer;
+  background: none; border: 1px solid var(--border, rgba(0,0,0,0.12));
+  border-radius: 2px; transition: border-color 0.18s ease;
+}
+.pd-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pd-thumb:hover { border-color: var(--gold-light); }
+.pd-thumb.active { border-color: var(--gold); }
+.pd-thumb:focus-visible { outline: 2px solid var(--gold-dark); outline-offset: 2px; }
+
+/* Sharing. Someone who has just found a gift for a friend is one tap from
+   telling three more, which is the cheapest reach this shop has. */
+.share-row {
+  display: flex; align-items: center; gap: 16px; margin-top: 22px;
+}
+.share-row[hidden] { display: none; }
+.share-link {
+  display: inline-flex; color: var(--gold); opacity: 0.85;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.share-link:hover { opacity: 1; transform: translateY(-1px); }
+.share-link:focus-visible { outline: 2px solid var(--gold-dark); outline-offset: 3px; }
+.share-link svg { display: block; width: 19px; height: 19px; fill: currentColor; }
+
+@media (prefers-reduced-motion: reduce) {
+  .share-link:hover { transform: none; }
+}
+
+/* The story above the contents list. Slightly larger than the generic line it
+   replaces, because on most boxes it is now the first thing read. */
+.pd-story {
+  font-size: 15.5px; color: var(--text); line-height: 1.68;
+  margin: 0 0 22px; max-width: 58ch;
+}

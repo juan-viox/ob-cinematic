@@ -163,6 +163,39 @@
     "Host's Delight": ["<b>Madeira Housewares</b> | Teak-Edge Grain Chop Block S | 8” x 8” x 1.25”", "<b>OB x Beautea Studio</b> | Organic Rose Mint Loose-leaf Tea", "<b>The Bee Box</b> | Mini Specialty Honey Jar | 4 oz of pure honey USDA Certified Organic", "<b>Three Blue Birds Swedish Dishcloth</b> | Sustainable, sturdy, and stylish dishcloths | Each cloth absorbs 20x its weight, replaces 17 rolls of paper towels | 70% cellulose (FSC-Certified). 30% organic cotton (FairTrade & GOTS) (2 count)", "<b>OB</b> <b>Coffee Scoop</b> | Food grade 304 Stainless Steel Ground Coffee Measuring Spoon/Scoop with Bag Clip.", "<b>OB</b> | Wooden Honey Dipper", "Occasions Box Keepsake box | measures 11” x 8.66” x 4.33”", "A Complimentary Handwritten card of your choice"]
   };
 
+  /* ─── The story per box ───
+     A list of contents says what is in the box. It does not say who the box
+     is for, which is the thing a buyer is actually deciding. Every box on the
+     old site carried a short piece of prose before the list, and the rebuild
+     dropped it; this is where it lives now.
+
+     Each line is written from that box's real contents and nothing else. If a
+     product changes, this changes with it. Keep them to two or three
+     sentences: the list underneath does the detail. */
+  var PRODUCT_STORIES = {
+    "Love You": "The one to send when the words matter more than the occasion. A camel leather wristlet and a script keychain to carry, a blush notebook and a gold pen to write in, and a soy candle for the evening it gets opened.",
+    "Peaches & Cream": "Soft coral and blush from start to finish. A hand-loomed Turkish towel and a sea sponge for a long morning, a glass travel cup for the walk out of the door, and Dominican white chocolate for somewhere in between.",
+    "Spa Weekend": "Two days off, boxed. A hand-loomed Turkish towel and eucalyptus mint body wash for the bath, a gold tin candle to light beside it, and lemon curd biscuits for afterwards.",
+    "Coffee Lover": "For the person who measures the morning in cups. Colonial Blend coffee from Oliver Pluff, a clear double-insulated mug to drink it from, a teak bowl and spoon, and 100% dark chocolate for the cup that needs it.",
+    "The Reset": "A box about starting again. A self-care planner to lay out the week, an insulated bottle to keep beside it, wildflower facial steam for the evening, and a deep grey candle for the quiet part of it.",
+    "The Dinner Party": "Everything the table needs except the guests. Three gold-plated cheese knives, leather coasters, a linen sun tea towel and a host book, finished with almond cookies for the board.",
+    "Host's Delight": "The thank-you for whoever had everyone over. A teak edge-grain chopping block, organic loose-leaf tea, and a jar of the Bee Box's honey with a wooden dipper. Choose rose mint or chamomile.",
+    "The Nightcap": "For the hour after the plates are cleared. An antiqued gold pineapple corkscrew, leather coasters, a soy candle and almond cookies, which is most of what a good nightcap asks for.",
+    "Lemonade": "For when life hands them a great deal at once. A teak edge-grain chopping block, lavender Earl Grey and Mocha Java coffee, and Swedish dishcloths that outlast seventeen rolls of paper towels.",
+    "Bright Side": "Small and yellow and meant to land on a hard day. A yellow tin Candlefish candle, brown butter milk chocolate and a wildflower facial steam, which is a good deal of comfort for a small box.",
+    "Cheers": "For the promotion, the closing, the yes. Faceted crystal champagne glasses and a gold double-hinged corkscrew, a gold tin candle and wine gummies, in a keepsake wooden box.",
+    "Everyday Luxe": "The small luxuries someone would never think to buy themselves. A silk charmeuse scrunchie and a compact mirror from Odeme, a lip scrub from Sara Happ, and wine gummies.",
+    "Welcome Home": "The first box through a new door. A teak edge-grain chopping block and an oatmeal linen tea towel for the kitchen, Earl Grey and a gold coffee scoop, and a sandalwood rose candle for the first evening.",
+    "The New Keys": "The housewarming box in full. A teak chopping block, leather coasters and a gold pineapple corkscrew for the first night hosting, then a beechwood serving spoon and a Home Sweet Home key tag to keep.",
+    "The Valet": "For the top of the dresser and the drive in. A personalised leather valet tray for whatever comes out of his pockets, a triple-insulated travel mug, a stainless cigar cutter and 77% dark chocolate.",
+    "Goodnight": "A box that only asks them to stop. A padded silk eye mask, organic full leaf tea and a soy candle, with a lip scrub and wine gummies for the way there.",
+    "Uncorked": "Four things and a bottle, which is all an evening really needs. A gold-plated signature corkscrew, leather coasters, a moulded metal Candlefish candle and fleur de sel dark chocolate.",
+    "The Wind Down": "For the person who is always the one holding it together. A 160-page leather journal and a gold felt tip pen, a triple-insulated travel mug, leather coasters and organic full leaf tea.",
+    "Mini Spa Day": "An hour to themselves, in a hand-woven keepsake basket. A hydration gel mask, a rose kaolin clay mask, a fizzing bath cube and bath salts, with a blush notebook and a gold pen for whatever surfaces.",
+    "First Night In": "Small, dark and calm, for the evening the boxes are still stacked in the hall. A midnight black candle with a 40 hour burn, Green Gold tea from Teaspressa, and fleur de sel dark chocolate.",
+    "Afternoon Tea": "A whole afternoon, arranged. Organic chamomile, a jar of the Bee Box's honey and almond cookies from Jocelyn & Co, with a Candlefish No. 31 candle on its own wood plate."
+  };
+
   var allProducts = [
     {name:'Love You', price:150, img: '/assets/img/OB0_7441-750w.jpg'},
     {name:'Peaches & Cream', price:132, img: '/assets/img/OB0_7537-750w.jpg'},
@@ -228,13 +261,21 @@
     return normaliseImages([product.img], label);
   }
 
+  /* The gallery the modal is currently showing, and which of it is on
+     screen. The lightbox opens on that same image rather than back at the
+     first one. */
+  var currentGallery = [];
+  var currentIndex = 0;
+
   function renderGallery(product) {
     var images = galleryFor(product, currentVariant);
     var main = document.getElementById('modalImg');
     var strip = document.getElementById('modalThumbs');
     if (!main || !images.length) return;
+    currentGallery = images;
 
     var show = function(i) {
+      currentIndex = i;
       main.src = images[i].src;
       main.alt = images[i].alt;
       if (!strip) return;
@@ -262,6 +303,183 @@
     }
     show(0);
   }
+
+  /* ─── Sharing ───
+     Someone who has just found the right gift for a friend is one tap away
+     from telling three more people, which is the cheapest reach this shop
+     has. The old site put these six under the Add To Cart button on every
+     box and the rebuild dropped them.
+
+     One list, read by the product pages at build time and by the modal at
+     run time, so the two can never offer different networks. {url}, {title}
+     and {image} are filled in per box; every value is URI-encoded first.
+     The glyphs are single paths on a 24x24 grid. */
+  var SHARE_TARGETS = [
+    { name: 'Facebook',
+      href: 'https://www.facebook.com/sharer/sharer.php?u={url}',
+      icon: 'M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.33-.04-1.56-.14-2.86-.14C11.93 2 10 3.66 10 6.7v2.8H7v4h3V22h4v-8.5z' },
+    { name: 'Twitter',
+      href: 'https://twitter.com/intent/tweet?url={url}&text={title}',
+      icon: 'M22 5.8a8.5 8.5 0 0 1-2.36.64 4.13 4.13 0 0 0 1.81-2.27 8.21 8.21 0 0 1-2.61 1 4.1 4.1 0 0 0-7 3.74 11.64 11.64 0 0 1-8.45-4.29 4.16 4.16 0 0 0-.55 2.07 4.09 4.09 0 0 0 1.82 3.41 4.05 4.05 0 0 1-1.86-.51v.05a4.1 4.1 0 0 0 3.3 4.03 4.1 4.1 0 0 1-1.86.07 4.11 4.11 0 0 0 3.83 2.84A8.22 8.22 0 0 1 2 18.28a11.57 11.57 0 0 0 6.29 1.85A11.59 11.59 0 0 0 20 8.45c0-.17 0-.35-.01-.53A8.43 8.43 0 0 0 22 5.8z' },
+    { name: 'LinkedIn',
+      href: 'https://www.linkedin.com/sharing/share-offsite/?url={url}',
+      icon: 'M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3V9zm7 0h3.8v1.7h.05c.53-1 1.83-2.05 3.75-2.05C21.6 8.65 22 11.1 22 14.3V21h-4v-6c0-1.43-.03-3.27-2-3.27-2 0-2.3 1.56-2.3 3.17V21h-4V9z' },
+    { name: 'Reddit',
+      href: 'https://www.reddit.com/submit?url={url}&title={title}',
+      icon: 'M22 12.14a2.14 2.14 0 0 0-3.62-1.54 10.5 10.5 0 0 0-5.35-1.7l.91-4.29 2.98.63a1.72 1.72 0 1 0 .2-1.42l-3.6-.76a.7.7 0 0 0-.83.54l-1.1 5.2a10.5 10.5 0 0 0-5.4 1.7A2.14 2.14 0 1 0 3.6 14.2a4.2 4.2 0 0 0-.05.65c0 3.3 3.78 5.98 8.45 5.98s8.45-2.68 8.45-5.98a4.2 4.2 0 0 0-.05-.64A2.14 2.14 0 0 0 22 12.14zM7.5 13.6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0zm8.3 4.2c-1.03.92-3 .99-3.8.99s-2.77-.07-3.8-.99a.4.4 0 0 1 .53-.6c.65.58 2.04.79 3.27.79s2.62-.21 3.27-.79a.4.4 0 0 1 .53.6zm-.3-2.7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z' },
+    { name: 'Tumblr',
+      href: 'https://www.tumblr.com/widgets/share/tool?canonicalUrl={url}&caption={title}',
+      icon: 'M14.2 21c-3.2 0-5.6-1.64-5.6-5.57V10.1H6V7.5c2.86-.74 4.06-3.2 4.2-5.5h2.53v4.99h3.5v3.1h-3.5v4.7c0 1.48.75 2 1.94 2H16.4V21h-2.2z' },
+    { name: 'Pinterest',
+      href: 'https://pinterest.com/pin/create/button/?url={url}&media={image}&description={title}',
+      icon: 'M12 2a10 10 0 0 0-3.65 19.31c-.09-.78-.17-1.98.03-2.83.18-.78 1.18-4.98 1.18-4.98s-.3-.6-.3-1.5c0-1.4.82-2.45 1.83-2.45.86 0 1.28.65 1.28 1.42 0 .87-.55 2.17-.84 3.37-.24 1.01.5 1.84 1.5 1.84 1.8 0 3.19-1.9 3.19-4.65 0-2.43-1.75-4.13-4.24-4.13-2.89 0-4.59 2.17-4.59 4.41 0 .87.34 1.81.76 2.32.08.1.1.19.07.29l-.28 1.15c-.05.18-.15.22-.34.13-1.27-.59-2.06-2.44-2.06-3.93 0-3.2 2.32-6.13 6.7-6.13 3.52 0 6.25 2.5 6.25 5.85 0 3.5-2.2 6.31-5.26 6.31-1.03 0-2-.53-2.32-1.17l-.63 2.4c-.23.88-.85 1.98-1.26 2.65A10 10 0 1 0 12 2z' }
+  ];
+
+  function shareRowHtml(url, title, image) {
+    return SHARE_TARGETS.map(function(t) {
+      var href = t.href
+        .replace('{url}', encodeURIComponent(url))
+        .replace('{title}', encodeURIComponent(title))
+        .replace('{image}', encodeURIComponent(image || ''));
+      return '<a class="share-link" href="' + href + '" target="_blank" rel="noopener noreferrer"' +
+             ' aria-label="Share ' + escapeHtml(title) + ' on ' + t.name + '" title="Share on ' + t.name + '">' +
+             '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + t.icon + '"/></svg></a>';
+    }).join('');
+  }
+
+  /* The modal has no address of its own, so it shares the box's product page
+     rather than whatever page the modal happens to be open on top of. */
+  function renderShare(product) {
+    var row = document.getElementById('modalShare');
+    if (!row) return;
+    var origin = window.location.origin;
+    var url = origin + '/shop/' + slugifyName(product.name);
+    var image = product.img ? origin + product.img : '';
+    row.innerHTML = shareRowHtml(url, product.name + ' from Occasions Box', image);
+    row.hidden = false;
+  }
+
+  /* Matches the slugs tools/build-pages.mjs writes, so the link resolves. */
+  function slugifyName(name) {
+    /* Character for character the same transform as slugify() in
+       tools/build-pages.mjs, which is what actually names the files. An
+       ampersand is a separator there, so Peaches & Cream is peaches-cream.
+       tools/build-pages.mjs fails the build if the two ever drift. */
+    return name.toLowerCase().replace(/['’]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  /* ─── Lightbox ───
+     The photograph is the product. At 750px inside a modal you cannot see the
+     weave on the towel or read a label, which is most of what someone is
+     looking for before they spend $150, so the main image opens full size.
+
+     The markup is built once, on first use, rather than sitting in every one
+     of the twenty-one product pages and the modal partial. Escape closes it,
+     the arrow keys walk a multi-photograph box, and focus goes back to
+     whatever opened it. */
+  var lightbox = null;
+
+  function buildLightbox() {
+    if (lightbox) return lightbox;
+
+    var root = document.createElement('div');
+    root.className = 'lightbox';
+    root.id = 'lightbox';
+    root.setAttribute('role', 'dialog');
+    root.setAttribute('aria-modal', 'true');
+    root.setAttribute('aria-label', 'Photograph');
+    root.hidden = true;
+    root.innerHTML =
+      '<button type="button" class="lightbox-close" aria-label="Close photograph">&times;</button>' +
+      '<button type="button" class="lightbox-nav lightbox-prev" aria-label="Previous photograph">&lsaquo;</button>' +
+      '<figure class="lightbox-figure">' +
+        '<img class="lightbox-img" alt="">' +
+        '<figcaption class="lightbox-caption"></figcaption>' +
+      '</figure>' +
+      '<button type="button" class="lightbox-nav lightbox-next" aria-label="Next photograph">&rsaquo;</button>';
+    document.body.appendChild(root);
+
+    lightbox = {
+      root: root,
+      img: root.querySelector('.lightbox-img'),
+      caption: root.querySelector('.lightbox-caption'),
+      prev: root.querySelector('.lightbox-prev'),
+      next: root.querySelector('.lightbox-next'),
+      close: root.querySelector('.lightbox-close'),
+      images: [],
+      at: 0,
+      opener: null
+    };
+
+    lightbox.close.addEventListener('click', closeLightbox);
+    lightbox.prev.addEventListener('click', function() { stepLightbox(-1); });
+    lightbox.next.addEventListener('click', function() { stepLightbox(1); });
+
+    /* The backdrop closes; the photograph and the controls do not. */
+    root.addEventListener('click', function(e) {
+      if (e.target === root || e.target.classList.contains('lightbox-figure')) closeLightbox();
+    });
+
+    return lightbox;
+  }
+
+  function paintLightbox() {
+    var lb = lightbox;
+    var img = lb.images[lb.at];
+    if (!img) return;
+    lb.img.src = img.src;
+    lb.img.alt = img.alt;
+    lb.caption.textContent = lb.images.length > 1
+      ? img.alt + ' (' + (lb.at + 1) + ' of ' + lb.images.length + ')'
+      : img.alt;
+    var many = lb.images.length > 1;
+    lb.prev.hidden = !many;
+    lb.next.hidden = !many;
+  }
+
+  function stepLightbox(by) {
+    if (!lightbox || lightbox.images.length < 2) return;
+    var n = lightbox.images.length;
+    lightbox.at = (lightbox.at + by + n) % n;
+    paintLightbox();
+  }
+
+  function openLightbox(images, at, opener) {
+    if (!images || !images.length) return;
+    var lb = buildLightbox();
+    lb.images = images;
+    lb.at = Math.min(Math.max(at || 0, 0), images.length - 1);
+    lb.opener = opener || null;
+    paintLightbox();
+    lb.root.hidden = false;
+    /* The class lands a frame later so the fade actually has somewhere to
+       fade from. */
+    requestAnimationFrame(function() { lb.root.classList.add('active'); });
+    document.body.classList.add('lightbox-open');
+    lb.close.focus();
+  }
+
+  function closeLightbox() {
+    if (!lightbox || lightbox.root.hidden) return;
+    lightbox.root.classList.remove('active');
+    lightbox.root.hidden = true;
+    document.body.classList.remove('lightbox-open');
+    /* The product modal may still be open behind it, and it owns the scroll
+       lock; only give the page back if nothing else is holding it. */
+    var modal = document.getElementById('productModal');
+    if (!modal || !modal.classList.contains('active')) document.body.style.overflow = '';
+    if (lightbox.opener && lightbox.opener.focus) lightbox.opener.focus();
+    lightbox.opener = null;
+  }
+  window.closeLightbox = closeLightbox;
+
+  document.addEventListener('keydown', function(e) {
+    if (!lightbox || lightbox.root.hidden) return;
+    if (e.key === 'Escape') { e.stopPropagation(); closeLightbox(); }
+    else if (e.key === 'ArrowLeft') stepLightbox(-1);
+    else if (e.key === 'ArrowRight') stepLightbox(1);
+  }, true);
 
   function openModal(productName) {
     var product = allProducts.find(function(p) { return p.name === productName; });
@@ -309,6 +527,7 @@
 
     renderGallery(product);
     renderContents(product);
+    renderShare(product);
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
   }
@@ -322,15 +541,27 @@
     }
     var list = document.getElementById('modalContents');
     var desc = document.getElementById('modalDesc');
+
+    /* The story and the list are not alternatives. The prose says who the box
+       is for, the list says what is in it, and a buyer wants both. Only a box
+       with neither falls back to the generic sentence already in the markup. */
+    var story = PRODUCT_STORIES[product.name];
+    if (desc) {
+      if (story) {
+        desc.textContent = story;
+        desc.hidden = false;
+      } else {
+        desc.hidden = !!(contents && contents.length);
+      }
+    }
+
     if (list) {
       if (contents && contents.length) {
         list.innerHTML = '<div class="modal-contents-title">Box includes</div><ul>' +
           contents.map(function(item) { return '<li>' + item + '</li>'; }).join('') + '</ul>';
         list.hidden = false;
-        if (desc) desc.hidden = true;
       } else {
         list.hidden = true;
-        if (desc) desc.hidden = false;
       }
     }
 
@@ -619,6 +850,42 @@
     document.getElementById('productModal').classList.remove('active');
     document.body.style.overflow = '';
   };
+
+  /* ─── Opening the photograph ───
+     Two places show a product photograph: the modal on /shop, and the twenty
+     one product pages. Both hand the same gallery to the same lightbox. */
+  var modalMainImg = document.getElementById('modalImg');
+  if (modalMainImg) {
+    modalMainImg.addEventListener('click', function() {
+      openLightbox(currentGallery, currentIndex, modalMainImg);
+    });
+  }
+
+  var pdArticle = document.querySelector('.pd[data-product]');
+  var pdMainImg = document.getElementById('pdImg');
+  if (pdArticle && pdMainImg) {
+    var pdProduct = allProducts.find(function(p) { return p.name === pdArticle.dataset.product; });
+    var pdImages = pdProduct ? galleryFor(pdProduct, null) : [{ src: pdMainImg.src, alt: pdMainImg.alt }];
+    var pdAt = 0;
+
+    var pdShow = function(i) {
+      pdAt = i;
+      pdMainImg.src = pdImages[i].src;
+      pdMainImg.alt = pdImages[i].alt;
+      document.querySelectorAll('.pd-thumb').forEach(function(t, j) {
+        t.classList.toggle('active', j === i);
+        t.setAttribute('aria-current', j === i ? 'true' : 'false');
+      });
+    };
+
+    document.querySelectorAll('.pd-thumb').forEach(function(btn, j) {
+      btn.addEventListener('click', function() { pdShow(j); });
+    });
+
+    pdMainImg.addEventListener('click', function() {
+      openLightbox(pdImages, pdAt, pdMainImg);
+    });
+  }
 
   // Close modal on overlay click
   var modalEl = document.getElementById('productModal');

@@ -122,6 +122,79 @@ function loadContents() {
 }
 const CONTENTS = loadContents();
 
+/* The prose that runs above the contents list, lifted from site.js for the
+   same reason the contents are: the modal and the product page must not be
+   able to describe the same box differently. A box with no story simply
+   does not get the paragraph. */
+function loadStories() {
+  const js = read('site/assets/js/site.js');
+  const start = js.indexOf('var PRODUCT_STORIES = {');
+  if (start === -1) throw new Error('site.js: PRODUCT_STORIES not found');
+  const open = js.indexOf('{', start);
+  const end = js.indexOf('\n  };', open);
+  if (end === -1) throw new Error('site.js: end of PRODUCT_STORIES not found');
+  const map = new Function(`return ${js.slice(open, end + 4)}`)();
+  if (!map || !Object.keys(map).length) {
+    throw new Error('site.js: PRODUCT_STORIES parsed to nothing');
+  }
+  return map;
+}
+const STORIES = loadStories();
+
+/* The six share networks, also from site.js, so the product pages and the
+   modal can never offer a different set. */
+function loadShareTargets() {
+  const js = read('site/assets/js/site.js');
+  const start = js.indexOf('var SHARE_TARGETS = [');
+  if (start === -1) throw new Error('site.js: SHARE_TARGETS not found');
+  const open = js.indexOf('[', start);
+  const end = js.indexOf('\n  ];', open);
+  if (end === -1) throw new Error('site.js: end of SHARE_TARGETS not found');
+  const list = new Function(`return ${js.slice(open, end + 4)}`)();
+  if (!Array.isArray(list) || !list.length) {
+    throw new Error('site.js: SHARE_TARGETS parsed to nothing');
+  }
+  return list;
+}
+const SHARE_TARGETS = loadShareTargets();
+
+/* The modal builds its share links in the browser, so it has to slugify a box
+   name to the same string this file does or every share link 404s. That is
+   two copies of one rule in two languages, which is exactly the kind of thing
+   that drifts silently, so the build compares them on every run. */
+function assertSlugsAgree() {
+  const js = read('site/assets/js/site.js');
+  const m = js.match(/function slugifyName\(name\) \{[\s\S]*?\n  \}/);
+  if (!m) throw new Error('site.js: slugifyName not found');
+  const theirs = new Function(`return ${m[0].replace('function slugifyName', 'function')}`)();
+  const wrong = PRODUCTS
+    .map((p) => ({ name: p.name, mine: slugify(p.name), theirs: theirs(p.name) }))
+    .filter((r) => r.mine !== r.theirs);
+  if (wrong.length) {
+    const lines = wrong.map((r) => `  ${r.name}: build-pages "${r.mine}" vs site.js "${r.theirs}"`);
+    throw new Error(
+      'slugify() and site.js slugifyName() disagree, so the modal share links\n' +
+      'would not resolve. Make the two transforms identical:\n' + lines.join('\n')
+    );
+  }
+}
+assertSlugsAgree();
+
+/* Built here rather than in the browser so the links are in the HTML a
+   crawler sees, and so they still work with JavaScript switched off. */
+function shareRow(url, title, image) {
+  const links = SHARE_TARGETS.map((t) => {
+    const href = t.href
+      .replace('{url}', encodeURIComponent(url))
+      .replace('{title}', encodeURIComponent(title))
+      .replace('{image}', encodeURIComponent(image || ''));
+    return `<a class="share-link" href="${href}" target="_blank" rel="noopener noreferrer" ` +
+           `aria-label="Share ${esc(title)} on ${t.name}" title="Share on ${t.name}">` +
+           `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${t.icon}"/></svg></a>`;
+  }).join('');
+  return `\n      <div class="share-row">${links}</div>`;
+}
+
 /* Each box gets its own address. Until now all 21 lived behind one /shop URL
    and a modal, so nothing could be linked to, shared or found by name. */
 const productUrl = (p) => `/shop/${slugify(p.name)}`;
@@ -502,6 +575,20 @@ function productBody(p) {
 ${variants.map((v, n) => `        <button type="button" class="pd-variant${n === 0 ? ' active' : ''}" data-variant="${n}">${v.label}</button>`).join('\n')}
       </div>` : '';
 
+  const story = STORIES[p.name];
+  const storyBlock = story ? `\n      <p class="pd-story">${esc(story)}</p>` : '';
+
+  /* A box with several photographs gets a strip under the main one; with one
+     it stays out of the way entirely. site.js turns these into the lightbox
+     gallery, so adding a photograph here is a one line data change. */
+  const gallery = (p.images || [p.img])
+    .map((e) => (typeof e === 'string' ? { src: e, alt: '' } : e))
+    .filter((e) => e && e.src);
+  const thumbs = gallery.length > 1 ? `
+      <div class="pd-thumbs">
+${gallery.map((g, n) => `        <button type="button" class="pd-thumb${n === 0 ? ' active' : ''}" aria-label="Show photograph ${n + 1} of ${gallery.length}"><img src="${g.src}" alt="" loading="lazy" width="74" height="74"></button>`).join('\n')}
+      </div>` : '';
+
   const contentsBlock = contents && contents.length ? `
       <div class="pd-contents" id="pdContents">
         <div class="pd-contents-title">Box includes</div>
@@ -510,6 +597,7 @@ ${contents.map((item) => `          <li>${item}</li>`).join('\n')}
         </ul>
       </div>` : `
       <p class="pd-generic">Thoughtfully curated gift box featuring premium artisan products, beautifully wrapped with tissue and ribbon, ready to delight.</p>`;
+  const bodyBlock = story ? contentsBlock.replace(/\n\s*<p class="pd-generic">[\s\S]*?<\/p>/, '') : contentsBlock;
 
   const cautionBlock = p.note
     ? `\n      <p class="pd-caution">${p.note}</p>` : '';
@@ -525,12 +613,12 @@ ${contents.map((item) => `          <li>${item}</li>`).join('\n')}
   <div class="pd-grid">
     <figure class="pd-gallery">
       <img id="pdImg" src="${img}" width="${w}" height="${h}" fetchpriority="high"
-           alt="The ${p.name} gift box from Occasions Box">
+           alt="The ${p.name} gift box from Occasions Box">${thumbs}
     </figure>
 
     <div class="pd-body">
       <h1 class="pd-name">${p.name}</h1>
-      <div class="pd-price">$${p.price.toFixed(2)}</div>${variantBlock}${contentsBlock}${cautionBlock}
+      <div class="pd-price">$${p.price.toFixed(2)}</div>${storyBlock}${variantBlock}${bodyBlock}${cautionBlock}
       <p class="pd-sub">Contents are sourced from small makers in small batches. If one sells out or changes a product, we substitute something of equal or greater value in keeping with the box. Photographs show a representative selection.</p>
 
       <div class="pd-buy">
@@ -539,7 +627,7 @@ ${contents.map((item) => `          <li>${item}</li>`).join('\n')}
           <input type="number" id="pdQty" value="1" min="1" max="20">
         </div>
         <button type="button" class="pd-add" id="pdAdd">Add to Cart</button>
-      </div>
+      </div>${shareRow(`${SITE}${productUrl(p)}`, `${p.name} from Occasions Box`, `${SITE}${p.img}`)}
 
       <p class="pd-ship">Free gift wrapping &middot; Handwritten note included &middot; Ships nationwide</p>
     </div>
