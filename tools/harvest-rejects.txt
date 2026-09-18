@@ -1,0 +1,30 @@
+# Photographs the harvest fetched and a person turned down.
+#
+# harvest-squarespace.mjs reads this before it downloads anything: a name in
+# here is never fetched, never added to site/assets/img/manifest.tsv and never
+# recorded in tools/squarespace-import.json. Deleting a file is not enough on
+# its own, because the next run fetches it again and commits it again, which
+# is what happened twice on Host's Delight.
+#
+# Delete a line to let a photograph back in. One filename per line.
+
+# Host's Delight, green colourway.
+# green-2 is a second rendition of the cover shot already in the gallery.
+hosts-delight-green-2-1500w.jpg
+# green-7, -8 and -9 are screen captures, not product photography.
+hosts-delight-green-7-1500w.jpg
+hosts-delight-green-8-1500w.jpg
+hosts-delight-green-9-1500w.jpg
+# green-10 is the same frame as rose-8; it sits on both colourway pages.
+hosts-delight-green-10-1500w.jpg
+
+# Host's Delight, rose colourway. Six are shown; these are past the sixth.
+hosts-delight-rose-6-1500w.jpg
+hosts-delight-rose-7-1500w.jpg
+hosts-delight-rose-8-1500w.jpg
+hosts-delight-rose-9-1500w.jpg
+hosts-delight-rose-10-1500w.jpg
+hosts-delight-rose-11-1500w.jpg
+hosts-delight-rose-12-1500w.jpg
+hosts-delight-rose-13-1500w.jpg
+hosts-delight-rose-14-1500w.jpg

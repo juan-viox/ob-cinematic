@@ -19,6 +19,27 @@ const DEST = 'site/assets/img';
 const MANIFEST = `${DEST}/manifest.tsv`;
 const OUT = 'tools/squarespace-import.json';
 const LIMIT = Number(process.env.LIMIT || 0);
+const REJECTS = 'tools/harvest-rejects.txt';
+
+/* Photographs a person looked at and turned down.
+ *
+ * The harvest fetches everything the old page holds, and a person then keeps
+ * the handful worth showing and deletes the rest. Deleting them is not a
+ * decision this script can see: the next run fetched them again and committed
+ * them again, which is exactly what happened twice on Host's Delight. So the
+ * rejection is written down instead, and the harvest reads it.
+ *
+ * A name in here is never downloaded, never added to the manifest and never
+ * counted in the import record. Remove a line to let a photograph back in. */
+function rejected() {
+  let raw = '';
+  try { raw = readFileSync(REJECTS, 'utf8'); } catch { return new Set(); }
+  return new Set(
+    raw.split('\n').map((l) => l.replace(/#.*$/, '').trim()).filter(Boolean)
+  );
+}
+const REJECTED = rejected();
+if (REJECTED.size) console.log(`${REJECTED.size} photographs previously turned down; skipping them.`);
 
 /* The redirects are the record of which old page became which box, so they are
    the list of pages to visit. Reading them here means the two cannot drift. */
@@ -135,14 +156,24 @@ for (const [n, t] of targets().entries()) {
   const bySource = {};
   const allImages = [];
   const allFiles = [];
+  let skipped = 0;
   for (const hit of hits) {
     const tag = hits.length > 1 ? `-${tagFor(hit.source)}` : '';
-    const files = hit.images.map((u, i) => `${t.slug}${tag}-${i + 1}-1500w.jpg`);
-    hit.images.forEach((u, i) => manifestLines.push(`${files[i]}\t${sized(u, 1500)}`));
-    bySource[hit.source] = { tag: tag.replace(/^-/, ''), body: hit.body, images: hit.images, files };
-    allImages.push(...hit.images);
-    allFiles.push(...files);
+    /* Number every photograph the page holds before filtering, so a name is
+       stable: dropping the seventh must not renumber the eighth into its
+       place, or the rejection list would point at the wrong picture. */
+    const numbered = hit.images.map((u, i) => ({ url: u, file: `${t.slug}${tag}-${i + 1}-1500w.jpg` }));
+    const keep = numbered.filter((n) => !REJECTED.has(n.file));
+    skipped += numbered.length - keep.length;
+    keep.forEach((n) => manifestLines.push(`${n.file}\t${sized(n.url, 1500)}`));
+    bySource[hit.source] = {
+      tag: tag.replace(/^-/, ''), body: hit.body,
+      images: keep.map((n) => n.url), files: keep.map((n) => n.file),
+    };
+    allImages.push(...keep.map((n) => n.url));
+    allFiles.push(...keep.map((n) => n.file));
   }
+  if (skipped) console.log(`${t.slug}: skipped ${skipped} previously turned down`);
 
   const lead = hits[0];
   results[t.slug] = {
