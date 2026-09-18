@@ -139,9 +139,13 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 /* ═══════════════════════════════════════════
    SECTION 1: HERO / SCROLL-DRIVEN VIDEO
    ═══════════════════════════════════════════ */
+/* The sticky panel inside is 100vh, so this height is how far someone has
+   to scroll before the page moves on: at 300vh that was two full screens of
+   scrolling past a photograph that had already finished saying what it says.
+   150vh keeps the drift and the zoom and halves the wait. */
 #hero {
   position: relative;
-  height: 300vh;
+  height: 150vh;
 }
 .hero-sticky {
   position: sticky; top: 0;
@@ -223,14 +227,6 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   transition: color 0.2s;
 }
 .hero-cta-secondary:hover { color: var(--gold); }
-.hero-scroll-hint {
-  position: absolute; bottom: 3vh; left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px; color: var(--muted);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:.4}50%{opacity:1} }
-
 /* Hero fallback gradient (used if frames not loaded) */
 .hero-fallback {
   position: absolute; inset: 0;
@@ -311,7 +307,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 /* ═══════════════════════════════════════════
    SECTION 5B: SHOP GRID / ALL PRODUCTS
    ═══════════════════════════════════════════ */
-#shop { padding: 120px 24px; max-width: 1200px; margin: 0 auto; }
+#shop { padding: 120px 24px; max-width: 1440px; margin: 0 auto; }
 .shop-header { text-align: center; margin-bottom: 56px; }
 .shop-filters {
   display: flex; justify-content: center; gap: 8px;
@@ -352,8 +348,9 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   .shop-filter { font-size: 14px; padding: 9px 16px; letter-spacing: 0; }
   .shop-filters { gap: 8px; }
 }
-/* On a phone the chips scroll sideways rather than stacking into a wall. */
-@media (max-width: 640px) {
+/* Below the width where all eight chips fit on one centred line, the row
+   scrolls sideways inside itself rather than pushing the page wider. */
+@media (max-width: 1080px) {
   .shop-filters {
     flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start;
     padding: 2px 20px 8px; margin-bottom: 32px;
@@ -364,14 +361,16 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 }
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px 16px;
 }
 .shop-card {
   position: relative;
-  border-radius: 16px; overflow: hidden;
-  background: var(--bg); border: 1px solid var(--border);
-  transition: all 0.3s ease; cursor: pointer;
+  transition: transform 0.3s ease; cursor: pointer;
+}
+.shop-card-frame {
+  position: relative; overflow: hidden; border-radius: 2px;
+  background: var(--border);
 }
 .modal-variants { margin: 16px 0 0; }
 .modal-variants-label {
@@ -408,17 +407,17 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   padding: 5px 12px; border-radius: 100px; white-space: nowrap;
   box-shadow: 0 2px 8px rgba(26,26,26,0.18);
 }
-.shop-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 48px rgba(197,165,90,0.12);
-  border-color: var(--gold);
+.shop-card:hover .shop-card-frame {
+  box-shadow: 0 14px 40px rgba(26,26,26,0.16);
 }
+.shop-card:hover .shop-card-name { color: var(--gold-dark); }
+.shop-card-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .shop-card-img {
   width: 100%; aspect-ratio: 1; object-fit: cover;
   transition: transform 0.4s ease;
 }
 .shop-card:hover .shop-card-img { transform: scale(1.04); }
-.shop-card-body { padding: 20px; }
+.shop-card-body { padding: 12px 2px 0; }
 .shop-card-name {
   font-family: var(--serif); font-size: 18px; font-weight: 400;
   color: var(--text); margin-bottom: 4px;
@@ -427,16 +426,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   font-family: var(--sans); font-size: 14px; color: var(--gold);
   font-weight: 500;
 }
-.shop-card-btn {
-  display: block; width: 100%; margin-top: 12px;
-  padding: 10px; border-radius: 8px;
-  background: var(--gold-bg); color: var(--gold);
-  font-family: var(--sans); font-size: 12px; font-weight: 500;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  text-align: center; border: none; cursor: pointer;
-  transition: all 0.2s;
-}
-.shop-card-btn:hover { background: var(--gold); color: #fff; }
+.shop-card-btn { display: none; }
 
 /* ═══════════════════════════════════════════
    SECTION 6: HOW IT WORKS / PROCESS RAIL
@@ -948,10 +938,10 @@ footer {
 .modal-overlay.active { opacity: 1; pointer-events: all; }
 .modal {
   background: var(--bg); border-radius: 20px;
-  max-width: 880px; width: 100%;
+  max-width: 1180px; width: 100%;
   max-height: 90vh; overflow-y: auto;
   box-shadow: 0 40px 80px rgba(0,0,0,0.15);
-  display: grid; grid-template-columns: 1fr 1fr;
+  display: grid; grid-template-columns: 1.15fr 1fr;
   position: relative;
 }
 .modal-close {
@@ -963,14 +953,15 @@ footer {
   transition: all 0.2s;
 }
 .modal-close:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
-.modal-gallery {
-  display: grid; grid-template-rows: auto auto;
-  align-self: start; position: sticky; top: 0;
+/* The photograph, the thumbnails and the related boxes are one column. */
+.modal-side {
+  display: flex; flex-direction: column;
   background: var(--bg-alt); border-radius: 20px 0 0 20px; overflow: hidden;
 }
+.modal-gallery { display: grid; grid-template-rows: auto auto; }
 .modal-img {
   display: block; width: 100%; height: auto;
-  aspect-ratio: 5 / 4; object-fit: contain; object-position: center;
+  aspect-ratio: 4 / 3; object-fit: contain; object-position: center;
 }
 /* Only shown once a box has more than one photograph. */
 .modal-thumbs {
@@ -991,8 +982,39 @@ footer {
 .modal-thumb:focus-visible { outline: 2px solid var(--gold-dark); outline-offset: 2px; }
 .shop-card-img { cursor: pointer; }
 .modal-body {
-  padding: 40px; display: flex; flex-direction: column; justify-content: center;
+  padding: 40px; display: flex; flex-direction: column; justify-content: flex-start;
 }
+
+/* The gallery is short and the form is long, so the foot of the left column
+   was empty. Four boxes from the same occasion go there. */
+.modal-more { padding: 20px 20px 24px; }
+.modal-more[hidden] { display: none; }
+.modal-more-title {
+  font-family: var(--serif); font-size: 16px; font-weight: 400;
+  color: var(--text); margin: 0 0 14px;
+}
+.modal-more-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+}
+.modal-more-card {
+  display: block; width: 100%; padding: 0; cursor: pointer; text-align: left;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; transition: border-color 0.2s, transform 0.2s;
+}
+.modal-more-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.modal-more-card:focus-visible { outline: 2px solid var(--gold-dark); outline-offset: 2px; }
+.modal-more-card img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+.modal-more-name {
+  display: block; padding: 8px 10px 0;
+  font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--text);
+}
+.modal-more-price {
+  display: block; padding: 2px 10px 10px;
+  font-family: var(--sans); font-size: 12px; color: var(--gold-dark);
+}
+.modal-more-all { margin: 14px 0 0; font-size: 12px; }
+.modal-more-all a { color: var(--gold-dark); text-decoration: none; border-bottom: 1px solid var(--border); padding-bottom: 2px; }
+.modal-more-all a:hover { border-bottom-color: var(--gold); }
 .modal-name {
   font-family: var(--serif); font-size: 28px; font-weight: 400;
   color: var(--text); margin-bottom: 8px;
@@ -1033,12 +1055,13 @@ footer {
 .pricing-header { text-align: center; margin-bottom: 56px; max-width: 600px; margin-left: auto; margin-right: auto; }
 .pricing-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 20px; max-width: 880px; margin: 0 auto;
+  gap: 24px; max-width: 1100px; margin: 0 auto;
 }
 .pricing-card {
   background: var(--bg); border: 1px solid var(--border);
-  border-radius: 18px; padding: 32px 24px; text-align: center;
+  border-radius: 18px; padding: 40px 32px; text-align: center;
   position: relative; transition: all 0.3s ease;
+  display: flex; flex-direction: column;
 }
 .pricing-card:hover {
   transform: translateY(-6px);
@@ -1063,7 +1086,7 @@ footer {
   color: var(--gold); margin-bottom: 10px; margin-top: 8px;
 }
 .pricing-price {
-  font-family: var(--serif); font-size: 42px; font-weight: 400;
+  font-family: var(--serif); font-size: 48px; font-weight: 400;
   color: var(--text); line-height: 1; margin-bottom: 4px;
 }
 .pricing-unit {
@@ -1072,17 +1095,17 @@ footer {
   color: var(--muted); margin-top: 8px;
 }
 .pricing-items {
-  font-size: 13px; color: var(--muted); margin-bottom: 20px;
+  font-size: 14px; color: var(--muted); margin-bottom: 24px;
 }
-.pricing-features { list-style: none; padding: 0; text-align: left; margin-bottom: 24px; }
+.pricing-features { list-style: none; padding: 0; text-align: left; margin-bottom: 28px; flex: 1; }
 .pricing-features li {
-  font-size: 13px; color: var(--muted); padding: 6px 0;
+  font-size: 14px; color: var(--muted); padding: 8px 0;
   border-bottom: 1px solid var(--border);
 }
 .pricing-features li:last-child { border: none; }
 .pricing-features li::before { content: '✓ '; color: var(--gold); font-weight: 600; }
 .pricing-cta {
-  display: block; width: 100%; padding: 12px; border-radius: 10px;
+  display: block; width: 100%; padding: 14px; border-radius: 10px;
   font-family: var(--sans); font-size: 13px; font-weight: 500;
   letter-spacing: 0.06em; text-transform: uppercase;
   border: 1px solid var(--gold); color: var(--gold);
@@ -1376,15 +1399,20 @@ footer {
 .products-cta a:hover { background: var(--gold); color: #fff; }
 
 .peek-grid {
-  max-width: 1200px; margin: 0 auto;
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px;
+  max-width: 1320px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
 }
 .peek-card { display: block; text-decoration: none; }
 .peek-img {
   border-radius: 2px; overflow: hidden; background: var(--bg-alt);
 }
+/* The photographs are 750 by 500. A fixed 340px height in a 279px column
+   cropped a third off each side of a landscape photograph of a wide box, so
+   the box was the part being thrown away. 3:2 is the shape they were shot in,
+   which means nothing is cropped at all. */
 .peek-img img {
-  display: block; width: 100%; height: 340px; object-fit: cover;
+  display: block; width: 100%; height: auto; aspect-ratio: 3 / 2;
+  object-fit: cover;
   transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .peek-card:hover .peek-img img { transform: scale(1.04); }
@@ -1720,9 +1748,23 @@ body.page-concierge #concierge { padding-top: 64px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 768px) {
-  .modal { grid-template-columns: 1fr; max-height: 95vh; }
-  .modal-gallery { min-height: 250px; border-radius: 20px 20px 0 0; }
-  .modal-body { padding: 24px; }
+  /* Stacked, the related boxes belong after the form, not between the
+     photograph and the name of the box. */
+  .modal {
+    grid-template-columns: 1fr;
+    grid-template-areas: "gallery" "body" "more";
+    max-height: 95vh;
+  }
+  .modal-side { display: contents; }
+  .modal-gallery {
+    grid-area: gallery; min-height: 250px;
+    background: var(--bg-alt); border-radius: 20px 20px 0 0; overflow: hidden;
+  }
+  .modal-body { grid-area: body; padding: 24px; }
+  .modal-more {
+    grid-area: more; background: var(--bg-alt);
+    border-radius: 0 0 20px 20px; border-top: 1px solid var(--border);
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -1927,6 +1969,16 @@ body:not(.home) .nav.scrolled .nav-logo img { height: 38px; }
   border-top: 1px solid var(--border); background: var(--bg-alt);
 }
 .cart-foot[hidden] { display: none; }
+/* The lines above the total: subtotal, then the processing and handling
+   fee, set quieter than the figure they add up to. */
+.cart-line {
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-family: var(--sans); font-size: 13px; color: var(--muted);
+  padding: 4px 0; font-variant-numeric: tabular-nums;
+}
+.cart-line small { font-size: 11px; opacity: 0.75; }
+.cart-line + .cart-total { margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
+
 .cart-total {
   display: flex; align-items: baseline; justify-content: space-between;
   font-family: var(--sans); font-size: 12px;
@@ -2282,4 +2334,246 @@ body:not(.home) .nav.scrolled .nav-logo img { height: 38px; }
 @media (max-width: 560px) {
   #occasions { padding: 56px 16px 8px; }
   .occ-grid { grid-template-columns: 1fr; gap: 26px; }
+}
+
+/* ═══ Lightbox, product thumbnails and sharing ═══ */
+
+/* The photograph is the product, so say it is clickable. */
+.modal-img, .pd-gallery img { cursor: zoom-in; }
+
+.lightbox {
+  position: fixed; inset: 0; z-index: 3000;
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 24px;
+  background: rgba(16,14,12,0.92);
+  opacity: 0; transition: opacity 0.22s ease;
+}
+.lightbox.active { opacity: 1; }
+.lightbox[hidden] { display: none; }
+body.lightbox-open { overflow: hidden; }
+
+.lightbox-figure {
+  margin: 0; display: flex; flex-direction: column; align-items: center; gap: 12px;
+  max-width: min(1100px, 100%); max-height: 100%;
+}
+.lightbox-img {
+  display: block; max-width: 100%; max-height: calc(100vh - 140px);
+  width: auto; height: auto; object-fit: contain;
+  border-radius: 2px; box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  background: #fff;
+}
+.lightbox-caption {
+  color: rgba(255,255,255,0.72); font-size: 0.82rem; letter-spacing: 0.04em;
+  text-align: center; max-width: 60ch;
+}
+.lightbox-close, .lightbox-nav {
+  flex: none; background: rgba(255,255,255,0.08); color: #fff;
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 50%;
+  cursor: pointer; line-height: 1; transition: background 0.18s ease, border-color 0.18s ease;
+}
+.lightbox-close:hover, .lightbox-nav:hover {
+  background: rgba(255,255,255,0.18); border-color: var(--gold);
+}
+.lightbox-close:focus-visible, .lightbox-nav:focus-visible {
+  outline: 2px solid var(--gold); outline-offset: 2px;
+}
+.lightbox-close {
+  position: absolute; top: 18px; right: 18px;
+  width: 42px; height: 42px; font-size: 1.6rem;
+}
+.lightbox-nav { width: 46px; height: 46px; font-size: 2rem; }
+.lightbox-nav[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox { transition: none; }
+}
+@media (max-width: 640px) {
+  .lightbox { padding: 16px 8px; }
+  .lightbox-img { max-height: calc(100vh - 170px); }
+  /* At phone width the arrows sit under the photograph rather than
+     squeezing it between them. */
+  .lightbox { flex-wrap: wrap; }
+  .lightbox-figure { order: -1; flex-basis: 100%; }
+}
+
+/* A box with more than one photograph gets a strip under the main one. */
+.pd-thumbs {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px;
+}
+.pd-thumbs[hidden] { display: none; }
+.pd-thumb {
+  width: 74px; height: 74px; padding: 0; overflow: hidden; cursor: pointer;
+  background: none; border: 1px solid var(--border, rgba(0,0,0,0.12));
+  border-radius: 2px; transition: border-color 0.18s ease;
+}
+.pd-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pd-thumb:hover { border-color: var(--gold-light); }
+.pd-thumb.active { border-color: var(--gold); }
+.pd-thumb:focus-visible { outline: 2px solid var(--gold-dark); outline-offset: 2px; }
+
+/* Sharing. Someone who has just found a gift for a friend is one tap from
+   telling three more, which is the cheapest reach this shop has. */
+.share-row {
+  display: flex; align-items: center; gap: 16px; margin-top: 22px;
+}
+.share-row[hidden] { display: none; }
+.share-link {
+  display: inline-flex; color: var(--gold); opacity: 0.85;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.share-link:hover { opacity: 1; transform: translateY(-1px); }
+.share-link:focus-visible { outline: 2px solid var(--gold-dark); outline-offset: 3px; }
+.share-link svg { display: block; width: 19px; height: 19px; fill: currentColor; }
+
+@media (prefers-reduced-motion: reduce) {
+  .share-link:hover { transform: none; }
+}
+
+/* The story above the contents list. Slightly larger than the generic line it
+   replaces, because on most boxes it is now the first thing read. */
+.pd-story {
+  font-size: 15.5px; color: var(--text); line-height: 1.68;
+  margin: 0 0 22px; max-width: 58ch;
+}
+
+/* ═══ Save to Pinterest, on the shop grid ═══
+   Pinterest is where gift buyers actually browse, and a pin of a box carries
+   its photograph, its price and a link back. The old Squarespace shop put a
+   Save button on every listing and the rebuild lost it.
+
+   Top right, because the CLIENT FAVORITE badge already owns the top left. */
+.shop-pin {
+  position: absolute; top: 12px; right: 12px; z-index: 3;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px 7px 11px; border-radius: 100px;
+  background: #e60023; color: #fff;
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  line-height: 1; letter-spacing: 0.02em; text-decoration: none;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+  opacity: 0; transform: translateY(-4px); pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+.shop-card:hover .shop-pin,
+.shop-card:focus-within .shop-pin {
+  opacity: 1; transform: none; pointer-events: auto;
+}
+.shop-pin:hover { background: #ad081b; }
+.shop-pin:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.shop-pin svg { width: 14px; height: 14px; fill: currentColor; }
+
+/* A touch screen has no hover, so the button would never appear. */
+@media (hover: none) {
+  .shop-pin { opacity: 1; transform: none; pointer-events: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop-pin { transition: opacity 0.2s ease; transform: none; }
+}
+
+/* ═══ The handwritten card ═══
+   Offered on the product page, in the modal and again in the cart, because
+   the choice is often made after the box is. */
+.ob-card-pick {
+  display: flex; flex-direction: column; gap: 7px;
+  margin: 20px 0; padding: 16px;
+  background: var(--gold-bg); border-left: 2px solid var(--gold);
+  border-radius: 0 4px 4px 0;
+}
+.ob-card-pick label {
+  font-family: var(--sans); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+}
+.ob-card-pick select,
+.ob-card-pick textarea,
+.cart-item-card select,
+.cart-item-card textarea {
+  font-family: var(--sans); font-size: 13.5px; color: var(--text);
+  padding: 9px 11px; border: 1px solid var(--border); border-radius: 4px;
+  background: #fff; width: 100%; box-sizing: border-box;
+}
+.ob-card-pick textarea, .cart-item-card textarea { resize: vertical; line-height: 1.5; }
+.ob-card-pick select:focus-visible, .ob-card-pick textarea:focus-visible,
+.cart-item-card select:focus-visible, .cart-item-card textarea:focus-visible {
+  outline: 2px solid var(--gold); outline-offset: 1px; border-color: var(--gold);
+}
+.ob-card-hint {
+  font-family: var(--sans); font-size: 11.5px; color: var(--muted); margin: 2px 0 0;
+}
+
+/* In the cart, tighter, and it says so when it is still empty. */
+.cart-item-card {
+  display: flex; flex-direction: column; gap: 5px; margin-top: 10px;
+  padding-top: 10px; border-top: 1px dashed var(--border);
+}
+.cart-item-card label {
+  font-family: var(--sans); font-size: 9.5px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+}
+.cart-item-card.needs-card select {
+  border-color: #b4472e; background: #fdf6f4;
+}
+.cart-item-card.needs-card > label:first-child { color: #b4472e; }
+
+.cart-card-warning {
+  font-family: var(--sans); font-size: 12.5px; line-height: 1.5;
+  color: #b4472e; margin: 0 0 12px;
+  padding: 10px 12px; background: #fdf6f4;
+  border-left: 2px solid #b4472e; border-radius: 0 4px 4px 0;
+}
+.cart-card-warning[hidden] { display: none; }
+
+/* Dimmed and unclickable while a box still has no card. onClick refuses it
+   as well, so removing this class in the inspector buys nothing. */
+#paypal-button-container.is-blocked {
+  opacity: 0.4; pointer-events: none; filter: grayscale(0.6);
+}
+
+/* ═══ Quick view, and paging a card's photographs ═══
+   Loft puts a bar across the foot of the photograph on hover. It is the one
+   thing the View Details button was doing that the photograph alone did not:
+   saying out loud that there is more to see without leaving the grid. */
+.shop-quickview {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+  border: none; cursor: pointer;
+  padding: 13px 10px;
+  background: rgba(255,255,255,0.94);
+  color: var(--text);
+  font-family: var(--sans); font-size: 11.5px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  transform: translateY(100%);
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.shop-card:hover .shop-quickview,
+.shop-card:focus-within .shop-quickview { transform: none; }
+.shop-quickview:hover { background: #fff; color: var(--gold-dark); }
+.shop-quickview:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+
+.shop-page {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.9); color: var(--text);
+  border: none; cursor: pointer; font-size: 1.3rem; line-height: 1;
+  opacity: 0; transition: opacity 0.2s ease, background 0.2s ease;
+}
+.shop-page-prev { left: 10px; }
+.shop-page-next { right: 10px; }
+.shop-card:hover .shop-page,
+.shop-card:focus-within .shop-page { opacity: 1; }
+.shop-page:hover { background: #fff; }
+.shop-page:focus-visible { opacity: 1; outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* No hover on a touch screen, so both stay put rather than never arriving. */
+@media (hover: none) {
+  .shop-quickview { transform: none; }
+  .shop-page { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop-quickview { transition: none; }
+}
+
+/* The share row on a product page, now that it says what it is for. */
+.pd-share-label {
+  font-family: var(--sans); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted); margin: 22px 0 -8px;
 }

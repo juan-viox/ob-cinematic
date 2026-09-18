@@ -9,6 +9,10 @@ import { IngestError } from '@/lib/ingest'
 export interface OrderLineInput {
   name: string
   variant?: string | null
+  /** Which printed 5x7 card, or the blank one. */
+  card?: string | null
+  /** What to write inside it, in the buyer's words. */
+  cardMessage?: string | null
   unitAmount: number
   quantity: number
 }
@@ -31,6 +35,8 @@ export interface CreateOrderInput {
   giftMessage?: string | null
   currency: string
   subtotal: number
+  /** Processing and handling, charged uniformly on every order. */
+  handlingAmount?: number
   shippingAmount?: number
   taxAmount?: number
   total: number
@@ -130,6 +136,7 @@ export async function createOrder(
       gift_message: input.giftMessage ?? null,
       currency: input.currency,
       subtotal: input.subtotal,
+      handling_amount: input.handlingAmount ?? 0,
       shipping_amount: input.shippingAmount ?? 0,
       tax_amount: input.taxAmount ?? 0,
       total: input.total,
@@ -180,6 +187,8 @@ export async function createOrder(
       sku: product?.sku ?? null,
       description: line.name,
       variant: line.variant || null,
+      card: line.card || null,
+      card_message: line.cardMessage || null,
       quantity: line.quantity,
       unit_price: line.unitAmount,
       total: Math.round(line.unitAmount * 100 * line.quantity) / 100,

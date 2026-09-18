@@ -77,7 +77,7 @@ const ogFor = (page) => page.post
   ? [`/assets/og/journal/${page.post.slug}.jpg`, page.post.imageAlt]
   : page.product
   ? [`/assets/og/products/${slugify(page.product.name)}.jpg`,
-     `The ${page.product.name} gift box from Occasions Box`]
+     `${theName(page.product.name)} gift box from Occasions Box`]
   : (OG[page.slug] || OG_DEFAULT);
 
 /* The shop grid is static HTML, so a crawler already sees 21 boxes. What it
@@ -121,6 +121,168 @@ function loadContents() {
   return map;
 }
 const CONTENTS = loadContents();
+
+/* The prose that runs above the contents list, lifted from site.js for the
+   same reason the contents are: the modal and the product page must not be
+   able to describe the same box differently. A box with no story simply
+   does not get the paragraph. */
+function loadStories() {
+  const js = read('site/assets/js/site.js');
+  const start = js.indexOf('var PRODUCT_STORIES = {');
+  if (start === -1) throw new Error('site.js: PRODUCT_STORIES not found');
+  const open = js.indexOf('{', start);
+  const end = js.indexOf('\n  };', open);
+  if (end === -1) throw new Error('site.js: end of PRODUCT_STORIES not found');
+  const map = new Function(`return ${js.slice(open, end + 4)}`)();
+  if (!map || !Object.keys(map).length) {
+    throw new Error('site.js: PRODUCT_STORIES parsed to nothing');
+  }
+  return map;
+}
+const STORIES = loadStories();
+
+/* The six share networks, also from site.js, so the product pages and the
+   modal can never offer a different set. */
+function loadShareTargets() {
+  const js = read('site/assets/js/site.js');
+  const start = js.indexOf('var SHARE_TARGETS = [');
+  if (start === -1) throw new Error('site.js: SHARE_TARGETS not found');
+  const open = js.indexOf('[', start);
+  const end = js.indexOf('\n  ];', open);
+  if (end === -1) throw new Error('site.js: end of SHARE_TARGETS not found');
+  const list = new Function(`return ${js.slice(open, end + 4)}`)();
+  if (!Array.isArray(list) || !list.length) {
+    throw new Error('site.js: SHARE_TARGETS parsed to nothing');
+  }
+  return list;
+}
+const SHARE_TARGETS = loadShareTargets();
+
+/* The twenty one card messages, from site.js so the modal and the product
+   page can never offer a different set. */
+function loadCardMessages() {
+  const js = read('site/assets/js/site.js');
+  const start = js.indexOf('var CARD_MESSAGES = [');
+  if (start === -1) throw new Error('site.js: CARD_MESSAGES not found');
+  const open = js.indexOf('[', start);
+  const end = js.indexOf('\n  ];', open);
+  if (end === -1) throw new Error('site.js: end of CARD_MESSAGES not found');
+  const list = new Function(`return ${js.slice(open, end + 4)}`)();
+  if (!Array.isArray(list) || !list.length) throw new Error('site.js: CARD_MESSAGES parsed to nothing');
+  return list;
+}
+const CARD_MESSAGES = loadCardMessages();
+
+/* The shop grid tags every card with the occasions it suits. Reading them here
+   lets a product page offer boxes for the same occasion rather than whichever
+   four happen to sit next to it in the catalogue. */
+function loadOccasions() {
+  const shop = read('tools/sections/shop.html');
+  const re = /class="shop-card[^"]*"[^>]*data-occasion="([^"]*)"[\s\S]*?href="\/shop\/([a-z0-9-]+)"/g;
+  const map = new Map();
+  let m;
+  while ((m = re.exec(shop))) map.set(m[2], m[1].split(/\s+/).filter(Boolean));
+  if (!map.size) throw new Error('tools/sections/shop.html: no cards with data-occasion');
+  return map;
+}
+const OCCASIONS = loadOccasions();
+
+/* The blank card is not a message, so it is not in CARD_MESSAGES, but it is
+   an option in every picker. Taking it from site.js rather than repeating the
+   words here is what keeps the product page and the modal offering the same
+   list; they were already one option apart before this was read. */
+function loadBlankCard() {
+  const js = read('site/assets/js/site.js');
+  const m = js.match(/var BLANK_CARD = '([^']+)';/);
+  if (!m) throw new Error('site.js: BLANK_CARD not found');
+  return m[1];
+}
+const BLANK_CARD = loadBlankCard();
+const CARD_OPTIONS = CARD_MESSAGES.concat([BLANK_CARD]);
+
+const cardPicker = () => `
+      <div class="ob-card-pick">
+        <label for="pdCard">Your handwritten card</label>
+        <select id="pdCard"><option value="">Choose your card</option>${
+          CARD_OPTIONS.map((m) => `<option value="${esc(m)}">${esc(m)}</option>`).join('')
+        }</select>
+        <label for="pdCardMsg">Your message</label>
+        <textarea id="pdCardMsg" rows="2" maxlength="240"
+                  placeholder="We will write this inside, by hand. Leave it blank for just the card."></textarea>
+        <p class="ob-card-hint">Every box includes a 5x7 card, handwritten by us.</p>
+      </div>`;
+
+/* The modal builds its share links in the browser, so it has to slugify a box
+   name to the same string this file does or every share link 404s. That is
+   two copies of one rule in two languages, which is exactly the kind of thing
+   that drifts silently, so the build compares them on every run. */
+function assertSlugsAgree() {
+  const js = read('site/assets/js/site.js');
+  const m = js.match(/function slugifyName\(name\) \{[\s\S]*?\n  \}/);
+  if (!m) throw new Error('site.js: slugifyName not found');
+  const theirs = new Function(`return ${m[0].replace('function slugifyName', 'function')}`)();
+  const wrong = PRODUCTS
+    .map((p) => ({ name: p.name, mine: slugify(p.name), theirs: theirs(p.name) }))
+    .filter((r) => r.mine !== r.theirs);
+  if (wrong.length) {
+    const lines = wrong.map((r) => `  ${r.name}: build-pages "${r.mine}" vs site.js "${r.theirs}"`);
+    throw new Error(
+      'slugify() and site.js slugifyName() disagree, so the modal share links\n' +
+      'would not resolve. Make the two transforms identical:\n' + lines.join('\n')
+    );
+  }
+}
+assertSlugsAgree();
+
+/* The product page renders its card picker here; the modal renders its own in
+   the browser from cardOptionsHtml(). Two renderers, one list, and they were
+   already one option apart the first time this was written: the product page
+   offered the twenty one printed cards and the modal also offered the blank
+   one. So the build runs site.js's own renderer and compares. */
+function assertCardPickersAgree() {
+  const js = read('site/assets/js/site.js');
+  const m = js.match(/function cardOptionsHtml\(selected\) \{[\s\S]*?\n  \}/);
+  if (!m) throw new Error('site.js: cardOptionsHtml not found');
+  const theirs = new Function('CARD_MESSAGES', 'BLANK_CARD', 'escapeHtml',
+    `return ${m[0].replace('function cardOptionsHtml', 'function')}`
+  /* esc, not an identity stub: the product page escapes its option values,
+     so an identity stub here reports "Mr &amp; Mrs" against "Mr & Mrs" and
+     fails a picker that is actually identical. */
+  )(CARD_MESSAGES, BLANK_CARD, esc);
+
+  const values = [...theirs('').matchAll(/<option value="([^"]*)"/g)]
+    .map((r) => r[1]).filter(Boolean);
+  /* Read what cardPicker() actually renders, not the list it is supposed to
+     read from. The first version of this compared CARD_OPTIONS to site.js and
+     passed while cardPicker() was still mapping CARD_MESSAGES, which is the
+     bug it was written to catch. */
+  const mine = [...cardPicker().matchAll(/<option value="([^"]*)"/g)]
+    .map((r) => r[1]).filter(Boolean);
+  const same = values.length === mine.length && values.every((v, i) => v === mine[i]);
+  if (!same) {
+    throw new Error(
+      'The product page and the modal offer different cards.\n' +
+      `  build-pages (${mine.length}): ${mine.join(' | ')}\n` +
+      `  site.js     (${values.length}): ${values.join(' | ')}`
+    );
+  }
+}
+assertCardPickersAgree();
+
+/* Built here rather than in the browser so the links are in the HTML a
+   crawler sees, and so they still work with JavaScript switched off. */
+function shareRow(url, title, image) {
+  const links = SHARE_TARGETS.map((t) => {
+    const href = t.href
+      .replace('{url}', encodeURIComponent(url))
+      .replace('{title}', encodeURIComponent(title))
+      .replace('{image}', encodeURIComponent(image || ''));
+    return `<a class="share-link" href="${href}" target="_blank" rel="noopener noreferrer" ` +
+           `aria-label="Share ${esc(title)} on ${t.name}" title="Share on ${t.name}">` +
+           `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${t.icon}"/></svg></a>`;
+  }).join('');
+  return `\n      <div class="share-row">${links}</div>`;
+}
 
 /* Each box gets its own address. Until now all 21 lived behind one /shop URL
    and a modal, so nothing could be linked to, shared or found by name. */
@@ -258,7 +420,10 @@ function ldGraph(page) {
       '@type': 'Product',
       '@id': `${canonical}#product`,
       name: p.name,
-      image: [SITE + p.img, SITE + ogPath],
+      /* Google shows a gallery against a product result when the markup
+         offers one. Now that a box has six photographs rather than one, it
+         should be advertising all of them, not just the card shot. */
+      image: [...new Set([...(p.images || [p.img]), ogPath].map((i) => SITE + i))],
       description: page.desc,
       brand: { '@type': 'Brand', name: BIZ.name },
       category: 'Gift Boxes',
@@ -363,6 +528,12 @@ function ldGraph(page) {
   }
 
   return { '@context': 'https://schema.org', '@graph': graph };
+}
+
+/* Six of the boxes are called "The Something", so the article is already
+   there and a second one reads as a stutter in the alt text. */
+function theName(name) {
+  return /^the\s/i.test(name) ? name : `The ${name}`;
 }
 
 function slugify(s) {
@@ -494,12 +665,44 @@ function productBody(p) {
   const img = p.img;
   const { w, h } = jpegSize(`site${img}`);
   const i = PRODUCTS.indexOf(p);
-  const related = [1, 2, 3, 4].map((k) => PRODUCTS[(i + k) % PRODUCTS.length]);
+  /* Somebody on a box that is nearly right wants the next nearest box, not
+     the next one along in the catalogue. Boxes sharing an occasion tag come
+     first, most tags in common first; the cyclic neighbours fill any gap so
+     there are always four. */
+  const mine = new Set(OCCASIONS.get(slugify(p.name)) || []);
+  const shared = (q) => (OCCASIONS.get(slugify(q.name)) || []).filter((t) => mine.has(t)).length;
+  const byOccasion = PRODUCTS
+    .filter((q) => q !== p && shared(q) > 0)
+    .sort((a, b) => shared(b) - shared(a) || PRODUCTS.indexOf(a) - PRODUCTS.indexOf(b));
+  const neighbours = [1, 2, 3, 4].map((k) => PRODUCTS[(i + k) % PRODUCTS.length]);
+  const related = [...new Set([...byOccasion, ...neighbours])].filter((q) => q !== p).slice(0, 4);
 
   const variantBlock = variants.length ? `
       <div class="pd-variants">
         <div class="pd-variants-label">Choose your colour</div>
 ${variants.map((v, n) => `        <button type="button" class="pd-variant${n === 0 ? ' active' : ''}" data-variant="${n}">${v.label}</button>`).join('\n')}
+      </div>` : '';
+
+  const story = STORIES[p.name];
+  const storyBlock = story ? `\n      <p class="pd-story">${esc(story)}</p>` : '';
+
+  /* A box with several photographs gets a strip under the main one. On a box
+     with colourways the strip belongs to the colourway, so it starts on the
+     first one and site.js repaints it when the buyer picks the other; the
+     container is emitted either way so there is something to repaint into,
+     carrying hidden when the opening colourway has a single photograph.
+     site.js turns these into the lightbox gallery, so adding a photograph
+     here is a one line data change. */
+  const firstVariant = variants[0];
+  const gallery = ((firstVariant && (firstVariant.images || (firstVariant.img && [firstVariant.img])))
+      || p.images || [p.img])
+    .map((e) => (typeof e === 'string' ? { src: e, alt: '' } : e))
+    .filter((e) => e && e.src);
+  const anyMultiple = gallery.length > 1 ||
+    variants.some((v) => (v.images || []).length > 1) || (p.images || []).length > 1;
+  const thumbs = anyMultiple ? `
+      <div class="pd-thumbs"${gallery.length > 1 ? '' : ' hidden'}>
+${gallery.map((g, n) => `        <button type="button" class="pd-thumb${n === 0 ? ' active' : ''}" aria-label="Show photograph ${n + 1} of ${gallery.length}"><img src="${g.src}" alt="" loading="lazy" width="74" height="74"></button>`).join('\n')}
       </div>` : '';
 
   const contentsBlock = contents && contents.length ? `
@@ -510,6 +713,7 @@ ${contents.map((item) => `          <li>${item}</li>`).join('\n')}
         </ul>
       </div>` : `
       <p class="pd-generic">Thoughtfully curated gift box featuring premium artisan products, beautifully wrapped with tissue and ribbon, ready to delight.</p>`;
+  const bodyBlock = story ? contentsBlock.replace(/\n\s*<p class="pd-generic">[\s\S]*?<\/p>/, '') : contentsBlock;
 
   const cautionBlock = p.note
     ? `\n      <p class="pd-caution">${p.note}</p>` : '';
@@ -525,13 +729,15 @@ ${contents.map((item) => `          <li>${item}</li>`).join('\n')}
   <div class="pd-grid">
     <figure class="pd-gallery">
       <img id="pdImg" src="${img}" width="${w}" height="${h}" fetchpriority="high"
-           alt="The ${p.name} gift box from Occasions Box">
+           alt="${theName(p.name)} gift box from Occasions Box">${thumbs}
     </figure>
 
     <div class="pd-body">
       <h1 class="pd-name">${p.name}</h1>
-      <div class="pd-price">$${p.price.toFixed(2)}</div>${variantBlock}${contentsBlock}${cautionBlock}
+      <div class="pd-price">$${p.price.toFixed(2)}</div>${storyBlock}${variantBlock}${bodyBlock}${cautionBlock}
       <p class="pd-sub">Contents are sourced from small makers in small batches. If one sells out or changes a product, we substitute something of equal or greater value in keeping with the box. Photographs show a representative selection.</p>
+
+${cardPicker()}
 
       <div class="pd-buy">
         <div class="pd-qty">
@@ -540,18 +746,19 @@ ${contents.map((item) => `          <li>${item}</li>`).join('\n')}
         </div>
         <button type="button" class="pd-add" id="pdAdd">Add to Cart</button>
       </div>
+      <div class="pd-share-label">Share the box</div>${shareRow(`${SITE}${productUrl(p)}`, `${p.name} from Occasions Box`, `${SITE}${p.img}`)}
 
-      <p class="pd-ship">Free gift wrapping &middot; Handwritten note included &middot; Ships nationwide</p>
+      <p class="pd-ship">The box is the wrapping &middot; Handwritten 5x7 note included &middot; Ships nationwide</p>
     </div>
   </div>
 
   <section class="pd-more">
-    <h2 class="pd-more-title">More boxes</h2>
+    <h2 class="pd-more-title">More beautiful boxes to consider</h2>
     <div class="pd-more-grid">
 ${related.map((r) => {
   const rs = jpegSize(`site${r.img}`);
   return `      <a class="pd-more-card" href="${productUrl(r)}">
-        <img src="${r.img}" width="${rs.w}" height="${rs.h}" loading="lazy" alt="The ${r.name} gift box">
+        <img src="${r.img}" width="${rs.w}" height="${rs.h}" loading="lazy" alt="${theName(r.name)} gift box">
         <span class="pd-more-name">${r.name}</span>
         <span class="pd-more-price">$${r.price.toFixed(2)}</span>
       </a>`;

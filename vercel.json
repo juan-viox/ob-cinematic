@@ -165,16 +165,5 @@
       "source": "/admin/:path*",
       "destination": "https://ob-crm-vio-x-bergsify.vercel.app/admin/:path*"
     }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
-        }
-      ]
-    }
   ]
 }

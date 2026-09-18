@@ -163,28 +163,220 @@
     "Host's Delight": ["<b>Madeira Housewares</b> | Teak-Edge Grain Chop Block S | 8” x 8” x 1.25”", "<b>OB x Beautea Studio</b> | Organic Rose Mint Loose-leaf Tea", "<b>The Bee Box</b> | Mini Specialty Honey Jar | 4 oz of pure honey USDA Certified Organic", "<b>Three Blue Birds Swedish Dishcloth</b> | Sustainable, sturdy, and stylish dishcloths | Each cloth absorbs 20x its weight, replaces 17 rolls of paper towels | 70% cellulose (FSC-Certified). 30% organic cotton (FairTrade & GOTS) (2 count)", "<b>OB</b> <b>Coffee Scoop</b> | Food grade 304 Stainless Steel Ground Coffee Measuring Spoon/Scoop with Bag Clip.", "<b>OB</b> | Wooden Honey Dipper", "Occasions Box Keepsake box | measures 11” x 8.66” x 4.33”", "A Complimentary Handwritten card of your choice"]
   };
 
+  /* ─── The story per box ───
+     A list of contents says what is in the box. It does not say who the box
+     is for, which is the thing a buyer is actually deciding. Every box on the
+     old site carried a short piece of prose before the list, and the rebuild
+     dropped it; this is where it lives now.
+
+     Each line is written from that box's real contents and nothing else. If a
+     product changes, this changes with it. Keep them to two or three
+     sentences: the list underneath does the detail. */
+  var PRODUCT_STORIES = {
+    "Love You": "The one to send when the words matter more than the occasion. A camel leather wristlet and a script keychain to carry, a blush notebook and a gold pen to write in, and a soy candle for the evening it gets opened.",
+    "Peaches & Cream": "Soft coral and blush from start to finish. A hand-loomed Turkish towel and a sea sponge for a long morning, a glass travel cup for the walk out of the door, and Dominican white chocolate for somewhere in between.",
+    "Spa Weekend": "Two days off, boxed. A hand-loomed Turkish towel and eucalyptus mint body wash for the bath, a gold tin candle to light beside it, and lemon curd biscuits for afterwards.",
+    "Coffee Lover": "For the person who measures the morning in cups. Colonial Blend coffee from Oliver Pluff, a clear double-insulated mug to drink it from, a teak bowl and spoon, and 100% dark chocolate for the cup that needs it.",
+    "The Reset": "A box about starting again. A self-care planner to lay out the week, an insulated bottle to keep beside it, wildflower facial steam for the evening, and a deep grey candle for the quiet part of it.",
+    "The Dinner Party": "Everything the table needs except the guests. Three gold-plated cheese knives, leather coasters, a linen sun tea towel and a host book, finished with almond cookies for the board.",
+    "Host's Delight": "The thank-you for whoever had everyone over. A teak edge-grain chopping block, organic loose-leaf tea, and a jar of the Bee Box's honey with a wooden dipper. Choose rose mint or chamomile.",
+    "The Nightcap": "For the hour after the plates are cleared. An antique rose gold pineapple corkscrew, leather coasters, a soy candle and almond cookies, which is most of what a good nightcap asks for.",
+    "Lemonade": "For when life hands them a great deal at once. A teak edge-grain chopping block, lavender Earl Grey and Mocha Java coffee, and Swedish dishcloths that outlast seventeen rolls of paper towels.",
+    "Bright Side": "Small and yellow and meant to land on a hard day. A yellow tin Candlefish candle, brown butter milk chocolate and a wildflower facial steam, which is a good deal of comfort for a small box.",
+    "Cheers": "For the promotion, the closing, the yes. Faceted crystal champagne glasses and a gold double-hinged corkscrew, a gold tin candle and wine gummies, in a keepsake wooden box.",
+    "Everyday Luxe": "The small luxuries someone would never think to buy themselves. A silk charmeuse scrunchie and a compact mirror from Odeme, a lip scrub from Sara Happ, and wine gummies.",
+    "Welcome Home": "The first box through a new door. A teak edge-grain chopping block and an oatmeal linen tea towel for the kitchen, Earl Grey and a gold coffee scoop, and a sandalwood rose candle for the first evening.",
+    "The New Keys": "The housewarming box in full. A teak chopping block, leather coasters and an antique rose gold pineapple corkscrew for the first night hosting, then a beechwood serving spoon and a Home Sweet Home key tag to keep.",
+    "The Valet": "For the top of the dresser and the drive in. A personalised leather valet tray for whatever comes out of his pockets, a triple-insulated travel mug, a stainless cigar cutter and 77% dark chocolate.",
+    "Goodnight": "A box that only asks them to stop. A padded silk eye mask, organic full leaf tea and a soy candle, with a lip scrub and wine gummies for the way there.",
+    "Uncorked": "Four things and a bottle, which is all an evening really needs. A gold-plated signature corkscrew, leather coasters, a moulded metal Candlefish candle and fleur de sel dark chocolate.",
+    "The Wind Down": "For the person who is always the one holding it together. A 160-page leather journal and a gold felt tip pen, a triple-insulated travel mug, leather coasters and organic full leaf tea.",
+    "Mini Spa Day": "An hour to themselves, in a hand-woven keepsake basket. A hydration gel mask, a rose kaolin clay mask, a fizzing bath cube and bath salts, with a blush notebook and a gold pen for whatever surfaces.",
+    "First Night In": "Small, dark and calm, for the evening the boxes are still stacked in the hall. A midnight black candle with a 40 hour burn, Green Gold tea from Teaspressa, and fleur de sel dark chocolate.",
+    "Afternoon Tea": "A whole afternoon, arranged. Organic chamomile, a jar of the Bee Box's honey and almond cookies from Jocelyn & Co, with a Candlefish No. 31 candle on its own wood plate."
+  };
+
   var allProducts = [
-    {name:'Love You', price:150, img: '/assets/img/OB0_7441-750w.jpg'},
-    {name:'Peaches & Cream', price:132, img: '/assets/img/OB0_7537-750w.jpg'},
-    {name:'Spa Weekend', note:"Contains eucalyptus mint body wash and lemon curd biscuits.", price:120, img: '/assets/img/OB0_7721-750w.jpg'},
-    {name:'Coffee Lover', price:145, img: '/assets/img/OB0_7584-750w.jpg'},
-    {name:'The Reset', price:145, img: '/assets/img/OB0_7512-750w.jpg'},
-    {name:'The Dinner Party', note:"Contains almond cookies (tree nuts).", price:175, img: '/assets/img/0B0_5612-750w.jpg'},
-    {name:"Host's Delight", price:105, img: '/assets/img/0B0_5453-750w.jpg', variants:[{label:'Rose', img:'/assets/img/0B0_5453-750w.jpg', tea:'<b>OB x Beautea Studio</b> | Organic rose mint loose-leaf tea'},{label:'Green', img:'/assets/img/OB_0299-750w.jpg', tea:'<b>OB x Beautea Studio</b> | Organic chamomile loose-leaf tea'}]},
-    {name:'The Nightcap', note:"Contains almond cookies (tree nuts).", price:120, img: '/assets/img/0B0_5067-750w.jpg'},
-    {name:'Lemonade', price:120, img: '/assets/img/0B0_5827-750w.jpg'},
-    {name:'Bright Side', price:105, img: '/assets/img/0B0_5699-750w.jpg'},
-    {name:'Cheers', price:145, img: '/assets/img/0B0_4910-750w.jpg'},
-    {name:'Everyday Luxe', price:150, img: '/assets/img/0B0_5137-750w.jpg'},
-    {name:'Welcome Home', price:125, img: '/assets/img/0B0_5183-750w.jpg'},
-    {name:'The New Keys', price:170, img: '/assets/img/0B0_4712-750w.jpg'},
-    {name:'The Valet', price:150, img: '/assets/img/_MG_1812-750w.jpg'},
-    {name:'Goodnight', price:130, img: '/assets/img/ob_1471-750w.jpg'},
-    {name:'Uncorked', price:120, img: '/assets/img/0B0_2489-750w.jpg'},
-    {name:'The Wind Down', price:150, img: '/assets/img/_MG_1792-750w.jpg'},
-    {name:'Mini Spa Day', note:"Contains essential oils and a clay mask. Not suitable as a gift for someone who is pregnant or nursing; tell us and we will swap the bath products for something safe.", price:115, img: '/assets/img/IMG_9325-750w.jpg'},
-    {name:'First Night In', price:110, img: '/assets/img/ob_6944-750w.jpg'},
-    {name:'Afternoon Tea', note:"Contains almond cookies (tree nuts).", price:128, img: '/assets/img/IMG_9730-750w.jpg'}
+    {name:"Love You", price:150, img: "/assets/img/OB0_7441-750w.jpg", images:[
+      "/assets/img/OB0_7441-750w.jpg",
+      "/assets/img/love-you-1-1500w.jpg",
+      "/assets/img/love-you-2-1500w.jpg",
+      "/assets/img/love-you-3-1500w.jpg",
+      "/assets/img/love-you-4-1500w.jpg",
+      "/assets/img/love-you-5-1500w.jpg"
+    ]},
+    {name:"Peaches & Cream", price:132, img: "/assets/img/OB0_7537-750w.jpg", images:[
+      "/assets/img/OB0_7537-750w.jpg",
+      "/assets/img/peaches-cream-1-1500w.jpg",
+      "/assets/img/peaches-cream-2-1500w.jpg",
+      "/assets/img/peaches-cream-3-1500w.jpg",
+      "/assets/img/peaches-cream-4-1500w.jpg",
+      "/assets/img/peaches-cream-5-1500w.jpg"
+    ]},
+    {name:"Spa Weekend", note:"Contains eucalyptus mint body wash and lemon curd biscuits.", price:120, img: "/assets/img/OB0_7721-750w.jpg", images:[
+      "/assets/img/OB0_7721-750w.jpg",
+      "/assets/img/spa-weekend-1-1500w.jpg",
+      "/assets/img/spa-weekend-2-1500w.jpg",
+      "/assets/img/spa-weekend-3-1500w.jpg",
+      "/assets/img/spa-weekend-4-1500w.jpg",
+      "/assets/img/spa-weekend-5-1500w.jpg"
+    ]},
+    {name:"Coffee Lover", price:145, img: "/assets/img/OB0_7584-750w.jpg", images:[
+      "/assets/img/OB0_7584-750w.jpg",
+      "/assets/img/coffee-lover-1-1500w.jpg",
+      "/assets/img/coffee-lover-2-1500w.jpg",
+      "/assets/img/coffee-lover-3-1500w.jpg",
+      "/assets/img/coffee-lover-4-1500w.jpg",
+      "/assets/img/coffee-lover-5-1500w.jpg"
+    ]},
+    {name:"The Reset", price:145, img: "/assets/img/OB0_7512-750w.jpg", images:[
+      "/assets/img/OB0_7512-750w.jpg",
+      "/assets/img/the-reset-1-1500w.jpg",
+      "/assets/img/the-reset-2-1500w.jpg",
+      "/assets/img/the-reset-3-1500w.jpg",
+      "/assets/img/the-reset-4-1500w.jpg",
+      "/assets/img/the-reset-5-1500w.jpg"
+    ]},
+    {name:"The Dinner Party", note:"Contains almond cookies (tree nuts).", price:175, img: "/assets/img/0B0_5612-750w.jpg", images:[
+      "/assets/img/0B0_5612-750w.jpg",
+      "/assets/img/the-dinner-party-1-1500w.jpg",
+      "/assets/img/the-dinner-party-2-1500w.jpg",
+      "/assets/img/the-dinner-party-3-1500w.jpg",
+      "/assets/img/the-dinner-party-4-1500w.jpg",
+      "/assets/img/the-dinner-party-5-1500w.jpg"
+    ]},
+    /* Two colourways, two boxes, two sets of photographs: rose mint and
+       chamomile do not share a dishcloth, a tea tin or a backdrop. The gallery
+       follows whichever is picked, and the top level images are the rose set
+       because rose is what the card and the grid show. */
+    {name:"Host's Delight", price:105, img: "/assets/img/0B0_5453-750w.jpg", images:[
+      "/assets/img/0B0_5453-750w.jpg",
+      "/assets/img/hosts-delight-rose-1-1500w.jpg",
+      "/assets/img/hosts-delight-rose-2-1500w.jpg",
+      "/assets/img/hosts-delight-rose-3-1500w.jpg",
+      "/assets/img/hosts-delight-rose-4-1500w.jpg",
+      "/assets/img/hosts-delight-rose-5-1500w.jpg"
+    ], variants:[
+      {label:"Rose", img:"/assets/img/0B0_5453-750w.jpg", images:[
+        "/assets/img/0B0_5453-750w.jpg",
+        "/assets/img/hosts-delight-rose-1-1500w.jpg",
+        "/assets/img/hosts-delight-rose-2-1500w.jpg",
+        "/assets/img/hosts-delight-rose-3-1500w.jpg",
+        "/assets/img/hosts-delight-rose-4-1500w.jpg",
+        "/assets/img/hosts-delight-rose-5-1500w.jpg"
+      ], tea:"<b>OB x Beautea Studio</b> | Organic rose mint loose-leaf tea"},
+      {label:"Green", img:"/assets/img/OB_0299-750w.jpg", images:[
+        "/assets/img/OB_0299-750w.jpg",
+        "/assets/img/hosts-delight-green-1-1500w.jpg",
+        "/assets/img/hosts-delight-green-3-1500w.jpg",
+        "/assets/img/hosts-delight-green-4-1500w.jpg",
+        "/assets/img/hosts-delight-green-5-1500w.jpg",
+        "/assets/img/hosts-delight-green-6-1500w.jpg"
+      ], tea:"<b>OB x Beautea Studio</b> | Organic chamomile loose-leaf tea"}
+    ]},
+    {name:"The Nightcap", note:"Contains almond cookies (tree nuts).", price:120, img: "/assets/img/0B0_5067-750w.jpg", images:[
+      "/assets/img/0B0_5067-750w.jpg",
+      "/assets/img/the-nightcap-1-1500w.jpg",
+      "/assets/img/the-nightcap-2-1500w.jpg",
+      "/assets/img/the-nightcap-3-1500w.jpg",
+      "/assets/img/the-nightcap-4-1500w.jpg",
+      "/assets/img/the-nightcap-5-1500w.jpg"
+    ]},
+    {name:"Lemonade", price:120, img: "/assets/img/0B0_5827-750w.jpg", images:[
+      "/assets/img/0B0_5827-750w.jpg",
+      "/assets/img/lemonade-1-1500w.jpg",
+      "/assets/img/lemonade-2-1500w.jpg",
+      "/assets/img/lemonade-3-1500w.jpg",
+      "/assets/img/lemonade-4-1500w.jpg",
+      "/assets/img/lemonade-5-1500w.jpg"
+    ]},
+    {name:"Bright Side", price:105, img: "/assets/img/0B0_5699-750w.jpg", images:[
+      "/assets/img/0B0_5699-750w.jpg",
+      "/assets/img/bright-side-1-1500w.jpg",
+      "/assets/img/bright-side-2-1500w.jpg",
+      "/assets/img/bright-side-3-1500w.jpg",
+      "/assets/img/bright-side-4-1500w.jpg",
+      "/assets/img/bright-side-5-1500w.jpg"
+    ]},
+    {name:"Cheers", price:145, img: "/assets/img/0B0_4910-750w.jpg", images:[
+      "/assets/img/0B0_4910-750w.jpg",
+      "/assets/img/cheers-1-1500w.jpg",
+      "/assets/img/cheers-2-1500w.jpg",
+      "/assets/img/cheers-3-1500w.jpg",
+      "/assets/img/cheers-4-1500w.jpg",
+      "/assets/img/cheers-5-1500w.jpg"
+    ]},
+    {name:"Everyday Luxe", price:150, img: "/assets/img/0B0_5137-750w.jpg", images:[
+      "/assets/img/0B0_5137-750w.jpg",
+      "/assets/img/everyday-luxe-1-1500w.jpg",
+      "/assets/img/everyday-luxe-2-1500w.jpg",
+      "/assets/img/everyday-luxe-3-1500w.jpg",
+      "/assets/img/everyday-luxe-4-1500w.jpg",
+      "/assets/img/everyday-luxe-5-1500w.jpg"
+    ]},
+    {name:"Welcome Home", price:125, img: "/assets/img/0B0_5183-750w.jpg", images:[
+      "/assets/img/0B0_5183-750w.jpg",
+      "/assets/img/welcome-home-1-1500w.jpg",
+      "/assets/img/welcome-home-2-1500w.jpg",
+      "/assets/img/welcome-home-3-1500w.jpg",
+      "/assets/img/welcome-home-4-1500w.jpg",
+      "/assets/img/welcome-home-5-1500w.jpg"
+    ]},
+    {name:"The New Keys", price:170, img: "/assets/img/0B0_4712-750w.jpg", images:[
+      "/assets/img/0B0_4712-750w.jpg",
+      "/assets/img/the-new-keys-1-1500w.jpg",
+      "/assets/img/the-new-keys-2-1500w.jpg",
+      "/assets/img/the-new-keys-3-1500w.jpg",
+      "/assets/img/the-new-keys-4-1500w.jpg",
+      "/assets/img/the-new-keys-5-1500w.jpg"
+    ]},
+    {name:"The Valet", price:150, img: "/assets/img/_MG_1812-750w.jpg", images:[
+      "/assets/img/_MG_1812-750w.jpg",
+      "/assets/img/the-valet-2-1500w.jpg",
+      "/assets/img/the-valet-3-1500w.jpg",
+      "/assets/img/the-valet-4-1500w.jpg",
+      "/assets/img/the-valet-5-1500w.jpg",
+      "/assets/img/the-valet-6-1500w.jpg"
+    ]},
+    {name:"Goodnight", price:130, img: "/assets/img/ob_1471-750w.jpg"},
+    {name:"Uncorked", price:120, img: "/assets/img/0B0_2489-750w.jpg", images:[
+      "/assets/img/0B0_2489-750w.jpg",
+      "/assets/img/uncorked-2-1500w.jpg",
+      "/assets/img/uncorked-3-1500w.jpg",
+      "/assets/img/uncorked-4-1500w.jpg",
+      "/assets/img/uncorked-5-1500w.jpg",
+      "/assets/img/uncorked-6-1500w.jpg"
+    ]},
+    {name:"The Wind Down", price:150, img: "/assets/img/_MG_1792-750w.jpg", images:[
+      "/assets/img/_MG_1792-750w.jpg",
+      "/assets/img/the-wind-down-2-1500w.jpg",
+      "/assets/img/the-wind-down-3-1500w.jpg",
+      "/assets/img/the-wind-down-4-1500w.jpg",
+      "/assets/img/the-wind-down-5-1500w.jpg",
+      "/assets/img/the-wind-down-6-1500w.jpg"
+    ]},
+    {name:"Mini Spa Day", note:"Contains essential oils and a clay mask. Not suitable as a gift for someone who is pregnant or nursing; tell us and we will swap the bath products for something safe.", price:115, img: "/assets/img/IMG_9325-750w.jpg", images:[
+      "/assets/img/IMG_9325-750w.jpg",
+      "/assets/img/mini-spa-day-1-1500w.jpg",
+      "/assets/img/mini-spa-day-2-1500w.jpg",
+      "/assets/img/mini-spa-day-3-1500w.jpg",
+      "/assets/img/mini-spa-day-4-1500w.jpg"
+    ]},
+    {name:"First Night In", price:110, img: "/assets/img/ob_6944-750w.jpg", images:[
+      "/assets/img/ob_6944-750w.jpg",
+      "/assets/img/first-night-in-1-1500w.jpg",
+      "/assets/img/first-night-in-2-1500w.jpg",
+      "/assets/img/first-night-in-3-1500w.jpg",
+      "/assets/img/first-night-in-4-1500w.jpg",
+      "/assets/img/first-night-in-5-1500w.jpg"
+    ]},
+    {name:"Afternoon Tea", note:"Contains almond cookies (tree nuts).", price:128, img: "/assets/img/IMG_9730-750w.jpg", images:[
+      "/assets/img/IMG_9730-750w.jpg",
+      "/assets/img/afternoon-tea-1-1500w.jpg",
+      "/assets/img/afternoon-tea-2-1500w.jpg",
+      "/assets/img/afternoon-tea-3-1500w.jpg",
+      "/assets/img/afternoon-tea-4-1500w.jpg"
+    ]}
   ];
 
   var currentProduct = null;
@@ -228,31 +420,47 @@
     return normaliseImages([product.img], label);
   }
 
-  function renderGallery(product) {
-    var images = galleryFor(product, currentVariant);
-    var main = document.getElementById('modalImg');
-    var strip = document.getElementById('modalThumbs');
-    if (!main || !images.length) return;
+  /* The gallery the modal is currently showing, and which of it is on
+     screen. The lightbox opens on that same image rather than back at the
+     first one. */
+  var currentGallery = [];
+  var currentIndex = 0;
+
+  /* ─── One gallery painter, two surfaces ───
+     The modal on /shop and the twenty one product pages show the same
+     photographs and must agree about which ones belong to the colourway on
+     screen. Both call this; onShow reports the index back so each surface can
+     keep its own lightbox position.
+
+     The strip is rebuilt from the images every time rather than toggled,
+     because a colourway change replaces the photographs, not just the one on
+     top: the product page used to swap the main shot and leave the strip
+     underneath showing the other colour's box. */
+  function paintGallery(main, strip, cls, images, onShow) {
+    if (!main || !images.length) return function() {};
 
     var show = function(i) {
       main.src = images[i].src;
       main.alt = images[i].alt;
-      if (!strip) return;
-      strip.querySelectorAll('.modal-thumb').forEach(function(t, j) {
-        t.classList.toggle('active', j === i);
-        t.setAttribute('aria-current', j === i ? 'true' : 'false');
-      });
+      if (strip) {
+        strip.querySelectorAll('.' + cls).forEach(function(t, j) {
+          t.classList.toggle('active', j === i);
+          t.setAttribute('aria-current', j === i ? 'true' : 'false');
+        });
+      }
+      if (onShow) onShow(i);
     };
 
     if (strip) {
       if (images.length > 1) {
         strip.innerHTML = images.map(function(img, i) {
-          return '<button type="button" class="modal-thumb' + (i === 0 ? ' active' : '') + '" data-img="' + i +
-                 '" aria-label="Show ' + escapeHtml(img.alt) + '"><img src="' + escapeHtml(img.src) +
-                 '" alt="" loading="lazy"></button>';
+          return '<button type="button" class="' + cls + (i === 0 ? ' active' : '') +
+                 '" data-img="' + i + '" aria-label="Show photograph ' + (i + 1) + ' of ' +
+                 images.length + ' of ' + escapeHtml(img.alt) + '">' +
+                 '<img src="' + escapeHtml(img.src) + '" alt="" loading="lazy"></button>';
         }).join('');
         strip.hidden = false;
-        strip.querySelectorAll('.modal-thumb').forEach(function(btn) {
+        strip.querySelectorAll('.' + cls).forEach(function(btn) {
           btn.addEventListener('click', function() { show(parseInt(this.dataset.img, 10)); });
         });
       } else {
@@ -261,7 +469,346 @@
       }
     }
     show(0);
+    return show;
   }
+
+  function renderGallery(product) {
+    var images = galleryFor(product, currentVariant);
+    if (!images.length) return;
+    currentGallery = images;
+    paintGallery(
+      document.getElementById('modalImg'),
+      document.getElementById('modalThumbs'),
+      'modal-thumb',
+      images,
+      function(i) { currentIndex = i; }
+    );
+  }
+
+  /* ─── The handwritten card ───
+     Every box ships with a 5x7 card, handwritten, and the buyer picks which
+     one. The contents list has promised "a complimentary handwritten card of
+     your choice" all along without ever offering the choice, so the choice
+     was being made for them somewhere off the website.
+
+     The card is chosen per box, not per order: someone sending three boxes to
+     three people wants three different cards. It travels with the cart line
+     the same way a colourway does, through to PayPal and into the CRM order,
+     so whoever packs the box can read what to write without asking.
+
+     This is the list Occasions Box actually has printed. Adding one here puts
+     it on all twenty one product pages and in the modal. */
+  var CARD_MESSAGES = [
+    "Thank You", "Welcome Baby", "Welcome Home", "Thinking of You", "XO",
+    "Happy Mother's Day", "Happy Father's Day", "I Love You", "Congrats",
+    "Happy Holidays", "Mr & Mrs", "You're Extraordinary", "Happy Home",
+    "Happy Birthday", "Merry Everything", "Grateful For You", "Feliz Navidad",
+    "Happy Graduation", "Cheers", "Get Well Soon", "Just Say Yes"
+  ];
+
+  /* Not every gift wants a printed sentiment on the front. The blank card
+     carries only the Occasions Box mark on the back, and whatever the buyer
+     writes goes inside it. */
+  var BLANK_CARD = 'Blank card, our logo on the back';
+
+  /* The message the buyer wants written inside, in their words. Long enough
+     for a real note, short enough to fit a 5x7 card in handwriting. */
+  var MAX_MESSAGE = 240;
+
+  function isValidCard(value) {
+    return value === BLANK_CARD || CARD_MESSAGES.indexOf(value) !== -1;
+  }
+
+  function cleanMessage(value) {
+    if (typeof value !== 'string') return '';
+    return value.replace(/\s+/g, ' ').trim().slice(0, MAX_MESSAGE);
+  }
+
+  /* Reads whichever card picker is on this page. Returns empty strings when
+     there is none, which the cart then asks for before checkout. */
+  function readCardPicker(selectId, messageId) {
+    var sel = document.getElementById(selectId);
+    var msg = document.getElementById(messageId);
+    return {
+      card: sel && isValidCard(sel.value) ? sel.value : '',
+      message: msg ? cleanMessage(msg.value) : ''
+    };
+  }
+
+  function cardOptionsHtml(selected) {
+    var opts = CARD_MESSAGES.concat([BLANK_CARD]);
+    return '<option value="">Choose your card</option>' +
+      opts.map(function(m) {
+        return '<option value="' + escapeHtml(m) + '"' +
+               (m === selected ? ' selected' : '') + '>' + escapeHtml(m) + '</option>';
+      }).join('');
+  }
+
+  /* ─── Sharing ───
+     Someone who has just found the right gift for a friend is one tap away
+     from telling three more people, which is the cheapest reach this shop
+     has. The old site put these six under the Add To Cart button on every
+     box and the rebuild dropped them.
+
+     One list, read by the product pages at build time and by the modal at
+     run time, so the two can never offer different networks. {url}, {title}
+     and {image} are filled in per box; every value is URI-encoded first.
+     The glyphs are single paths on a 24x24 grid. */
+  var SHARE_TARGETS = [
+    { name: 'Facebook',
+      href: 'https://www.facebook.com/sharer/sharer.php?u={url}',
+      icon: 'M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.33-.04-1.56-.14-2.86-.14C11.93 2 10 3.66 10 6.7v2.8H7v4h3V22h4v-8.5z' },
+    { name: 'Twitter',
+      href: 'https://twitter.com/intent/tweet?url={url}&text={title}',
+      icon: 'M22 5.8a8.5 8.5 0 0 1-2.36.64 4.13 4.13 0 0 0 1.81-2.27 8.21 8.21 0 0 1-2.61 1 4.1 4.1 0 0 0-7 3.74 11.64 11.64 0 0 1-8.45-4.29 4.16 4.16 0 0 0-.55 2.07 4.09 4.09 0 0 0 1.82 3.41 4.05 4.05 0 0 1-1.86-.51v.05a4.1 4.1 0 0 0 3.3 4.03 4.1 4.1 0 0 1-1.86.07 4.11 4.11 0 0 0 3.83 2.84A8.22 8.22 0 0 1 2 18.28a11.57 11.57 0 0 0 6.29 1.85A11.59 11.59 0 0 0 20 8.45c0-.17 0-.35-.01-.53A8.43 8.43 0 0 0 22 5.8z' },
+    { name: 'LinkedIn',
+      href: 'https://www.linkedin.com/sharing/share-offsite/?url={url}',
+      icon: 'M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3V9zm7 0h3.8v1.7h.05c.53-1 1.83-2.05 3.75-2.05C21.6 8.65 22 11.1 22 14.3V21h-4v-6c0-1.43-.03-3.27-2-3.27-2 0-2.3 1.56-2.3 3.17V21h-4V9z' },
+    { name: 'Reddit',
+      href: 'https://www.reddit.com/submit?url={url}&title={title}',
+      icon: 'M22 12.14a2.14 2.14 0 0 0-3.62-1.54 10.5 10.5 0 0 0-5.35-1.7l.91-4.29 2.98.63a1.72 1.72 0 1 0 .2-1.42l-3.6-.76a.7.7 0 0 0-.83.54l-1.1 5.2a10.5 10.5 0 0 0-5.4 1.7A2.14 2.14 0 1 0 3.6 14.2a4.2 4.2 0 0 0-.05.65c0 3.3 3.78 5.98 8.45 5.98s8.45-2.68 8.45-5.98a4.2 4.2 0 0 0-.05-.64A2.14 2.14 0 0 0 22 12.14zM7.5 13.6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0zm8.3 4.2c-1.03.92-3 .99-3.8.99s-2.77-.07-3.8-.99a.4.4 0 0 1 .53-.6c.65.58 2.04.79 3.27.79s2.62-.21 3.27-.79a.4.4 0 0 1 .53.6zm-.3-2.7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z' },
+    { name: 'Tumblr',
+      href: 'https://www.tumblr.com/widgets/share/tool?canonicalUrl={url}&caption={title}',
+      icon: 'M14.2 21c-3.2 0-5.6-1.64-5.6-5.57V10.1H6V7.5c2.86-.74 4.06-3.2 4.2-5.5h2.53v4.99h3.5v3.1h-3.5v4.7c0 1.48.75 2 1.94 2H16.4V21h-2.2z' },
+    { name: 'Pinterest',
+      href: 'https://pinterest.com/pin/create/button/?url={url}&media={image}&description={title}',
+      icon: 'M12 2a10 10 0 0 0-3.65 19.31c-.09-.78-.17-1.98.03-2.83.18-.78 1.18-4.98 1.18-4.98s-.3-.6-.3-1.5c0-1.4.82-2.45 1.83-2.45.86 0 1.28.65 1.28 1.42 0 .87-.55 2.17-.84 3.37-.24 1.01.5 1.84 1.5 1.84 1.8 0 3.19-1.9 3.19-4.65 0-2.43-1.75-4.13-4.24-4.13-2.89 0-4.59 2.17-4.59 4.41 0 .87.34 1.81.76 2.32.08.1.1.19.07.29l-.28 1.15c-.05.18-.15.22-.34.13-1.27-.59-2.06-2.44-2.06-3.93 0-3.2 2.32-6.13 6.7-6.13 3.52 0 6.25 2.5 6.25 5.85 0 3.5-2.2 6.31-5.26 6.31-1.03 0-2-.53-2.32-1.17l-.63 2.4c-.23.88-.85 1.98-1.26 2.65A10 10 0 1 0 12 2z' }
+  ];
+
+  function shareRowHtml(url, title, image) {
+    return SHARE_TARGETS.map(function(t) {
+      var href = t.href
+        .replace('{url}', encodeURIComponent(url))
+        .replace('{title}', encodeURIComponent(title))
+        .replace('{image}', encodeURIComponent(image || ''));
+      return '<a class="share-link" href="' + href + '" target="_blank" rel="noopener noreferrer"' +
+             ' aria-label="Share ' + escapeHtml(title) + ' on ' + t.name + '" title="Share on ' + t.name + '">' +
+             '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + t.icon + '"/></svg></a>';
+    }).join('');
+  }
+
+  /* The modal has no address of its own, so it shares the box's product page
+     rather than whatever page the modal happens to be open on top of. */
+  function renderShare(product) {
+    var row = document.getElementById('modalShare');
+    if (!row) return;
+    var origin = window.location.origin;
+    var url = origin + '/shop/' + slugifyName(product.name);
+    var image = product.img ? origin + product.img : '';
+    row.innerHTML = shareRowHtml(url, product.name + ' from Occasions Box', image);
+    row.hidden = false;
+  }
+
+  /* ─── More boxes to consider ───
+     Someone who opened a box and is not sure about it should not have to shut
+     the modal to see a second one. The four shown are the same four that the box’s
+     own product page shows, picked by the same rule: most occasion tags in
+     common first, then catalogue order, topped up with the next boxes along so
+     there are always four. The tags are read off the shop cards already in the
+     page rather than repeated here, which is why the two can never disagree.
+
+     Each one reopens the modal in place instead of navigating away, so the
+     browser back button still means "leave the shop". */
+  var occasionTags = null;
+
+  function loadOccasionTags() {
+    if (occasionTags) return occasionTags;
+    occasionTags = {};
+    document.querySelectorAll(".shop-card[data-occasion]").forEach(function(card) {
+      var link = card.querySelector(".shop-card-link");
+      var href = link && link.getAttribute("href");
+      var slug = href && href.split("/").filter(Boolean).pop();
+      if (!slug) return;
+      occasionTags[slug] = (card.getAttribute("data-occasion") || "").split(/\s+/)
+        .filter(Boolean);
+    });
+    return occasionTags;
+  }
+
+  function relatedProducts(product) {
+    var tags = loadOccasionTags();
+    var mine = tags[slugifyName(product.name)] || [];
+    var shared = function(q) {
+      var theirs = tags[slugifyName(q.name)] || [];
+      return theirs.filter(function(t) { return mine.indexOf(t) !== -1; }).length;
+    };
+    var i = allProducts.indexOf(product);
+    var byOccasion = allProducts
+      .filter(function(q) { return q !== product && shared(q) > 0; })
+      .sort(function(a, b) {
+        return shared(b) - shared(a) ||
+               allProducts.indexOf(a) - allProducts.indexOf(b);
+      });
+    var neighbours = [1, 2, 3, 4].map(function(k) {
+      return allProducts[(i + k) % allProducts.length];
+    });
+    var out = [];
+    byOccasion.concat(neighbours).forEach(function(q) {
+      if (q && q !== product && out.indexOf(q) === -1) out.push(q);
+    });
+    return out.slice(0, 4);
+  }
+
+  /* Six boxes are called "The Something" and do not want a second article. */
+  function theName(name) {
+    return /^the\s/i.test(name) ? name : 'The ' + name;
+  }
+
+  function renderMore(product) {
+    var wrap = document.getElementById("modalMore");
+    if (!wrap) return;
+    var related = relatedProducts(product);
+    if (!related.length) {
+      wrap.hidden = true;
+      wrap.innerHTML = "";
+      return;
+    }
+    wrap.innerHTML =
+      "<h3 class=\"modal-more-title\">More beautiful boxes to consider</h3>" +
+      "<div class=\"modal-more-grid\">" +
+      related.map(function(r) {
+        return "<button type=\"button\" class=\"modal-more-card\" data-more=\"" +
+               escapeHtml(r.name) + "\">" +
+               "<img src=\"" + r.img + "\" loading=\"lazy\" alt=\"" +
+               escapeHtml(theName(r.name)) + " gift box\">" +
+               "<span class=\"modal-more-name\">" + escapeHtml(r.name) + "</span>" +
+               "<span class=\"modal-more-price\">$" + r.price.toFixed(2) + "</span>" +
+               "</button>";
+      }).join("") +
+      "</div>" +
+      "<p class=\"modal-more-all\"><a href=\"/shop\">See all " + allProducts.length +
+      " boxes</a></p>";
+    wrap.hidden = false;
+    wrap.querySelectorAll(".modal-more-card").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        openModal(btn.getAttribute("data-more"));
+        var modal = document.querySelector("#productModal .modal");
+        if (modal) modal.scrollTop = 0;
+      });
+    });
+  }
+
+  /* Matches the slugs tools/build-pages.mjs writes, so the link resolves. */
+  function slugifyName(name) {
+    /* Character for character the same transform as slugify() in
+       tools/build-pages.mjs, which is what actually names the files. An
+       ampersand is a separator there, so Peaches & Cream is peaches-cream.
+       tools/build-pages.mjs fails the build if the two ever drift. */
+    return name.toLowerCase().replace(/['’]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  /* ─── Lightbox ───
+     The photograph is the product. At 750px inside a modal you cannot see the
+     weave on the towel or read a label, which is most of what someone is
+     looking for before they spend $150, so the main image opens full size.
+
+     The markup is built once, on first use, rather than sitting in every one
+     of the twenty-one product pages and the modal partial. Escape closes it,
+     the arrow keys walk a multi-photograph box, and focus goes back to
+     whatever opened it. */
+  var lightbox = null;
+
+  function buildLightbox() {
+    if (lightbox) return lightbox;
+
+    var root = document.createElement('div');
+    root.className = 'lightbox';
+    root.id = 'lightbox';
+    root.setAttribute('role', 'dialog');
+    root.setAttribute('aria-modal', 'true');
+    root.setAttribute('aria-label', 'Photograph');
+    root.hidden = true;
+    root.innerHTML =
+      '<button type="button" class="lightbox-close" aria-label="Close photograph">&times;</button>' +
+      '<button type="button" class="lightbox-nav lightbox-prev" aria-label="Previous photograph">&lsaquo;</button>' +
+      '<figure class="lightbox-figure">' +
+        '<img class="lightbox-img" alt="">' +
+        '<figcaption class="lightbox-caption"></figcaption>' +
+      '</figure>' +
+      '<button type="button" class="lightbox-nav lightbox-next" aria-label="Next photograph">&rsaquo;</button>';
+    document.body.appendChild(root);
+
+    lightbox = {
+      root: root,
+      img: root.querySelector('.lightbox-img'),
+      caption: root.querySelector('.lightbox-caption'),
+      prev: root.querySelector('.lightbox-prev'),
+      next: root.querySelector('.lightbox-next'),
+      close: root.querySelector('.lightbox-close'),
+      images: [],
+      at: 0,
+      opener: null
+    };
+
+    lightbox.close.addEventListener('click', closeLightbox);
+    lightbox.prev.addEventListener('click', function() { stepLightbox(-1); });
+    lightbox.next.addEventListener('click', function() { stepLightbox(1); });
+
+    /* The backdrop closes; the photograph and the controls do not. */
+    root.addEventListener('click', function(e) {
+      if (e.target === root || e.target.classList.contains('lightbox-figure')) closeLightbox();
+    });
+
+    return lightbox;
+  }
+
+  function paintLightbox() {
+    var lb = lightbox;
+    var img = lb.images[lb.at];
+    if (!img) return;
+    lb.img.src = img.src;
+    lb.img.alt = img.alt;
+    lb.caption.textContent = lb.images.length > 1
+      ? img.alt + ' (' + (lb.at + 1) + ' of ' + lb.images.length + ')'
+      : img.alt;
+    var many = lb.images.length > 1;
+    lb.prev.hidden = !many;
+    lb.next.hidden = !many;
+  }
+
+  function stepLightbox(by) {
+    if (!lightbox || lightbox.images.length < 2) return;
+    var n = lightbox.images.length;
+    lightbox.at = (lightbox.at + by + n) % n;
+    paintLightbox();
+  }
+
+  function openLightbox(images, at, opener) {
+    if (!images || !images.length) return;
+    var lb = buildLightbox();
+    lb.images = images;
+    lb.at = Math.min(Math.max(at || 0, 0), images.length - 1);
+    lb.opener = opener || null;
+    paintLightbox();
+    lb.root.hidden = false;
+    /* The class lands a frame later so the fade actually has somewhere to
+       fade from. */
+    requestAnimationFrame(function() { lb.root.classList.add('active'); });
+    document.body.classList.add('lightbox-open');
+    lb.close.focus();
+  }
+
+  function closeLightbox() {
+    if (!lightbox || lightbox.root.hidden) return;
+    lightbox.root.classList.remove('active');
+    lightbox.root.hidden = true;
+    document.body.classList.remove('lightbox-open');
+    /* The product modal may still be open behind it, and it owns the scroll
+       lock; only give the page back if nothing else is holding it. */
+    var modal = document.getElementById('productModal');
+    if (!modal || !modal.classList.contains('active')) document.body.style.overflow = '';
+    if (lightbox.opener && lightbox.opener.focus) lightbox.opener.focus();
+    lightbox.opener = null;
+  }
+  window.closeLightbox = closeLightbox;
+
+  document.addEventListener('keydown', function(e) {
+    if (!lightbox || lightbox.root.hidden) return;
+    if (e.key === 'Escape') { e.stopPropagation(); closeLightbox(); }
+    else if (e.key === 'ArrowLeft') stepLightbox(-1);
+    else if (e.key === 'ArrowRight') stepLightbox(1);
+  }, true);
 
   function openModal(productName) {
     var product = allProducts.find(function(p) { return p.name === productName; });
@@ -307,8 +854,15 @@
       }
     }
 
+    var modalCard = document.getElementById('modalCard');
+    if (modalCard) modalCard.innerHTML = cardOptionsHtml('');
+    var modalCardMsg = document.getElementById('modalCardMsg');
+    if (modalCardMsg) modalCardMsg.value = '';
+
     renderGallery(product);
     renderContents(product);
+    renderShare(product);
+    renderMore(product);
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
   }
@@ -322,15 +876,27 @@
     }
     var list = document.getElementById('modalContents');
     var desc = document.getElementById('modalDesc');
+
+    /* The story and the list are not alternatives. The prose says who the box
+       is for, the list says what is in it, and a buyer wants both. Only a box
+       with neither falls back to the generic sentence already in the markup. */
+    var story = PRODUCT_STORIES[product.name];
+    if (desc) {
+      if (story) {
+        desc.textContent = story;
+        desc.hidden = false;
+      } else {
+        desc.hidden = !!(contents && contents.length);
+      }
+    }
+
     if (list) {
       if (contents && contents.length) {
         list.innerHTML = '<div class="modal-contents-title">Box includes</div><ul>' +
           contents.map(function(item) { return '<li>' + item + '</li>'; }).join('') + '</ul>';
         list.hidden = false;
-        if (desc) desc.hidden = true;
       } else {
         list.hidden = true;
-        if (desc) desc.hidden = false;
       }
     }
 
@@ -362,9 +928,14 @@
         return line && typeof line.name === 'string' &&
                typeof line.qty === 'number' && isFinite(line.qty) && line.qty >= 1;
       }).slice(0, MAX_LINES).map(function(line) {
+        /* A card we no longer print is dropped rather than carried into an
+           order nobody can fulfil. */
+        var card = typeof line.card === 'string' && isValidCard(line.card) ? line.card : '';
         return {
           name: line.name,
           variant: typeof line.variant === 'string' ? line.variant : '',
+          card: card,
+          message: cleanMessage(line.message),
           qty: Math.min(Math.round(line.qty), MAX_QTY)
         };
       });
@@ -416,18 +987,57 @@
     }, 0);
   }
 
+  /* ─── Processing and handling ───
+     Every card and wallet takes a cut, and at PayPal's US rate that is 3.49%
+     plus 49 cents on a checkout sale. This recovers most of it.
+
+     It is charged on every order, whatever the buyer pays with, and that is
+     deliberate rather than incidental. PayPal's own User Agreement says a
+     seller "will not impose a surcharge or any other fee for accepting PayPal
+     as a payment method", and in the same breath allows a handling fee "as
+     long as the handling fee does not operate as a surcharge and is not
+     higher than the handling fee you charge for non-PayPal transactions".
+     A fee that appears only when someone reaches for PayPal is the first
+     thing; a flat fee on the sale is the second. Charging it uniformly also
+     keeps us clear of the card network rule against surcharging debit cards,
+     and of the states that ban surcharging outright, neither of which reaches
+     a fee that is not conditioned on how the buyer pays.
+
+     One rate, one label, one place to change either. */
+  var PROCESSING_RATE = 0.03;
+  var PROCESSING_LABEL = 'Processing & Handling';
+
+  /* Rounded once on the whole order rather than per line, so three boxes are
+     charged what one order costs instead of three separate roundings. */
+  function processingCents(baseCents) {
+    return Math.round(baseCents * PROCESSING_RATE);
+  }
+
   function money(cents) {
     return '$' + (cents / 100).toFixed(2);
+  }
+
+  /* Sarah cannot pack a box without knowing which card goes in it, and
+     chasing the buyer by email after the fact loses a day on a gift that is
+     usually already late. So the card is required, and checkout waits. */
+  function linesMissingCard(resolved) {
+    return resolved.filter(function(r) { return !r.line.card; });
   }
 
   function cartUnits(resolved) {
     return resolved.reduce(function(n, r) { return n + r.line.qty; }, 0);
   }
 
-  function addToCart(product, variant, qty) {
+  function addToCart(product, variant, qty, card, message) {
     var variantLabel = variant ? variant.label : '';
+    var cardLabel = isValidCard(card) ? card : '';
+    var note = cleanMessage(message);
+    /* Same box, same colourway, same card and the same words is one line. Any
+       of those different and it is a different gift going to a different
+       person, so it gets its own line. */
     var existing = cart.find(function(l) {
-      return l.name === product.name && (l.variant || '') === variantLabel;
+      return l.name === product.name && (l.variant || '') === variantLabel &&
+             (l.card || '') === cardLabel && (l.message || '') === note;
     });
     if (existing) {
       existing.qty = Math.min(existing.qty + qty, MAX_QTY);
@@ -436,7 +1046,8 @@
         showToast('That is as many different boxes as the cart holds. Email Collaborate@occasionsbox.com and we will quote the whole order.', 'error');
         return false;
       }
-      cart.push({ name: product.name, variant: variantLabel, qty: Math.min(qty, MAX_QTY) });
+      cart.push({ name: product.name, variant: variantLabel, card: cardLabel,
+                  message: note, qty: Math.min(qty, MAX_QTY) });
     }
     saveCart();
     renderCart();
@@ -475,6 +1086,16 @@
             '<button type="button" class="cart-step" data-act="inc" aria-label="One more ' + label + '">+</button>' +
             '<button type="button" class="cart-remove" data-act="remove">Remove</button>' +
           '</div>' +
+          '<div class="cart-item-card' + (r.line.card ? '' : ' needs-card') + '">' +
+            '<label for="cartCard' + i + '">Card</label>' +
+            '<select id="cartCard' + i + '" class="cart-card-select" data-act="card">' +
+              cardOptionsHtml(r.line.card || '') +
+            '</select>' +
+            '<label for="cartMsg' + i + '">Your message</label>' +
+            '<textarea id="cartMsg' + i + '" class="cart-msg" data-act="msg" rows="2" ' +
+              'maxlength="' + MAX_MESSAGE + '" placeholder="We will write this inside, by hand. Leave it blank for just the card.">' +
+              escapeHtml(r.line.message || '') + '</textarea>' +
+          '</div>' +
         '</div>' +
         '<div class="cart-item-total">' + money(Math.round(r.price * 100) * r.line.qty) + '</div>' +
       '</li>';
@@ -485,8 +1106,25 @@
     if (empty) empty.hidden = resolved.length > 0;
     if (foot) foot.hidden = resolved.length === 0;
 
+    var subCents = subtotalCents(resolved);
+    var feeCents = processingCents(subCents);
     var subtotal = document.getElementById('cartSubtotal');
-    if (subtotal) subtotal.textContent = money(subtotalCents(resolved));
+    if (subtotal) subtotal.textContent = money(subCents);
+    var feeEl = document.getElementById('cartFee');
+    if (feeEl) feeEl.textContent = money(feeCents);
+    var dueEl = document.getElementById('cartDue');
+    if (dueEl) dueEl.textContent = money(subCents + feeCents);
+
+    var missing = linesMissingCard(resolved);
+    var warn = document.getElementById('cartCardWarning');
+    if (warn) {
+      warn.textContent = missing.length === 1
+        ? 'Choose a card for ' + missing[0].label + ' before checking out.'
+        : 'Choose a card for each of your ' + missing.length + ' boxes before checking out.';
+      warn.hidden = missing.length === 0;
+    }
+    var pay = document.getElementById('paypal-button-container');
+    if (pay) pay.classList.toggle('is-blocked', missing.length > 0);
   }
 
   function openCart() {
@@ -527,9 +1165,23 @@
     container.innerHTML = '';
     paypalSDK.Buttons({
       style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'pay', height: 45 },
+      /* Dimming the container is the visible half. This is the half that
+         holds when someone deletes the class in the inspector. */
+      onClick: function(data, actions) {
+        var missing = linesMissingCard(resolveCart());
+        if (!missing.length) return actions.resolve();
+        showToast('Choose a card for every box first. Each one is handwritten.', 'error');
+        var first = document.querySelector('.cart-item-card.needs-card .cart-card-select');
+        if (first) first.focus();
+        return actions.reject();
+      },
       createOrder: function(data, actions) {
         var resolved = resolveCart();
-        var total = (subtotalCents(resolved) / 100).toFixed(2);
+        var itemCents = subtotalCents(resolved);
+        var feeCents = processingCents(itemCents);
+        var items = (itemCents / 100).toFixed(2);
+        var handling = (feeCents / 100).toFixed(2);
+        var total = ((itemCents + feeCents) / 100).toFixed(2);
         var units = cartUnits(resolved);
         var description = resolved.length === 1
           ? resolved[0].label + ' Gift Box'
@@ -540,11 +1192,17 @@
             amount: {
               value: total,
               currency_code: 'USD',
-              breakdown: { item_total: { value: total, currency_code: 'USD' } }
+              breakdown: {
+                item_total: { value: items, currency_code: 'USD' },
+                handling: { value: handling, currency_code: 'USD' }
+              }
             },
             items: resolved.map(function(r) {
+              var note = [r.line.card, r.line.message && '"' + r.line.message + '"']
+                .filter(Boolean).join(' - ');
               return {
                 name: r.label.slice(0, 127),
+                description: note.slice(0, 127),
                 unit_amount: { value: r.price.toFixed(2), currency_code: 'USD' },
                 quantity: String(r.line.qty),
                 category: 'PHYSICAL_GOODS'
@@ -558,6 +1216,7 @@
         // report to the CRM has to be what was actually paid for.
         var resolved = resolveCart();
         var cents = subtotalCents(resolved);
+        var fee = processingCents(cents);
         return actions.order.capture().then(function(details) {
           closeCart();
           // Guest checkout / some funding sources return a payer without a name object.
@@ -568,7 +1227,7 @@
           saveCart();
           renderCart();
           var unit = (details && details.purchase_units && details.purchase_units[0]) || {};
-          recordOrder(data.orderID, payer, resolved, cents, unit.shipping || null);
+          recordOrder(data.orderID, payer, resolved, cents, fee, unit.shipping || null);
         });
       },
       onError: function(err) {
@@ -579,7 +1238,7 @@
 
   /* Payment has already succeeded by the time this runs, so a CRM failure is
      reported to us and softened for the buyer, never treated as a failed sale. */
-  function recordOrder(paypalOrderId, payer, resolved, cents, shipping) {
+  function recordOrder(paypalOrderId, payer, resolved, cents, feeCents, shipping) {
     if (!CRM_CONFIG.enabled || !CRM_CONFIG.apiUrl) return;
     var payerName = [payer.name && payer.name.given_name, payer.name && payer.name.surname]
       .filter(Boolean).join(' ');
@@ -589,9 +1248,19 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         items: resolved.map(function(r) {
-          return { name: r.line.name, variant: r.line.variant || '', unitAmount: r.price, quantity: r.line.qty };
+          return {
+            name: r.line.name,
+            variant: r.line.variant || '',
+            card: r.line.card || '',
+            message: r.line.message || '',
+            unitAmount: r.price,
+            quantity: r.line.qty
+          };
         }),
-        amount: cents / 100,
+        amount: (cents + feeCents) / 100,
+        subtotal: cents / 100,
+        processingFee: feeCents / 100,
+        processingLabel: PROCESSING_LABEL,
         currency: 'USD',
         paypalOrderId: paypalOrderId,
         payerEmail: payer.email_address || '',
@@ -620,6 +1289,39 @@
     document.body.style.overflow = '';
   };
 
+  /* ─── Opening the photograph ───
+     Two places show a product photograph: the modal on /shop, and the twenty
+     one product pages. Both hand the same gallery to the same lightbox. */
+  var modalMainImg = document.getElementById('modalImg');
+  if (modalMainImg) {
+    modalMainImg.addEventListener('click', function() {
+      openLightbox(currentGallery, currentIndex, modalMainImg);
+    });
+  }
+
+  var pdRepaint = null;
+  var pdArticle = document.querySelector('.pd[data-product]');
+  var pdMainImg = document.getElementById('pdImg');
+  if (pdArticle && pdMainImg) {
+    var pdGalleryProduct = allProducts.find(function(p) { return p.name === pdArticle.dataset.product; });
+    var pdStrip = pdArticle.querySelector('.pd-thumbs');
+    var pdImages = [{ src: pdMainImg.src, alt: pdMainImg.alt }];
+    var pdAt = 0;
+
+    /* Exposed so the colourway buttons below can repaint the strip. */
+    pdRepaint = function(variant) {
+      if (!pdGalleryProduct) return;
+      pdImages = galleryFor(pdGalleryProduct, variant);
+      if (!pdImages.length) return;
+      paintGallery(pdMainImg, pdStrip, 'pd-thumb', pdImages, function(i) { pdAt = i; });
+    };
+    pdRepaint((pdGalleryProduct && pdGalleryProduct.variants && pdGalleryProduct.variants[0]) || null);
+
+    pdMainImg.addEventListener('click', function() {
+      openLightbox(pdImages, pdAt, pdMainImg);
+    });
+  }
+
   // Close modal on overlay click
   var modalEl = document.getElementById('productModal');
   if (modalEl) modalEl.addEventListener('click', function(e) {
@@ -642,6 +1344,88 @@
       var name = this.closest('.shop-card').querySelector('.shop-card-name').textContent;
       openModal(name);
     });
+  });
+
+  /* ─── Save to Pinterest, and a card that is clickable all over ───
+     The button under each card was a third way to do what clicking the
+     photograph already did, and it was the tallest piece of white space in
+     the grid, so it is gone and the name and price open the box instead.
+
+     The Save button is built here rather than written into all twenty one
+     cards, and it reuses the Pinterest entry in SHARE_TARGETS so the pin a
+     shopper saves from the grid matches the one they would get from the box's
+     own page. */
+  var pinTarget = SHARE_TARGETS.filter(function(t) { return t.name === 'Pinterest'; })[0];
+
+  document.querySelectorAll('.shop-card').forEach(function(card) {
+    var body = card.querySelector('.shop-card-body');
+    var nameEl = card.querySelector('.shop-card-name');
+    if (body && nameEl) {
+      body.addEventListener('click', function() { openModal(nameEl.textContent); });
+    }
+
+    var frame = card.querySelector('.shop-card-frame');
+    var link = card.querySelector('.shop-card-link');
+    var img = card.querySelector('.shop-card-img');
+    if (!pinTarget || !frame || !link || !img || !nameEl) return;
+
+    /* .href and .src read back absolute, which is what Pinterest needs. */
+    var pin = document.createElement('a');
+    pin.className = 'shop-pin';
+    pin.href = pinTarget.href
+      .replace('{url}', encodeURIComponent(link.href))
+      .replace('{image}', encodeURIComponent(img.src))
+      .replace('{title}', encodeURIComponent(nameEl.textContent + ' from Occasions Box'));
+    pin.target = '_blank';
+    pin.rel = 'noopener noreferrer';
+    pin.setAttribute('aria-label', 'Save ' + nameEl.textContent + ' to Pinterest');
+    pin.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' +
+      pinTarget.icon + '"/></svg>Save';
+    /* Clicking the card opens the box. Saving it must not. */
+    pin.addEventListener('click', function(e) { e.stopPropagation(); });
+    frame.appendChild(pin);
+
+    /* ─── Quick view ───
+       The whole card already opens the box, but nothing on it said so. A bar
+       across the foot of the photograph on hover does, and it is the one
+       affordance the View Details button was carrying before the grid gave
+       its room back to the photographs. */
+    var quick = document.createElement('button');
+    quick.type = 'button';
+    quick.className = 'shop-quickview';
+    quick.textContent = 'Quick view';
+    quick.setAttribute('aria-label', 'Quick view of ' + nameEl.textContent);
+    quick.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openModal(nameEl.textContent);
+    });
+    frame.appendChild(quick);
+
+    /* ─── Paging the photographs on the card ───
+       A box with several shots can be flicked through without opening it,
+       which is how somebody scanning twenty one boxes decides which one to
+       open. One photograph and the arrows never appear. */
+    var product = allProducts.find(function(pr) { return pr.name === nameEl.textContent; });
+    var shots = product ? galleryFor(product, null) : [];
+    if (shots.length > 1) {
+      var at = 0;
+      var step = function(by, e) {
+        e.stopPropagation();
+        at = (at + by + shots.length) % shots.length;
+        img.src = shots[at].src;
+        img.alt = shots[at].alt;
+      };
+      ['prev', 'next'].forEach(function(dir) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'shop-page shop-page-' + dir;
+        b.innerHTML = dir === 'prev' ? '&lsaquo;' : '&rsaquo;';
+        b.setAttribute('aria-label', (dir === 'prev' ? 'Previous' : 'Next') +
+          ' photograph of ' + nameEl.textContent);
+        b.addEventListener('click', function(e) { step(dir === 'prev' ? -1 : 1, e); });
+        frame.appendChild(b);
+      });
+    }
   });
 
   /* The photograph is a real link to the box's own page, which is what a
@@ -677,7 +1461,10 @@
         pdRoot.querySelectorAll('.pd-variant').forEach(function(b) {
           b.classList.toggle('active', b === btn);
         });
-        if (pdImg && v.img) { pdImg.src = v.img; }
+        /* The colourway is a different set of photographs, not a different
+           first photograph, so the strip is rebuilt with it. */
+        if (pdRepaint) pdRepaint(v);
+        else if (pdImg && v.img) { pdImg.src = v.img; }
         /* The tea is the one line that differs between the colourways. */
         if (pdContents && v.tea) {
           var items = pdContents.querySelectorAll('li');
@@ -691,7 +1478,8 @@
       var qty = parseInt(document.getElementById('pdQty').value, 10);
       if (!qty || qty < 1) qty = 1;
       if (qty > MAX_QTY) qty = MAX_QTY;
-      if (!addToCart(pdProduct, currentVariant, qty)) return;
+      var pick = readCardPicker('pdCard', 'pdCardMsg');
+      if (!addToCart(pdProduct, currentVariant, qty, pick.card, pick.message)) return;
       if (document.getElementById('cartOverlay')) {
         openCart();
       } else {
@@ -706,7 +1494,8 @@
     var qty = parseInt(document.getElementById('modalQty').value, 10);
     if (!qty || qty < 1) qty = 1;
     if (qty > MAX_QTY) qty = MAX_QTY;
-    if (!addToCart(currentProduct, currentVariant, qty)) return;
+    var pick = readCardPicker('modalCard', 'modalCardMsg');
+    if (!addToCart(currentProduct, currentVariant, qty, pick.card, pick.message)) return;
     closeModal();
     if (document.getElementById('cartOverlay')) {
       openCart();
@@ -725,6 +1514,7 @@
     var entry = resolved[parseInt(row.dataset.line, 10)];
     if (!entry) return;
     var act = btn.dataset.act;
+    if (act === 'card' || act === 'msg') return; // handled on change, below
     if (act === 'inc') {
       entry.line.qty = Math.min(entry.line.qty + 1, MAX_QTY);
     } else if (act === 'dec') {
@@ -733,6 +1523,36 @@
     if (act === 'remove' || entry.line.qty < 1) {
       cart = cart.filter(function(l) { return l !== entry.line; });
     }
+    saveCart();
+    renderCart();
+  });
+
+  /* Choosing the card in the cart, for anyone who added the box before
+     deciding, or who is sending the same box to two people. */
+  if (cartItemsEl) cartItemsEl.addEventListener('change', function(e) {
+    var field = e.target.closest('.cart-card-select, .cart-msg');
+    if (!field) return;
+    var row = field.closest('.cart-item');
+    if (!row) return;
+    var resolved = resolveCart();
+    var entry = resolved[parseInt(row.dataset.line, 10)];
+    if (!entry) return;
+    if (field.classList.contains('cart-msg')) entry.line.message = cleanMessage(field.value);
+    else entry.line.card = isValidCard(field.value) ? field.value : '';
+
+    /* Changing a card can make two lines identical. Fold them together rather
+       than leaving the same box listed twice with the same card. */
+    var merged = [];
+    cart.forEach(function(line) {
+      var twin = merged.find(function(m) {
+        return m.name === line.name && (m.variant || '') === (line.variant || '') &&
+               (m.card || '') === (line.card || '');
+      });
+      if (twin) twin.qty = Math.min(twin.qty + line.qty, MAX_QTY);
+      else merged.push(line);
+    });
+    cart = merged;
+
     saveCart();
     renderCart();
   });

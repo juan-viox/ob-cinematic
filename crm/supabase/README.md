@@ -1,11 +1,11 @@
 # Supabase schema — OccasionsBox CRM
 
 **Quickest path on a new, empty project:** paste `setup-all.sql` into the
-Supabase SQL Editor and run it once. It is the nine migrations below concatenated
+Supabase SQL Editor and run it once. It is the ten migrations below concatenated
 in order, so there is nothing to sequence by hand. Do not run it against a
 database that already has the CRM schema: `001`, `003`, `004` and `005` all use
 plain `CREATE TABLE` / `CREATE POLICY` and fail on a second run. To bring an
-older CRM database up to date instead, run `006`, `007`, `008`, `009` and then
+older CRM database up to date instead, run `006`, `007`, `008`, `009`, `010` and then
 the seed, in that order — those are the idempotent ones. Running only `006`
 is not enough: `007` is what creates the catalogue columns and every one of
 `inventory_items`, `product_components`, `inventory_movements`, `occasions`,
@@ -25,9 +25,10 @@ them one at a time (Dashboard → SQL Editor → New query → paste the file �
 | 7 | `migrations/007_catalogue_occasions_proposals.sql` | The catalogue on `products`; `inventory_items`, `product_components`, `inventory_movements`; `occasions` + `client_occasions`; `proposals` + `proposal_items`; `orders` + `order_items`; `document_counters` and `next_document_number()`; deal columns for quantity / needed_by / occasion |
 | 8 | `migrations/008_function_hardening.sql` | Pins `search_path` on every function the linter flagged (a mutable one lets a caller shadow an unqualified name inside a `SECURITY DEFINER` body), and takes `next_document_number()` away from `anon` — it writes, so only members and the service role may call it |
 | 9 | `migrations/009_rls_initplan_and_indexes.sql` | Rewrites the eight policies that called `auth.uid()` per row as `(SELECT auth.uid())` so the planner evaluates it once per query, and adds `organization_id` indexes on `inventory_movements` and `product_components` |
-| 10 | `seed/occasionsbox_catalogue.sql` | The catalogue itself: 21 boxes, 3 tiers, 3 services, 3 concierge plans, 8 add-ons, 91 inventory components with their bill of materials, 27 gifting occasions and 6 outreach email templates |
+| 10 | `migrations/010_order_card.sql` | Adds `card` and `card_message` to `order_items`. Every box ships with a handwritten 5x7 card and the shop now asks which one, so an order arrives knowing what to write |
+| 11 | `seed/occasionsbox_catalogue.sql` | The catalogue itself: 21 boxes, 3 tiers, 3 services, 3 concierge plans, 8 add-ons, 91 inventory components with their bill of materials, 27 gifting occasions and 6 outreach email templates |
 
-`006` through `009` and the seed are all idempotent and can be re-run. The seed
+`006` through `010` and the seed are all idempotent and can be re-run. The seed
 refreshes names, prices, contents and photographs and never overwrites stock,
 costs, reorder points or `is_active`, so it is safe against a live database.
 
@@ -45,10 +46,11 @@ Files that used to live here and must **not** be applied (deleted from the repo)
 
 ## The live project
 
-Project `wztawjcxezojoqvpxvoa` ("OB-CRM", us-west-2) already has all nine
-migrations and the catalogue applied. Nothing here needs running against it
+Project `wztawjcxezojoqvpxvoa` ("OB-CRM", us-west-2) has migrations `001`
+through `009` and the catalogue applied. **`010` has not been run against it
+yet**: until it is, an order carrying a card choice loses it on the way in. Nothing here needs running against it
 again; the files are the record of what it contains, and re-running any of
-`006`–`009` or the seed against it is safe.
+`006`–`010` or the seed against it is safe.
 
 ## After the migrations
 
