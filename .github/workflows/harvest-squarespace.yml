@@ -23,6 +23,13 @@ on:
   # A GitHub App token cannot POST to the dispatches endpoint, so pushing a
   # change to this workflow or its script is how the run actually starts.
   push:
+    # Never on main. Merging this workflow into main re-triggered it there, and
+    # it committed back every photograph the curation pass had deleted: the
+    # harvest fetches everything the old page had, and choosing which of those
+    # to keep is a judgement it cannot make twice the same way. It belongs on a
+    # working branch, where its output is reviewed before it merges.
+    branches-ignore:
+      - main
     paths:
       - '.github/workflows/harvest-squarespace.yml'
       - '.github/scripts/harvest-squarespace.mjs'
