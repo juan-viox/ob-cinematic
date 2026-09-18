@@ -670,6 +670,14 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 .cl-kr         { height: 64px; }
 .cl-chubb      { height: 31px; }
 
+/* Set like the other quiet notes under a photograph row, at the muted weight
+   so it reads as a footnote to the marks rather than a tenth logo. */
+.clients-note {
+  font-family: var(--sans); font-size: 13px; line-height: 1.6;
+  color: var(--muted); text-align: center;
+  margin: 52px 0 0; font-style: italic;
+}
+
 @media (max-width: 768px) {
   .clients-grid { grid-template-columns: repeat(2, 1fr); gap: 40px 28px; }
 }
