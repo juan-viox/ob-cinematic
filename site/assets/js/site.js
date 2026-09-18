@@ -628,12 +628,68 @@
   // Wire all "View Details" buttons in the shop grid
   /* The photograph is the thing people reach for, so it opens the box as
      readily as the button does. The button stays for the keyboard. */
-  document.querySelectorAll('.shop-card-btn, .shop-card-img').forEach(function(el) {
+  document.querySelectorAll('.shop-card-btn').forEach(function(el) {
     el.addEventListener('click', function() {
       var name = this.closest('.shop-card').querySelector('.shop-card-name').textContent;
       openModal(name);
     });
   });
+
+  /* The photograph is a real link to the box's own page, which is what a
+     crawler follows and what a middle click, a long press or a shared link
+     opens. A plain left click still opens the modal, because browsing twenty
+     one boxes is faster without a page load between each one. */
+  document.querySelectorAll('.shop-card-link').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      openModal(this.closest('.shop-card').querySelector('.shop-card-name').textContent);
+    });
+  });
+
+  /* ─── Product page ───
+     Every box now has its own address. The page is rendered at build time, so
+     a crawler and anyone without JavaScript still see the whole box and its
+     contents; this adds only the buying and the colourway switch. */
+  var pdRoot = document.querySelector('.pd[data-product]');
+  var pdProduct = pdRoot && allProducts.find(function(p) { return p.name === pdRoot.dataset.product; });
+  if (pdProduct) {
+    currentProduct = pdProduct;
+    currentVariant = (pdProduct.variants && pdProduct.variants[0]) || null;
+
+    var pdImg = document.getElementById('pdImg');
+    var pdContents = document.getElementById('pdContents');
+
+    pdRoot.querySelectorAll('.pd-variant').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var v = pdProduct.variants[parseInt(btn.dataset.variant, 10)];
+        if (!v) return;
+        currentVariant = v;
+        pdRoot.querySelectorAll('.pd-variant').forEach(function(b) {
+          b.classList.toggle('active', b === btn);
+        });
+        if (pdImg && v.img) { pdImg.src = v.img; }
+        /* The tea is the one line that differs between the colourways. */
+        if (pdContents && v.tea) {
+          var items = pdContents.querySelectorAll('li');
+          if (items[1]) items[1].innerHTML = v.tea;
+        }
+      });
+    });
+
+    var pdAdd = document.getElementById('pdAdd');
+    if (pdAdd) pdAdd.addEventListener('click', function() {
+      var qty = parseInt(document.getElementById('pdQty').value, 10);
+      if (!qty || qty < 1) qty = 1;
+      if (qty > MAX_QTY) qty = MAX_QTY;
+      if (!addToCart(pdProduct, currentVariant, qty)) return;
+      if (document.getElementById('cartOverlay')) {
+        openCart();
+      } else {
+        showToast(orderName() + ' added to your cart.', 'success');
+      }
+    });
+  }
 
   var modalAdd = document.getElementById('modalAdd');
   if (modalAdd) modalAdd.addEventListener('click', function() {

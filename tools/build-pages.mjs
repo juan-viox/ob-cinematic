@@ -11,7 +11,7 @@
  * The output is committed; Vercel serves site/ directly with no build step,
  * so edit the partials and re-run this rather than editing site/*.html.
  */
-import { readFileSync, writeFileSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, statSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -64,7 +64,10 @@ const OG = {
   contact: ['/assets/og/contact.jpg',
     'An open Occasions Box with an olive wood board, a gold spoon and a soy candle'],
 };
-const ogFor = (page) => OG[page.slug] || OG_DEFAULT;
+const ogFor = (page) => page.product
+  ? [`/assets/og/products/${slugify(page.product.name)}.jpg`,
+     `The ${page.product.name} gift box from Occasions Box`]
+  : (OG[page.slug] || OG_DEFAULT);
 
 /* The shop grid is static HTML, so a crawler already sees 21 boxes. What it
    cannot see is which number is a price and whether the box is in stock, so
@@ -90,6 +93,53 @@ function loadProducts() {
   return products;
 }
 const PRODUCTS = loadProducts();
+
+/* What is in each box, also lifted from site.js so the shop grid, the modal
+   and the product pages can never disagree about a box's contents. */
+function loadContents() {
+  const js = read('site/assets/js/site.js');
+  const start = js.indexOf('var PRODUCT_CONTENTS = {');
+  if (start === -1) throw new Error('site.js: PRODUCT_CONTENTS not found');
+  const open = js.indexOf('{', start);
+  const end = js.indexOf('\n  };', open);
+  if (end === -1) throw new Error('site.js: end of PRODUCT_CONTENTS not found');
+  const map = new Function(`return ${js.slice(open, end + 4)}`)();
+  if (!map || !Object.keys(map).length) {
+    throw new Error('site.js: PRODUCT_CONTENTS parsed to nothing');
+  }
+  return map;
+}
+const CONTENTS = loadContents();
+
+/* Each box gets its own address. Until now all 21 lived behind one /shop URL
+   and a modal, so nothing could be linked to, shared or found by name. */
+const productUrl = (p) => `/shop/${slugify(p.name)}`;
+
+/* The makers are the reason these boxes cost what they do, so the search
+   result names them. Items read "<b>Brand</b> | description"; a few lead with
+   the description instead, and those are skipped rather than guessed at. */
+function makersIn(name) {
+  const seen = [];
+  for (const item of CONTENTS[name] || []) {
+    const m = /^<b>\s*([^<|]+?)\s*(?:<\/b>|\|)/.exec(item);
+    if (!m) continue;
+    const brand = m[1].replace(/\.$/, '').trim();
+    if (brand && !/^(OB|Occasions Box|Keepsake)/i.test(brand) && !seen.includes(brand)) {
+      seen.push(brand);
+    }
+    if (seen.length === 3) break;
+  }
+  return seen;
+}
+
+function productDesc(p) {
+  const makers = makersIn(p.name);
+  const made = makers.length >= 2
+    ? `Inside: ${makers.slice(0, -1).join(', ')} and ${makers.at(-1)}. `
+    : '';
+  return `${p.name}, $${p.price}. ${made}Packed by hand in Fort Lee, New Jersey, `
+       + 'finished with a handwritten note and shipped nationwide.';
+}
 
 /* A schema.org graph per page. One <script> holds the lot; the @id references
    let the nodes point at each other instead of repeating the business. */
@@ -159,16 +209,40 @@ function ldGraph(page) {
 
   /* Home is the root, so a one-item trail would be noise. */
   if (page.url !== '/') {
-    const crumb = page.title.split(' | ')[0];
+    const trail = page.product
+      ? [['Home', `${SITE}/`], ['Shop', `${SITE}/shop`], [page.product.name, canonical]]
+      : [['Home', `${SITE}/`], [page.title.split(' | ')[0], canonical]];
     webpage.breadcrumb = { '@id': `${canonical}#breadcrumb` };
     graph.push({
       '@type': 'BreadcrumbList',
       '@id': `${canonical}#breadcrumb`,
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` },
-        { '@type': 'ListItem', position: 2, name: crumb, item: canonical },
-      ],
+      itemListElement: trail.map(([name, item], n) => (
+        { '@type': 'ListItem', position: n + 1, name, item })),
     });
+  }
+
+  if (page.product) {
+    const p = page.product;
+    graph.push({
+      '@type': 'Product',
+      '@id': `${canonical}#product`,
+      name: p.name,
+      image: [SITE + p.img, SITE + ogPath],
+      description: page.desc,
+      brand: { '@type': 'Brand', name: BIZ.name },
+      category: 'Gift Boxes',
+      sku: slugify(p.name),
+      offers: {
+        '@type': 'Offer',
+        price: p.price.toFixed(2),
+        priceCurrency: 'USD',
+        availability: 'https://schema.org/InStock',
+        itemCondition: 'https://schema.org/NewCondition',
+        url: canonical,
+        seller: { '@id': ORG_ID },
+      },
+    });
+    webpage.mainEntity = { '@id': `${canonical}#product` };
   }
 
   if (page.slug === 'shop') {
@@ -182,7 +256,7 @@ function ldGraph(page) {
         position: i + 1,
         item: {
           '@type': 'Product',
-          '@id': `${canonical}#product-${slugify(p.name)}`,
+          '@id': `${SITE}${productUrl(p)}#product`,
           name: p.name,
           image: SITE + p.img,
           /* p.note is an allergen or suitability warning where one exists; it
@@ -193,14 +267,14 @@ function ldGraph(page) {
             : 'A curated Occasions Box gift box, packed by hand and finished with a handwritten card.',
           brand: { '@type': 'Brand', name: BIZ.name },
           category: 'Gift Boxes',
-          url: canonical,
+          url: SITE + productUrl(p),
           offers: {
             '@type': 'Offer',
             price: p.price.toFixed(2),
             priceCurrency: 'USD',
             availability: 'https://schema.org/InStock',
             itemCondition: 'https://schema.org/NewCondition',
-            url: canonical,
+            url: SITE + productUrl(p),
             seller: { '@id': ORG_ID },
           },
         },
@@ -260,7 +334,12 @@ function ldGraph(page) {
   return { '@context': 'https://schema.org', '@graph': graph };
 }
 
-const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function slugify(s) {
+  /* Drop the apostrophe rather than turn it into a separator, so Host's
+     Delight is hosts-delight and not host-s-delight. */
+  return s.toLowerCase().replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 
 const NAV = partial('nav');
 const FOOTER = partial('footer');
@@ -356,6 +435,116 @@ const PAGES = [
   },
 ];
 
+/* Photographs are not one shape: most are 5:4, several 3:2, one square. The
+   markup states each file's real size so the browser reserves the right box
+   and the page does not jump while the photo loads. */
+function jpegSize(file) {
+  const buf = readFileSync(join(ROOT, file));
+  if (buf.readUInt16BE(0) !== 0xffd8) throw new Error(`${file}: not a JPEG`);
+  let i = 2;
+  while (i < buf.length - 9) {
+    if (buf[i] !== 0xff) { i++; continue; }
+    const marker = buf[i + 1];
+    const isStartOfFrame = marker >= 0xc0 && marker <= 0xcf
+      && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc;
+    if (isStartOfFrame) return { h: buf.readUInt16BE(i + 5), w: buf.readUInt16BE(i + 7) };
+    if (marker === 0xd8 || (marker >= 0xd0 && marker <= 0xd9)) { i += 2; continue; }
+    i += 2 + buf.readUInt16BE(i + 2);
+  }
+  throw new Error(`${file}: no frame header`);
+}
+
+/* ── Product pages ─────────────────────────────────────────────────────────
+   One page per box, built from the same catalogue the grid renders from, so
+   a price or a contents list can only ever be changed in one place. */
+function productBody(p) {
+  const contents = CONTENTS[p.name];
+  const variants = p.variants || [];
+  const img = p.img;
+  const { w, h } = jpegSize(`site${img}`);
+  const i = PRODUCTS.indexOf(p);
+  const related = [1, 2, 3, 4].map((k) => PRODUCTS[(i + k) % PRODUCTS.length]);
+
+  const variantBlock = variants.length ? `
+      <div class="pd-variants">
+        <div class="pd-variants-label">Choose your colour</div>
+${variants.map((v, n) => `        <button type="button" class="pd-variant${n === 0 ? ' active' : ''}" data-variant="${n}">${v.label}</button>`).join('\n')}
+      </div>` : '';
+
+  const contentsBlock = contents && contents.length ? `
+      <div class="pd-contents" id="pdContents">
+        <div class="pd-contents-title">Box includes</div>
+        <ul>
+${contents.map((item) => `          <li>${item}</li>`).join('\n')}
+        </ul>
+      </div>` : `
+      <p class="pd-generic">Thoughtfully curated gift box featuring premium artisan products, beautifully wrapped with tissue and ribbon, ready to delight.</p>`;
+
+  const cautionBlock = p.note
+    ? `\n      <p class="pd-caution">${p.note}</p>` : '';
+
+  return `<!-- ═══ PRODUCT: ${p.name} ═══ -->
+<article class="pd" data-product="${esc(p.name)}">
+  <nav class="pd-crumb" aria-label="Breadcrumb">
+    <a href="/">Home</a> <span aria-hidden="true">&rsaquo;</span>
+    <a href="/shop">Shop</a> <span aria-hidden="true">&rsaquo;</span>
+    <span aria-current="page">${p.name}</span>
+  </nav>
+
+  <div class="pd-grid">
+    <figure class="pd-gallery">
+      <img id="pdImg" src="${img}" width="${w}" height="${h}" fetchpriority="high"
+           alt="The ${p.name} gift box from Occasions Box">
+    </figure>
+
+    <div class="pd-body">
+      <h1 class="pd-name">${p.name}</h1>
+      <div class="pd-price">$${p.price.toFixed(2)}</div>${variantBlock}${contentsBlock}${cautionBlock}
+      <p class="pd-sub">Contents are sourced from small makers in small batches. If one sells out or changes a product, we substitute something of equal or greater value in keeping with the box. Photographs show a representative selection.</p>
+
+      <div class="pd-buy">
+        <div class="pd-qty">
+          <label for="pdQty">Qty</label>
+          <input type="number" id="pdQty" value="1" min="1" max="20">
+        </div>
+        <button type="button" class="pd-add" id="pdAdd">Add to Cart</button>
+      </div>
+
+      <p class="pd-ship">Free gift wrapping &middot; Handwritten note included &middot; Ships nationwide</p>
+    </div>
+  </div>
+
+  <section class="pd-more">
+    <h2 class="pd-more-title">More boxes</h2>
+    <div class="pd-more-grid">
+${related.map((r) => {
+  const rs = jpegSize(`site${r.img}`);
+  return `      <a class="pd-more-card" href="${productUrl(r)}">
+        <img src="${r.img}" width="${rs.w}" height="${rs.h}" loading="lazy" alt="The ${r.name} gift box">
+        <span class="pd-more-name">${r.name}</span>
+        <span class="pd-more-price">$${r.price.toFixed(2)}</span>
+      </a>`;
+}).join('\n')}
+    </div>
+    <p class="pd-more-all"><a href="/shop">See all ${PRODUCTS.length} boxes</a></p>
+  </section>
+</article>
+`;
+}
+
+const PRODUCT_PAGES = PRODUCTS.map((p) => ({
+  slug: `shop/${slugify(p.name)}`,
+  url: productUrl(p),
+  nav: 'shop',
+  title: `${p.name} Gift Box, $${p.price} | Occasions Box`,
+  desc: productDesc(p),
+  sections: [],
+  html: productBody(p),
+  product: p,
+  cart: true,
+  paypal: true,
+}));
+
 const navFor = (page) => {
   const mark = (which) => (page.nav === which ? ' class="active"' : '');
   return NAV
@@ -374,12 +563,14 @@ const headerFor = (page) => page.header
     `  <p>${page.header.p}</p>\n</header>\n`
   : '';
 
-const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+function esc(s) {
+  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
 
 function render(page) {
   const canonical = SITE + page.url;
   const [ogImage, ogAlt] = ogFor(page);
-  const body = page.sections.map(section).join('\n\n');
+  const body = page.html || page.sections.map(section).join('\n\n');
   const extras = [page.modal ? MODAL : '', page.cart ? CART : '', WIDGETS].filter(Boolean).join('\n\n');
   const paypal = page.paypal
     ? '\n<!-- SANDBOX — replace client-id=sb with the live PayPal client ID before launch.\n' +
@@ -430,7 +621,7 @@ ${JSON.stringify(ldGraph(page), null, 2)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 </head>
-<body class="${page.nav === 'home' ? 'home' : `page-${page.slug}`}">
+<body class="${page.nav === 'home' ? 'home' : `page-${page.slug.replace('/', '-')}`}">
 
 ${navFor(page)}
 ${headerFor(page)}
@@ -457,13 +648,15 @@ function assertCommentsBalanced(slug, html) {
   }
 }
 
+mkdirSync(join(ROOT, 'site/shop'), { recursive: true });
+
 let n = 0;
-for (const page of PAGES) {
+for (const page of [...PAGES, ...PRODUCT_PAGES]) {
   const out = `site/${page.slug}.html`;
   const html = render(page);
   assertCommentsBalanced(page.slug, html);
   writeFileSync(join(ROOT, out), html, 'utf8');
-  console.log(`${out.padEnd(28)} ${page.url.padEnd(18)} ${page.sections.join(', ')}`);
+  console.log(`${out.padEnd(34)} ${page.url.padEnd(26)} ${page.product ? 'product' : page.sections.join(', ')}`);
   n++;
 }
 console.log(`\n${n} pages written.`);
@@ -475,8 +668,10 @@ console.log(`\n${n} pages written.`);
    change"; a sitemap that claims today's date on every page is noise Google
    learns to ignore. */
 const lastModified = (page) => {
-  const dates = page.sections.map((s) => {
-    const file = `tools/sections/${s}.html`;
+  const files = page.sections.length
+    ? page.sections.map((s) => `tools/sections/${s}.html`)
+    : ['site/assets/js/site.js'];
+  const dates = files.map((file) => {
     /* A fresh clone stamps every file with the checkout time, which would put
        today's date on all eight pages forever. Git knows when the content
        actually changed; fall back to the mtime only if git is unavailable. */
@@ -493,22 +688,24 @@ const lastModified = (page) => {
 /* The home page is what we most want crawled; policy pages least. */
 const PRIORITY = { index: '1.0', shop: '0.9', 'custom-gifting': '0.9', concierge: '0.8',
                    about: '0.7', contact: '0.7' };
+const priorityFor = (page) => (page.product ? '0.8' : PRIORITY[page.slug] || '0.3');
+const SITEMAP_PAGES = [...PAGES, ...PRODUCT_PAGES];
 
 const sitemap = [
   '<?xml version="1.0" encoding="UTF-8"?>',
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-  ...PAGES.map((page) => [
+  ...SITEMAP_PAGES.map((page) => [
     '  <url>',
     `    <loc>${SITE}${page.url}</loc>`,
     `    <lastmod>${lastModified(page)}</lastmod>`,
-    `    <priority>${PRIORITY[page.slug] || '0.3'}</priority>`,
+    `    <priority>${priorityFor(page)}</priority>`,
     '  </url>',
   ].join('\n')),
   '</urlset>',
   '',
 ].join('\n');
 writeFileSync(join(ROOT, 'site/sitemap.xml'), sitemap, 'utf8');
-console.log(`site/sitemap.xml            ${PAGES.length} urls`);
+console.log(`site/sitemap.xml${' '.repeat(18)} ${SITEMAP_PAGES.length} urls`);
 
 /* /admin is the CRM behind a rewrite. It is not secret, but it is not ours to
    put in front of a searcher, and crawling it just burns budget. */
