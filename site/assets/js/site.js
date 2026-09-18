@@ -182,7 +182,7 @@
     {name:'Goodnight', price:130, img: '/assets/img/ob_1471-750w.jpg'},
     {name:'Uncorked', price:120, img: '/assets/img/0B0_2489-750w.jpg'},
     {name:'The Wind Down', price:150, img: '/assets/img/_MG_1792-750w.jpg'},
-    {name:'Mini Spa Day', note:"Contains essential oils and a clay mask. Not suitable as a gift for someone who is pregnant or nursing \u2014 tell us and we will swap the bath products for something safe.", price:115, img: '/assets/img/IMG_9325-750w.jpg'},
+    {name:'Mini Spa Day', note:"Contains essential oils and a clay mask. Not suitable as a gift for someone who is pregnant or nursing; tell us and we will swap the bath products for something safe.", price:115, img: '/assets/img/IMG_9325-750w.jpg'},
     {name:'First Night In', price:110, img: '/assets/img/ob_6944-750w.jpg'},
     {name:'Afternoon Tea', note:"Contains almond cookies (tree nuts).", price:128, img: '/assets/img/IMG_9730-750w.jpg'}
   ];
@@ -194,7 +194,7 @@
      order to PayPal and to the CRM, not just the picture on screen. */
   function orderName() {
     if (!currentProduct) return '';
-    return currentProduct.name + (currentVariant ? ' — ' + currentVariant.label : '');
+    return currentProduct.name + (currentVariant ? ' \u00b7 ' + currentVariant.label : '');
   }
 
   function escapeHtml(s) {
@@ -213,7 +213,7 @@
       var alt = typeof entry === 'string' ? '' : (entry && entry.alt) || '';
       return {
         src: src,
-        alt: alt ? label + ' — ' + alt : (i === 0 ? label + ' gift box' : label + ' gift box, another view')
+        alt: alt ? label + ', ' + alt : (i === 0 ? label + ' gift box' : label + ' gift box, another view')
       };
     }).filter(function(img) { return img.src; });
   }
@@ -221,7 +221,7 @@
   /* A colourway carries its own photographs where it has them; otherwise the
      product's own set stands in. */
   function galleryFor(product, variant) {
-    var label = product.name + (variant ? ' \u2014 ' + variant.label : '');
+    var label = product.name + (variant ? ' \u00b7 ' + variant.label : '');
     if (variant && variant.images) return normaliseImages(variant.images, label);
     if (variant && variant.img) return normaliseImages([variant.img], label);
     if (product.images) return normaliseImages(product.images, label);
@@ -369,7 +369,7 @@
         };
       });
     } catch (e) {
-      // Private browsing, blocked storage, corrupted JSON — start empty.
+      // Private browsing, blocked storage, corrupted JSON: start empty.
       return [];
     }
   }
@@ -383,7 +383,7 @@
   }
 
   function lineLabel(line) {
-    return line.name + (line.variant ? ' — ' + line.variant : '');
+    return line.name + (line.variant ? ' \u00b7 ' + line.variant : '');
   }
 
   /* The catalogue is the source of truth. A stored line that no longer
@@ -512,7 +512,7 @@
   }
 
   /* PayPal is told the whole cart, one item per line, with an item_total that
-     matches the sum — so the payer's receipt lists what they actually bought
+     matches the sum, so the payer's receipt lists what they actually bought
      and the CRM can reconcile against it line for line. */
   function mountCheckout() {
     var container = document.getElementById('paypal-button-container');
@@ -533,7 +533,7 @@
         var units = cartUnits(resolved);
         var description = resolved.length === 1
           ? resolved[0].label + ' Gift Box'
-          : 'Occasions Box — ' + units + ' gift boxes';
+          : 'Occasions Box: ' + units + ' gift boxes';
         return actions.order.create({
           purchase_units: [{
             description: description.slice(0, 127),
@@ -602,7 +602,7 @@
     })
     .catch(function(err) {
       console.error('Order recorded by PayPal but not by the CRM:', err);
-      showToast('Order received — we\'ll confirm by email', 'success');
+      showToast('Order received. We\'ll confirm by email', 'success');
     });
   }
 
@@ -827,7 +827,7 @@
     })
     .catch(function(error) {
       console.error('Contact form submit failed:', error);
-      showToast('Something went wrong — email Hello@occasionsbox.com', 'error');
+      showToast('Something went wrong. Email Hello@occasionsbox.com', 'error');
     })
     .finally(function() {
       btn.classList.remove('btn-loading');
@@ -860,7 +860,7 @@
     })
     .catch(function(err) {
       console.error('Newsletter signup failed:', err);
-      showToast('Something went wrong — email Hello@occasionsbox.com', 'error');
+      showToast('Something went wrong. Email Hello@occasionsbox.com', 'error');
     })
     .finally(function() {
       btn.classList.remove('btn-loading');

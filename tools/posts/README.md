@@ -26,7 +26,7 @@ order: 1
 
 Body markup that is already styled: `<p>`, `<h2>`, `<h3>`, `<ul>`, `<ol>`,
 `<blockquote>`, `<a>`, `<img>`. Use `<h2>` for sections and `<h3>` for the
-small gold label above a list. Don't put an `<h1>` in the body — the title
+small gold label above a list. Don't put an `<h1>` in the body; the title
 from the metadata is the page's only one.
 
 `image` must be a path under `site/assets/img/`, and it is read at build time

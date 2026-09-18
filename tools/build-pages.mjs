@@ -58,7 +58,7 @@ const SITE_ID = `${SITE}/#website`;
 
 /* Share cards, cropped to 1200x630 so Facebook, LinkedIn, iMessage and X all
    show the same frame instead of each picking its own crop of a tall photo.
-   [path, alt] — the alt is read aloud by screen readers on X. */
+   [path, alt]; the alt is read aloud by screen readers on X. */
 const OG_DEFAULT = ['/assets/og/occasionsbox.jpg',
   'A charcoal Occasions Box gift box with a gold embossed lid and ivory ribbon'];
 const OG = {
@@ -581,7 +581,7 @@ const PRODUCT_PAGES = PRODUCTS.map((p) => ({
    Adding a post is writing that one file: the post page, the index, the share
    meta, the structured data and the sitemap all follow from it.
 
-   With no posts the section does not exist at all — no page, no link, no
+   With no posts the section does not exist at all: no page, no link, no
    sitemap entry. An empty index is a thin page, and a thin page is worse for
    the site than no page. */
 function loadPosts() {

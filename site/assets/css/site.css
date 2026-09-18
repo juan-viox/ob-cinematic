@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════
-   OCCASIONS BOX — CINEMATIC SITE
+   OCCASIONS BOX / CINEMATIC SITE
    Brand: Gold (#c5a55a) + Black (#1a1a1a) + White
    Typography: Cormorant Garamond + Outfit
    ═══════════════════════════════════════════ */
@@ -132,12 +132,12 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.7; max-width: 60ch;
 }
 /* Hidden only once the inline head script confirms JS is running, and
-   revealed again by a failsafe if the animation library never loads —
+   revealed again by a failsafe if the animation library never loads;
    otherwise a CDN hiccup leaves a page blank. */
 html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 
 /* ═══════════════════════════════════════════
-   SECTION 1: HERO — SCROLL-DRIVEN VIDEO
+   SECTION 1: HERO / SCROLL-DRIVEN VIDEO
    ═══════════════════════════════════════════ */
 #hero {
   position: relative;
@@ -309,7 +309,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 }
 
 /* ═══════════════════════════════════════════
-   SECTION 5B: SHOP GRID — ALL PRODUCTS
+   SECTION 5B: SHOP GRID / ALL PRODUCTS
    ═══════════════════════════════════════════ */
 #shop { padding: 120px 24px; max-width: 1200px; margin: 0 auto; }
 .shop-header { text-align: center; margin-bottom: 56px; }
@@ -439,7 +439,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 .shop-card-btn:hover { background: var(--gold); color: #fff; }
 
 /* ═══════════════════════════════════════════
-   SECTION 6: HOW IT WORKS — PROCESS RAIL
+   SECTION 6: HOW IT WORKS / PROCESS RAIL
    Four steps read at a glance, in one screen. The old version pinned a
    mockup and dimmed three of the four steps until you scrolled past them,
    which meant the page cost four screens of scrolling to say four things.
@@ -536,7 +536,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 }
 
 /* ═══════════════════════════════════════════
-   SECTION 7: TESTIMONIALS — HORIZONTAL MARQUEE
+   SECTION 7: TESTIMONIALS / HORIZONTAL MARQUEE
    White ground so the section reads as its own
    block under the tinted concierge teaser above.
    ═══════════════════════════════════════════ */
@@ -596,7 +596,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 }
 
 /* ═══════════════════════════════════════════
-   SECTION 9: CONNECT — NEWSLETTER + SOCIAL
+   SECTION 9: CONNECT / NEWSLETTER + SOCIAL
    ═══════════════════════════════════════════ */
 #connect { padding: 92px 24px; background: var(--bg); }
 .connect-grid {
@@ -618,7 +618,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 .connect-col .social-links { margin-top: 30px; }
 
 /* ═══════════════════════════════════════════
-   SECTION 9: FOLLOW ALONG — SOCIAL
+   SECTION 9: FOLLOW ALONG / SOCIAL
    ═══════════════════════════════════════════ */
 #social {
   padding: 96px 24px; text-align: center;
@@ -743,7 +743,7 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   gap: 72px; align-items: start;
 }
 /* Fields are labelled and carry their own spacing, so the form is a block
-   rather than a gapped flex column — a flex gap would double the margins. */
+   rather than a gapped flex column; a flex gap would double the margins. */
 .contact-form { display: block; }
 .contact-form input:not([type="checkbox"]), .contact-form textarea {
   display: block; width: 100%; box-sizing: border-box;
@@ -850,7 +850,7 @@ footer {
    RESPONSIVE
    ═══════════════════════════════════════════ */
 @media (max-width: 900px) {
-  /* Not enough width for a side column — stack the hero copy at the bottom.
+  /* Not enough width for a side column; stack the hero copy at the bottom.
      The desktop drop would push it into the scroll hint from here. */
   .hero-copy { margin-top: 0; }
   .hero-overlay {
@@ -1790,7 +1790,7 @@ body.page-concierge #concierge { padding-top: 64px; }
 }
 
 /* Inner pages open with the compact nav and no hero behind it, so the 26px
-   scrolled logo is the page's only branding — give it a little more presence. */
+   scrolled logo is the page's only branding; give it a little more presence. */
 body:not(.home) .nav.scrolled .nav-logo img { height: 38px; }
 @media (max-width: 480px) {
   body:not(.home) .nav.scrolled .nav-logo img { height: 32px; }
@@ -1800,7 +1800,7 @@ body:not(.home) .nav.scrolled .nav-logo img { height: 38px; }
    CART
    Someone sending gifts is rarely sending one, so the shop keeps a basket.
    The drawer slides in from the right over the grid, which keeps the
-   browsing context intact behind it — "continue shopping" is one tap back.
+   browsing context intact behind it; "continue shopping" is one tap back.
    ═══════════════════════════════════════════ */
 .nav-actions { display: flex; align-items: center; gap: 16px; }
 .nav-cart {
@@ -2000,7 +2000,7 @@ body:not(.home) .nav.scrolled .nav-logo img { height: 38px; }
   background: var(--bg-alt);
   position: sticky; top: 108px;
 }
-/* The photographs are not one shape — most 5:4, several 3:2, one square — so
+/* The photographs are not one shape: most 5:4, several 3:2, one square, so
    the frame takes the file's own ratio from its width and height attributes
    rather than a fixed height that would crop a second time. */
 .pd-gallery img { display: block; width: 100%; height: auto; }
@@ -2251,7 +2251,7 @@ body:not(.home) .nav.scrolled .nav-logo img { height: 38px; }
 .box-link img { display: block; }
 
 /* ═══════════════════════════════════════════
-   OCCASIONS — /custom-gifting
+   OCCASIONS, /custom-gifting
    Eight short entries, so the grid stays even at every breakpoint: four
    across, then two, then one. Each is a heading and one line, not a card,
    because a border around eight items would fight the pricing table below.
