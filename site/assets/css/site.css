@@ -139,9 +139,13 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
 /* ═══════════════════════════════════════════
    SECTION 1: HERO / SCROLL-DRIVEN VIDEO
    ═══════════════════════════════════════════ */
+/* The sticky panel inside is 100vh, so this height is how far someone has
+   to scroll before the page moves on: at 300vh that was two full screens of
+   scrolling past a photograph that had already finished saying what it says.
+   150vh keeps the drift and the zoom and halves the wait. */
 #hero {
   position: relative;
-  height: 300vh;
+  height: 150vh;
 }
 .hero-sticky {
   position: sticky; top: 0;
@@ -223,14 +227,6 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   transition: color 0.2s;
 }
 .hero-cta-secondary:hover { color: var(--gold); }
-.hero-scroll-hint {
-  position: absolute; bottom: 3vh; left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px; color: var(--muted);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:.4}50%{opacity:1} }
-
 /* Hero fallback gradient (used if frames not loaded) */
 .hero-fallback {
   position: absolute; inset: 0;
