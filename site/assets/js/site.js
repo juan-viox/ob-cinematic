@@ -173,51 +173,189 @@
      product changes, this changes with it. Keep them to two or three
      sentences: the list underneath does the detail. */
   var PRODUCT_STORIES = {
-    "Love You": "The one to send when the words matter more than the occasion. A camel leather wristlet and a script keychain to carry, a blush notebook and a gold pen to write in, and a soy candle for the evening it gets opened.",
-    "Peaches & Cream": "Soft coral and blush from start to finish. A hand-loomed Turkish towel and a sea sponge for a long morning, a glass travel cup for the walk out of the door, and Dominican white chocolate for somewhere in between.",
-    "Spa Weekend": "Two days off, boxed. A hand-loomed Turkish towel and eucalyptus mint body wash for the bath, a gold tin candle to light beside it, and lemon curd biscuits for afterwards.",
-    "Coffee Lover": "For the person who measures the morning in cups. Colonial Blend coffee from Oliver Pluff, a clear double-insulated mug to drink it from, a teak bowl and spoon, and 100% dark chocolate for the cup that needs it.",
+    "Love You": "Indulge in a delightful journey of sensory delights with this curated assortment, designed to pamper and uplift your spirit. Embark on a sensory journey on a serene evening illuminated by the soft glow of a P.F. Candle Co. Soy Candle, filling the air with the intoxicating fragrance of Sunbloom. Enhance the ambiance with OB Mini signature matches, igniting tranquility while capturing your thoughts with OB’s gold ballpoint pen in the Ramona & Ruth Soft Blush Slim Notebook. Carry all of your essentials including your keys with the Twin Sparrow \"Love You\" Script Keychain and complete the experience by indulging in Vinoos Vegan Wine Gummies, a guilt-free delight, adding opulence to your everyday rituals. Discover a harmonious blend of style, substance, and sweetness in this refined ensemble.",
+    "Peaches & Cream": "Experience bliss with our curated selection, designed to elevate your daily routines. Wrap yourself in luxury with our Hand-Loomed Turkish Towel. Sip your favorite brew on-the-go with the Uber Star Reusable Glass Travel Coffee Cup. Pamper your skin with the Fee Sea Sponge for a radiant glow. Of course, don’t forget to set the mood with the Candlefolk Gold Travel Candle's Juniper & Mint scent and Indulge in Fruition Chocolate Works Vanilla Bean Toasted White Chocolate. Treat yourself or a loved one to this exquisite ensemble, igniting joy and serenity in every moment.",
+    "Spa Weekend": "Indulge in luxury with this curated assortment of luxury. Wrap yourself in comfort with our Hand-Loomed Turkish Towel, while Long Wknd Body Wash Soap transforms your bath into a spa retreat. Illuminate your space with Candlefish No. 40 Gold Tin Soy Candle, and ignite joy with OB Mini Matches. Top this divine adventure by savoring Lady Joseph's Handcrafted Lemon Curd Biscuits. Elevate your gifting with our exquisite ensemble, designed to delight the senses and warm the heart.",
+    "Coffee Lover": "Treat yourself or a loved one to this delightful ensemble of comfort and joy. An elevated curation of essentials for your daily rituals. Sip in style with The Katy Cup, keeping your Oliver Pluff & Co.'s Colonial Blend Coffee at the perfect temperature. Indulge in Fruition Chocolate Works' 100% Dark Chocolate, pure cocoa from Dominican Republic and Peru. Add charm with Erin Flett's Oatmeal Dandelion Linen Tea Towel and serve with elegance using Bali Harvest's Round Teak Bowl and Wooden Spoon. As a final touch, set the tone with Benjamin Soap Co.'s Soy and Coconut Travel Candle in Cashmere scent. This curation is filled with elegance for the coffee lover.",
     "The Reset": "A box about starting again. A self-care planner to lay out the week, an insulated bottle to keep beside it, wildflower facial steam for the evening, and a deep grey candle for the quiet part of it.",
     "The Dinner Party": "Everything the table needs except the guests. Three gold-plated cheese knives, leather coasters, a linen sun tea towel and a host book, finished with almond cookies for the board.",
-    "Host's Delight": "The thank-you for whoever had everyone over. A teak edge-grain chopping block, organic loose-leaf tea, and a jar of the Bee Box's honey with a wooden dipper. Choose rose mint or chamomile.",
+    "Host's Delight": "You can never go wrong with a home-themed gift. Bring or send the perfect gift to your next birthday event or housewarming. Surprise your recipient with delicious organic tea and honey for that perfect warm and cozy feel. A decadent wooden chop or cheese board and some fabulous dishcloths that help reduce the use of paper towels. This is a gift you know they’ll use and LOVE!",
     "The Nightcap": "For the hour after the plates are cleared. An antique rose gold pineapple corkscrew, leather coasters, a soy candle and almond cookies, which is most of what a good nightcap asks for.",
-    "Lemonade": "For when life hands them a great deal at once. A teak edge-grain chopping block, lavender Earl Grey and Mocha Java coffee, and Swedish dishcloths that outlast seventeen rolls of paper towels.",
-    "Bright Side": "Small and yellow and meant to land on a hard day. A yellow tin Candlefish candle, brown butter milk chocolate and a wildflower facial steam, which is a good deal of comfort for a small box.",
-    "Cheers": "For the promotion, the closing, the yes. Faceted crystal champagne glasses and a gold double-hinged corkscrew, a gold tin candle and wine gummies, in a keepsake wooden box.",
+    "Lemonade": "You can never go wrong with a home-themed gift. Bring or send the perfect gift to your next event or housewarming. Surprise your recipient with delicious organic tea or coffee for a perfect warm and cozy feel. A decadent wooden chop or cheese board and some fabulous dishcloths that help reduce the use of paper towels. This is a gift you know they’ll use and LOVE!",
+    "Bright Side": "A cheerful assorted of goodies ready to bring “Sunshine” into any celebration! Help them shine style. This delightful curation makes the perfect gift for any event, including Mother’s Day, a birthday, housewarming, party and more!",
+    "Cheers": "A cheerful assorted of goodies ready to transport them right into any celebration! Help them ‘Cheers’ in style. This delightful curation makes the perfect gift for any event, including a birthday, housewarming, party and more!",
     "Everyday Luxe": "The small luxuries someone would never think to buy themselves. A silk charmeuse scrunchie and a compact mirror from Odeme, a lip scrub from Sara Happ, and wine gummies.",
     "Welcome Home": "The first box through a new door. A teak edge-grain chopping block and an oatmeal linen tea towel for the kitchen, Earl Grey and a gold coffee scoop, and a sandalwood rose candle for the first evening.",
     "The New Keys": "The housewarming box in full. A teak chopping block, leather coasters and an antique rose gold pineapple corkscrew for the first night hosting, then a beechwood serving spoon and a Home Sweet Home key tag to keep.",
-    "The Valet": "For the top of the dresser and the drive in. A personalised leather valet tray for whatever comes out of his pockets, a triple-insulated travel mug, a stainless cigar cutter and 77% dark chocolate.",
+    "The Valet": "This curation says “Manly” in everyway…packed with an assortment of items we know he’ll love. From a leather valet tray he can use for his wallet, keys or jewelry, to a triple insulated stainless steel mug he can take anywhere, together with a lotion bar to keep his hands moisturized, and a cigar cutter he can use on those relaxing nights with friends; topped with some delicious mini chocolates he can enjoy all by himself. Surprise that special man for his birthday or to congratulate him on a special milestone.",
     "Goodnight": "A box that only asks them to stop. A padded silk eye mask, organic full leaf tea and a soy candle, with a lip scrub and wine gummies for the way there.",
-    "Uncorked": "Four things and a bottle, which is all an evening really needs. A gold-plated signature corkscrew, leather coasters, a moulded metal Candlefish candle and fleur de sel dark chocolate.",
-    "The Wind Down": "For the person who is always the one holding it together. A 160-page leather journal and a gold felt tip pen, a triple-insulated travel mug, leather coasters and organic full leaf tea.",
-    "Mini Spa Day": "An hour to themselves, in a hand-woven keepsake basket. A hydration gel mask, a rose kaolin clay mask, a fizzing bath cube and bath salts, with a blush notebook and a gold pen for whatever surfaces.",
+    "Uncorked": "Because there’s always time to Celebrate! This elegant curation will make a statement no matter the Occasion. Perfect for a birthday or any special milestone.",
+    "The Wind Down": "Give him the perfect reason to sit back, relax and indulge with elegance in some “me time” with our NightTime Ritual box. He’ll be sipping on some delicious chamomile tea in a stainless steel, triple insulated mug that’ll keep his tea (or coffee) nice and hot for up to 3 hours. He can place his mug on an gorgeous leather coaster, while he jots down all his plans in this elegant leather journal…and of course this curation also comes with a travel size hand sanitizer to keep him safe! This curation makes the perfect gift to celebrate him!",
+    "Mini Spa Day": "Surprise her and help her relax and recharge, because she deserves a little “me time” - Bath time and facial essentials for the perfect day of self-care together with some delicious wine infused gummies and more!",
     "First Night In": "Small, dark and calm, for the evening the boxes are still stacked in the hall. A midnight black candle with a 40 hour burn, Green Gold tea from Teaspressa, and fleur de sel dark chocolate.",
-    "Afternoon Tea": "A whole afternoon, arranged. Organic chamomile, a jar of the Bee Box's honey and almond cookies from Jocelyn & Co, with a Candlefish No. 31 candle on its own wood plate."
+    "Afternoon Tea": "Help mom enjoy an exquisite tea time! This tea lover’s delight curation is the perfect gift for the mom who enjoys some quality time sipping on gourmet tea and cookies. Ah sweetness galore!"
   };
 
   var allProducts = [
-    {name:'Love You', price:150, img: '/assets/img/OB0_7441-750w.jpg'},
-    {name:'Peaches & Cream', price:132, img: '/assets/img/OB0_7537-750w.jpg'},
-    {name:'Spa Weekend', note:"Contains eucalyptus mint body wash and lemon curd biscuits.", price:120, img: '/assets/img/OB0_7721-750w.jpg'},
-    {name:'Coffee Lover', price:145, img: '/assets/img/OB0_7584-750w.jpg'},
-    {name:'The Reset', price:145, img: '/assets/img/OB0_7512-750w.jpg'},
-    {name:'The Dinner Party', note:"Contains almond cookies (tree nuts).", price:175, img: '/assets/img/0B0_5612-750w.jpg'},
-    {name:"Host's Delight", price:105, img: '/assets/img/0B0_5453-750w.jpg', variants:[{label:'Rose', img:'/assets/img/0B0_5453-750w.jpg', tea:'<b>OB x Beautea Studio</b> | Organic rose mint loose-leaf tea'},{label:'Green', img:'/assets/img/OB_0299-750w.jpg', tea:'<b>OB x Beautea Studio</b> | Organic chamomile loose-leaf tea'}]},
-    {name:'The Nightcap', note:"Contains almond cookies (tree nuts).", price:120, img: '/assets/img/0B0_5067-750w.jpg'},
-    {name:'Lemonade', price:120, img: '/assets/img/0B0_5827-750w.jpg'},
-    {name:'Bright Side', price:105, img: '/assets/img/0B0_5699-750w.jpg'},
-    {name:'Cheers', price:145, img: '/assets/img/0B0_4910-750w.jpg'},
-    {name:'Everyday Luxe', price:150, img: '/assets/img/0B0_5137-750w.jpg'},
-    {name:'Welcome Home', price:125, img: '/assets/img/0B0_5183-750w.jpg'},
-    {name:'The New Keys', price:170, img: '/assets/img/0B0_4712-750w.jpg'},
-    {name:'The Valet', price:150, img: '/assets/img/_MG_1812-750w.jpg'},
-    {name:'Goodnight', price:130, img: '/assets/img/ob_1471-750w.jpg'},
-    {name:'Uncorked', price:120, img: '/assets/img/0B0_2489-750w.jpg'},
-    {name:'The Wind Down', price:150, img: '/assets/img/_MG_1792-750w.jpg'},
-    {name:'Mini Spa Day', note:"Contains essential oils and a clay mask. Not suitable as a gift for someone who is pregnant or nursing; tell us and we will swap the bath products for something safe.", price:115, img: '/assets/img/IMG_9325-750w.jpg'},
-    {name:'First Night In', price:110, img: '/assets/img/ob_6944-750w.jpg'},
-    {name:'Afternoon Tea', note:"Contains almond cookies (tree nuts).", price:128, img: '/assets/img/IMG_9730-750w.jpg'}
+    {name:"Love You", price:150, img: "/assets/img/OB0_7441-750w.jpg", images:[
+      "/assets/img/OB0_7441-750w.jpg",
+      "/assets/img/love-you-1-1500w.jpg",
+      "/assets/img/love-you-2-1500w.jpg",
+      "/assets/img/love-you-3-1500w.jpg",
+      "/assets/img/love-you-4-1500w.jpg",
+      "/assets/img/love-you-5-1500w.jpg"
+    ]},
+    {name:"Peaches & Cream", price:132, img: "/assets/img/OB0_7537-750w.jpg", images:[
+      "/assets/img/OB0_7537-750w.jpg",
+      "/assets/img/peaches-cream-1-1500w.jpg",
+      "/assets/img/peaches-cream-2-1500w.jpg",
+      "/assets/img/peaches-cream-3-1500w.jpg",
+      "/assets/img/peaches-cream-4-1500w.jpg",
+      "/assets/img/peaches-cream-5-1500w.jpg"
+    ]},
+    {name:"Spa Weekend", note:"Contains eucalyptus mint body wash and lemon curd biscuits.", price:120, img: "/assets/img/OB0_7721-750w.jpg", images:[
+      "/assets/img/OB0_7721-750w.jpg",
+      "/assets/img/spa-weekend-1-1500w.jpg",
+      "/assets/img/spa-weekend-2-1500w.jpg",
+      "/assets/img/spa-weekend-3-1500w.jpg",
+      "/assets/img/spa-weekend-4-1500w.jpg",
+      "/assets/img/spa-weekend-5-1500w.jpg"
+    ]},
+    {name:"Coffee Lover", price:145, img: "/assets/img/OB0_7584-750w.jpg", images:[
+      "/assets/img/OB0_7584-750w.jpg",
+      "/assets/img/coffee-lover-1-1500w.jpg",
+      "/assets/img/coffee-lover-2-1500w.jpg",
+      "/assets/img/coffee-lover-3-1500w.jpg",
+      "/assets/img/coffee-lover-4-1500w.jpg",
+      "/assets/img/coffee-lover-5-1500w.jpg"
+    ]},
+    {name:"The Reset", price:145, img: "/assets/img/OB0_7512-750w.jpg", images:[
+      "/assets/img/OB0_7512-750w.jpg",
+      "/assets/img/the-reset-1-1500w.jpg",
+      "/assets/img/the-reset-2-1500w.jpg",
+      "/assets/img/the-reset-3-1500w.jpg",
+      "/assets/img/the-reset-4-1500w.jpg",
+      "/assets/img/the-reset-5-1500w.jpg"
+    ]},
+    {name:"The Dinner Party", note:"Contains almond cookies (tree nuts).", price:175, img: "/assets/img/0B0_5612-750w.jpg", images:[
+      "/assets/img/0B0_5612-750w.jpg",
+      "/assets/img/the-dinner-party-1-1500w.jpg",
+      "/assets/img/the-dinner-party-2-1500w.jpg",
+      "/assets/img/the-dinner-party-3-1500w.jpg",
+      "/assets/img/the-dinner-party-4-1500w.jpg",
+      "/assets/img/the-dinner-party-5-1500w.jpg"
+    ]},
+    {name:"Host's Delight", price:105, img: "/assets/img/0B0_5453-750w.jpg", images:[
+      "/assets/img/0B0_5453-750w.jpg",
+      "/assets/img/hosts-delight-1-1500w.jpg",
+      "/assets/img/hosts-delight-2-1500w.jpg",
+      "/assets/img/hosts-delight-3-1500w.jpg",
+      "/assets/img/hosts-delight-4-1500w.jpg",
+      "/assets/img/hosts-delight-5-1500w.jpg"
+    ], variants:[{"label":"Rose","img":"/assets/img/0B0_5453-750w.jpg","tea":"<b>OB x Beautea Studio</b> | Organic rose mint loose-leaf tea"},{"label":"Green","img":"/assets/img/OB_0299-750w.jpg","tea":"<b>OB x Beautea Studio</b> | Organic chamomile loose-leaf tea"}]},
+    {name:"The Nightcap", note:"Contains almond cookies (tree nuts).", price:120, img: "/assets/img/0B0_5067-750w.jpg", images:[
+      "/assets/img/0B0_5067-750w.jpg",
+      "/assets/img/the-nightcap-1-1500w.jpg",
+      "/assets/img/the-nightcap-2-1500w.jpg",
+      "/assets/img/the-nightcap-3-1500w.jpg",
+      "/assets/img/the-nightcap-4-1500w.jpg",
+      "/assets/img/the-nightcap-5-1500w.jpg"
+    ]},
+    {name:"Lemonade", price:120, img: "/assets/img/0B0_5827-750w.jpg", images:[
+      "/assets/img/0B0_5827-750w.jpg",
+      "/assets/img/lemonade-1-1500w.jpg",
+      "/assets/img/lemonade-2-1500w.jpg",
+      "/assets/img/lemonade-3-1500w.jpg",
+      "/assets/img/lemonade-4-1500w.jpg",
+      "/assets/img/lemonade-5-1500w.jpg"
+    ]},
+    {name:"Bright Side", price:105, img: "/assets/img/0B0_5699-750w.jpg", images:[
+      "/assets/img/0B0_5699-750w.jpg",
+      "/assets/img/bright-side-1-1500w.jpg",
+      "/assets/img/bright-side-2-1500w.jpg",
+      "/assets/img/bright-side-3-1500w.jpg",
+      "/assets/img/bright-side-4-1500w.jpg",
+      "/assets/img/bright-side-5-1500w.jpg"
+    ]},
+    {name:"Cheers", price:145, img: "/assets/img/0B0_4910-750w.jpg", images:[
+      "/assets/img/0B0_4910-750w.jpg",
+      "/assets/img/cheers-1-1500w.jpg",
+      "/assets/img/cheers-2-1500w.jpg",
+      "/assets/img/cheers-3-1500w.jpg",
+      "/assets/img/cheers-4-1500w.jpg",
+      "/assets/img/cheers-5-1500w.jpg"
+    ]},
+    {name:"Everyday Luxe", price:150, img: "/assets/img/0B0_5137-750w.jpg", images:[
+      "/assets/img/0B0_5137-750w.jpg",
+      "/assets/img/everyday-luxe-1-1500w.jpg",
+      "/assets/img/everyday-luxe-2-1500w.jpg",
+      "/assets/img/everyday-luxe-3-1500w.jpg",
+      "/assets/img/everyday-luxe-4-1500w.jpg",
+      "/assets/img/everyday-luxe-5-1500w.jpg"
+    ]},
+    {name:"Welcome Home", price:125, img: "/assets/img/0B0_5183-750w.jpg", images:[
+      "/assets/img/0B0_5183-750w.jpg",
+      "/assets/img/welcome-home-1-1500w.jpg",
+      "/assets/img/welcome-home-2-1500w.jpg",
+      "/assets/img/welcome-home-3-1500w.jpg",
+      "/assets/img/welcome-home-4-1500w.jpg",
+      "/assets/img/welcome-home-5-1500w.jpg"
+    ]},
+    {name:"The New Keys", price:170, img: "/assets/img/0B0_4712-750w.jpg", images:[
+      "/assets/img/0B0_4712-750w.jpg",
+      "/assets/img/the-new-keys-1-1500w.jpg",
+      "/assets/img/the-new-keys-2-1500w.jpg",
+      "/assets/img/the-new-keys-3-1500w.jpg",
+      "/assets/img/the-new-keys-4-1500w.jpg",
+      "/assets/img/the-new-keys-5-1500w.jpg"
+    ]},
+    {name:"The Valet", price:150, img: "/assets/img/_MG_1812-750w.jpg", images:[
+      "/assets/img/_MG_1812-750w.jpg",
+      "/assets/img/the-valet-2-1500w.jpg",
+      "/assets/img/the-valet-3-1500w.jpg",
+      "/assets/img/the-valet-4-1500w.jpg",
+      "/assets/img/the-valet-5-1500w.jpg",
+      "/assets/img/the-valet-6-1500w.jpg"
+    ]},
+    {name:"Goodnight", price:130, img: "/assets/img/ob_1471-750w.jpg"},
+    {name:"Uncorked", price:120, img: "/assets/img/0B0_2489-750w.jpg", images:[
+      "/assets/img/0B0_2489-750w.jpg",
+      "/assets/img/uncorked-2-1500w.jpg",
+      "/assets/img/uncorked-3-1500w.jpg",
+      "/assets/img/uncorked-4-1500w.jpg",
+      "/assets/img/uncorked-5-1500w.jpg",
+      "/assets/img/uncorked-6-1500w.jpg"
+    ]},
+    {name:"The Wind Down", price:150, img: "/assets/img/_MG_1792-750w.jpg", images:[
+      "/assets/img/_MG_1792-750w.jpg",
+      "/assets/img/the-wind-down-2-1500w.jpg",
+      "/assets/img/the-wind-down-3-1500w.jpg",
+      "/assets/img/the-wind-down-4-1500w.jpg",
+      "/assets/img/the-wind-down-5-1500w.jpg",
+      "/assets/img/the-wind-down-6-1500w.jpg"
+    ]},
+    {name:"Mini Spa Day", note:"Contains essential oils and a clay mask. Not suitable as a gift for someone who is pregnant or nursing; tell us and we will swap the bath products for something safe.", price:115, img: "/assets/img/IMG_9325-750w.jpg", images:[
+      "/assets/img/IMG_9325-750w.jpg",
+      "/assets/img/mini-spa-day-1-1500w.jpg",
+      "/assets/img/mini-spa-day-2-1500w.jpg",
+      "/assets/img/mini-spa-day-3-1500w.jpg",
+      "/assets/img/mini-spa-day-4-1500w.jpg"
+    ]},
+    {name:"First Night In", price:110, img: "/assets/img/ob_6944-750w.jpg", images:[
+      "/assets/img/ob_6944-750w.jpg",
+      "/assets/img/first-night-in-1-1500w.jpg",
+      "/assets/img/first-night-in-2-1500w.jpg",
+      "/assets/img/first-night-in-3-1500w.jpg",
+      "/assets/img/first-night-in-4-1500w.jpg",
+      "/assets/img/first-night-in-5-1500w.jpg"
+    ]},
+    {name:"Afternoon Tea", note:"Contains almond cookies (tree nuts).", price:128, img: "/assets/img/IMG_9730-750w.jpg", images:[
+      "/assets/img/IMG_9730-750w.jpg",
+      "/assets/img/afternoon-tea-1-1500w.jpg",
+      "/assets/img/afternoon-tea-2-1500w.jpg",
+      "/assets/img/afternoon-tea-3-1500w.jpg",
+      "/assets/img/afternoon-tea-4-1500w.jpg"
+    ]}
   ];
 
   var currentProduct = null;
