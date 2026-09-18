@@ -827,6 +827,31 @@ function assertCommentsBalanced(slug, html) {
   }
 }
 
+/* Sarah reads the em dash as a tell that a machine wrote the copy, and does
+   not want one anywhere on the site. The rule outlives this build, so the
+   build holds it: an em dash in a page, however it got there, stops the build
+   and names the page. En dashes are untouched; they are ranges (2-4 weeks)
+   and they are correct. To lift the rule, delete this function and its two
+   calls. */
+function assertNoEmDash(what, text) {
+  const i = text.indexOf('\u2014');
+  if (i !== -1) {
+    const near = text.slice(Math.max(0, i - 60), i + 60).replace(/\s+/g, ' ');
+    throw new Error(`${what}: em dash in the copy. Use the mark the sentence `
+      + `wants: a semicolon between two halves that each stand alone, a colon `
+      + `before a list, otherwise a comma.\n  ...${near}...`);
+  }
+}
+
+/* The storefront's product copy and the stylesheet are not built from here,
+   so they are checked directly rather than through a page. */
+for (const f of ['site/assets/js/site.js', 'site/assets/css/site.css']) {
+  const text = read(f);
+  assertNoEmDash(f, text);
+  /* \u2014 in a JS string renders as an em dash just the same. */
+  if (/\\u2014/.test(text)) throw new Error(`${f}: escaped em dash (\\u2014) in the copy.`);
+}
+
 mkdirSync(join(ROOT, 'site/shop'), { recursive: true });
 if (POSTS.length) mkdirSync(join(ROOT, 'site/journal'), { recursive: true });
 
@@ -835,6 +860,7 @@ for (const page of [...PAGES, ...PRODUCT_PAGES, ...JOURNAL_PAGES]) {
   const out = `site/${page.slug}.html`;
   const html = render(page);
   assertCommentsBalanced(page.slug, html);
+  assertNoEmDash(out, html);
   writeFileSync(join(ROOT, out), html, 'utf8');
   console.log(`${out.padEnd(34)} ${page.url.padEnd(26)} ${page.product ? 'product' : page.post ? 'journal post' : page.journalIndex ? 'journal index' : page.sections.join(', ')}`);
   n++;
