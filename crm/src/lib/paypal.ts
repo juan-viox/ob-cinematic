@@ -8,9 +8,17 @@
  * requires status COMPLETED plus a matching amount/currency; the payer email
  * is taken from PayPal's response, not from the request body.
  *
- * PAYPAL_ENV selects the API host: 'live' → api-m.paypal.com,
- * anything else (default) → api-m.sandbox.paypal.com (the site currently
- * uses client-id=sb, i.e. the sandbox).
+ * PAYPAL_ENV selects the API host: 'live' or 'production' → api-m.paypal.com,
+ * anything else, INCLUDING UNSET → api-m.sandbox.paypal.com.
+ *
+ * Set it deliberately. The shop loads the PayPal SDK with a real client id
+ * (site/shop.html and every site/shop/*.html use client-id=BAAxKYq3MeBz…, not
+ * the `sb` sandbox placeholder), so if that id belongs to a live PayPal app,
+ * leaving PAYPAL_ENV unset points verification at the sandbox and every real
+ * order fails to verify and lands as "Unverified order: …". Confirm which
+ * account issued that client id in the PayPal dashboard, then set this to
+ * match. An earlier version of this comment claimed the site used client-id=sb;
+ * it does not.
  */
 
 export interface PayPalConfig {

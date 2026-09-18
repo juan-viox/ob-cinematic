@@ -26,6 +26,7 @@ const CRM = path.resolve(here, '..')
 const DEFAULT_TEAM = [
   { email: 'sarah@occasionsbox.com', role: 'owner', name: 'Sarah De Jesus' },
   { email: 'kari@occasionsbox.com', role: 'admin', name: 'Kari Aragon' },
+  { email: 'juan@viox.ai', role: 'admin', name: 'Juan Alvarado' },
 ]
 
 /** Reads crm/.env.local so the script works with no exported variables. */
@@ -159,8 +160,11 @@ async function main() {
     }
   }
 
-  console.log('\nDone. Anyone who did not get an email can use "Forgot password" on the login page.')
-  console.log('Turn off public sign-ups in Supabase once everyone is in: Authentication → Providers → Email → Enable Sign Ups off.')
+  console.log('\nDone. An invited person never sets a password: the link signs them straight in.')
+  console.log('So on any later visit they use "Send Magic Link" on /admin/login, not the password box.')
+  console.log('Anyone who did not get an email uses that same button. There is no "Forgot password" page.')
+  console.log('Turn off public sign-ups once everyone is in: Supabase → Authentication → Sign In / Providers →')
+  console.log('"Allow new users to sign up" off. It is a project-wide setting, not a per-provider one.')
 }
 
 main().catch((err) => {

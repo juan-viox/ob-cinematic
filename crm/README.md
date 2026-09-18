@@ -42,9 +42,19 @@ host-agnostic (relative `Location` headers that include the base path).
    commits that do not touch `crm/`.)
 3. Paste the environment variables from `.env.example`:
    `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-   `SUPABASE_SERVICE_ROLE_KEY`, `SITE_API_KEY`, and optionally
-   `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `ALLOWED_ORIGINS`,
-   `NEXT_PUBLIC_APP_URL`.
+   `SUPABASE_SERVICE_ROLE_KEY`, `SITE_API_KEY` (only Olivia's five tools need
+   this one — the website forms authorise by `Origin`), and
+   `ELEVENLABS_WEBHOOK_SECRET` (without it every one of her conversations is
+   rejected with a 503 and nothing is filed). Optionally `RESEND_API_KEY`,
+   `RESEND_FROM_EMAIL`, `ALLOWED_ORIGINS`, `NEXT_PUBLIC_APP_URL` (if set it
+   **must** end in `/admin`), `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET` and
+   `PAYPAL_ENV`. Never set `NEXT_PUBLIC_BASE_PATH`: it is hard-coded in
+   `next.config.ts` and injected at build time.
+
+   Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are
+   checked by the middleware. Miss `SUPABASE_SERVICE_ROLE_KEY` and the app
+   looks configured, then throws `supabaseKey is required.` — every
+   authenticated API route and the public proposal page return 500.
 4. Deploy. The build succeeds even before the variables are pasted; until
    they exist the app serves a "not configured yet" page.
 
@@ -88,7 +98,11 @@ By hand instead:
    default deal stages from `src/crm.config.ts`.
 2. Accounts are invite-only after that. Invite teammates from
    **Settings → Team** (roles: `admin`, `member`). Invited users receive an
-   email that lands on `/admin/auth/callback`.
+   email that lands on `/admin/auth/callback`, which signs them in directly —
+   it never asks them to choose a password, and the CRM has no set-password,
+   reset-password or forgot-password page. An invited person therefore has no
+   password, and on every later visit signs in with **Send Magic Link** on
+   `/admin/login` rather than the email-and-password box.
 3. **Turn off public sign-ups** once the owner account exists: Supabase
    dashboard → Authentication → Providers → Email → disable
    **Enable Sign Ups** (or Authentication → Settings → "Allow new users to

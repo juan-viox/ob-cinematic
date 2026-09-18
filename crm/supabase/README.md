@@ -3,9 +3,13 @@
 **Quickest path on a new, empty project:** paste `setup-all.sql` into the
 Supabase SQL Editor and run it once. It is the nine migrations below concatenated
 in order, so there is nothing to sequence by hand. Do not run it against a
-database that already has the CRM schema — section 1 uses plain `CREATE TABLE`
-and will stop at the first table that exists. To update an older CRM database,
-run only `migrations/006_occasionsbox.sql`, which is idempotent.
+database that already has the CRM schema: `001`, `003`, `004` and `005` all use
+plain `CREATE TABLE` / `CREATE POLICY` and fail on a second run. To bring an
+older CRM database up to date instead, run `006`, `007`, `008`, `009` and then
+the seed, in that order — those are the idempotent ones. Running only `006`
+is not enough: `007` is what creates the catalogue columns and every one of
+`inventory_items`, `product_components`, `inventory_movements`, `occasions`,
+`client_occasions`, `proposals`, `orders` and their child tables.
 
 The individual migrations, in **this exact order**, if you would rather apply
 them one at a time (Dashboard → SQL Editor → New query → paste the file → Run):
@@ -27,8 +31,10 @@ them one at a time (Dashboard → SQL Editor → New query → paste the file �
 refreshes names, prices, contents and photographs and never overwrites stock,
 costs, reorder points or `is_active`, so it is safe against a live database.
 
-Both `007` and the seed are generated into `setup-all.sql` by
-`npm run sql:bundle`; edit the parts, never `setup-all.sql`.
+`npm run sql:bundle` regenerates the seed from the marketing site and then
+concatenates **every** migration plus that seed into `setup-all.sql`. Only the
+seed is generated; the migrations are hand-written. Edit the parts, never
+`setup-all.sql`.
 
 Files that used to live here and must **not** be applied (deleted from the repo):
 
@@ -48,8 +54,11 @@ again; the files are the record of what it contains, and re-running any of
 
 1. **Auth → URL configuration**: Site URL `https://www.occasionsbox.com/admin`,
    with redirect URLs for every host the CRM answers on — `https://www.occasionsbox.com/admin/**`,
-   `https://occasionsbox.com/admin/**`, `https://ob-crm-vio-x-bergsify.vercel.app/admin/**`
-   and the current preview host. Sign-in links bounce without them.
+   `https://occasionsbox.com/admin/**`, `https://ob-crm-vio-x-bergsify.vercel.app/admin/**`,
+   the current preview host, and `http://localhost:3000/admin/**` so `npm run dev`
+   can log in. Sign-in links bounce without them. Note the host is
+   `ob-crm-vio-x-bergsify.vercel.app`: `ob-crm` is the Vercel *project* name and
+   `ob-crm.vercel.app` is somebody else's deployment.
 2. **First sign-up becomes the owner.** `/signup` → `/api/auth/setup` creates the
    `occasionsbox` organization (slug from `crm.config.ts`) and seeds the pipeline
    stages (Inquiry → Quote Sent → Approved → Fulfillment → Delivered / Lost).
