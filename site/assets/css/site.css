@@ -148,6 +148,25 @@ html.anim .fade-up { opacity: 0; transform: translateY(30px); }
   width: 100%; height: 100vh;
   overflow: hidden;
 }
+/* The photograph drifts slowly on its own wrapper while the visitor is still,
+   and GSAP keeps the img's own transform for the scroll zoom. One element
+   cannot carry both without them fighting over `transform`.
+
+   36 seconds and a 4% move: slow enough that nobody catches it starting, which
+   is the difference between cinematic and a slideshow. */
+.hero-photo-wrap {
+  position: absolute; inset: 0;
+  animation: heroDrift 36s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes heroDrift {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to   { transform: scale(1.04) translate3d(-1.2%, -0.6%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-photo-wrap { animation: none; }
+}
+
 .hero-photo {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
