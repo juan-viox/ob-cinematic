@@ -686,14 +686,22 @@ ${variants.map((v, n) => `        <button type="button" class="pd-variant${n ===
   const story = STORIES[p.name];
   const storyBlock = story ? `\n      <p class="pd-story">${esc(story)}</p>` : '';
 
-  /* A box with several photographs gets a strip under the main one; with one
-     it stays out of the way entirely. site.js turns these into the lightbox
-     gallery, so adding a photograph here is a one line data change. */
-  const gallery = (p.images || [p.img])
+  /* A box with several photographs gets a strip under the main one. On a box
+     with colourways the strip belongs to the colourway, so it starts on the
+     first one and site.js repaints it when the buyer picks the other; the
+     container is emitted either way so there is something to repaint into,
+     carrying hidden when the opening colourway has a single photograph.
+     site.js turns these into the lightbox gallery, so adding a photograph
+     here is a one line data change. */
+  const firstVariant = variants[0];
+  const gallery = ((firstVariant && (firstVariant.images || (firstVariant.img && [firstVariant.img])))
+      || p.images || [p.img])
     .map((e) => (typeof e === 'string' ? { src: e, alt: '' } : e))
     .filter((e) => e && e.src);
-  const thumbs = gallery.length > 1 ? `
-      <div class="pd-thumbs">
+  const anyMultiple = gallery.length > 1 ||
+    variants.some((v) => (v.images || []).length > 1) || (p.images || []).length > 1;
+  const thumbs = anyMultiple ? `
+      <div class="pd-thumbs"${gallery.length > 1 ? '' : ' hidden'}>
 ${gallery.map((g, n) => `        <button type="button" class="pd-thumb${n === 0 ? ' active' : ''}" aria-label="Show photograph ${n + 1} of ${gallery.length}"><img src="${g.src}" alt="" loading="lazy" width="74" height="74"></button>`).join('\n')}
       </div>` : '';
 

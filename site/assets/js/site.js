@@ -245,14 +245,35 @@
       "/assets/img/the-dinner-party-4-1500w.jpg",
       "/assets/img/the-dinner-party-5-1500w.jpg"
     ]},
+    /* Two colourways, two boxes, two sets of photographs: rose mint and
+       chamomile do not share a dishcloth, a tea tin or a backdrop. The gallery
+       follows whichever is picked, and the top level images are the rose set
+       because rose is what the card and the grid show. */
     {name:"Host's Delight", price:105, img: "/assets/img/0B0_5453-750w.jpg", images:[
       "/assets/img/0B0_5453-750w.jpg",
-      "/assets/img/hosts-delight-1-1500w.jpg",
-      "/assets/img/hosts-delight-2-1500w.jpg",
-      "/assets/img/hosts-delight-3-1500w.jpg",
-      "/assets/img/hosts-delight-4-1500w.jpg",
-      "/assets/img/hosts-delight-5-1500w.jpg"
-    ], variants:[{"label":"Rose","img":"/assets/img/0B0_5453-750w.jpg","tea":"<b>OB x Beautea Studio</b> | Organic rose mint loose-leaf tea"},{"label":"Green","img":"/assets/img/OB_0299-750w.jpg","tea":"<b>OB x Beautea Studio</b> | Organic chamomile loose-leaf tea"}]},
+      "/assets/img/hosts-delight-rose-1-1500w.jpg",
+      "/assets/img/hosts-delight-rose-2-1500w.jpg",
+      "/assets/img/hosts-delight-rose-3-1500w.jpg",
+      "/assets/img/hosts-delight-rose-4-1500w.jpg",
+      "/assets/img/hosts-delight-rose-5-1500w.jpg"
+    ], variants:[
+      {label:"Rose", img:"/assets/img/0B0_5453-750w.jpg", images:[
+        "/assets/img/0B0_5453-750w.jpg",
+        "/assets/img/hosts-delight-rose-1-1500w.jpg",
+        "/assets/img/hosts-delight-rose-2-1500w.jpg",
+        "/assets/img/hosts-delight-rose-3-1500w.jpg",
+        "/assets/img/hosts-delight-rose-4-1500w.jpg",
+        "/assets/img/hosts-delight-rose-5-1500w.jpg"
+      ], tea:"<b>OB x Beautea Studio</b> | Organic rose mint loose-leaf tea"},
+      {label:"Green", img:"/assets/img/OB_0299-750w.jpg", images:[
+        "/assets/img/OB_0299-750w.jpg",
+        "/assets/img/hosts-delight-green-1-1500w.jpg",
+        "/assets/img/hosts-delight-green-3-1500w.jpg",
+        "/assets/img/hosts-delight-green-4-1500w.jpg",
+        "/assets/img/hosts-delight-green-5-1500w.jpg",
+        "/assets/img/hosts-delight-green-6-1500w.jpg"
+      ], tea:"<b>OB x Beautea Studio</b> | Organic chamomile loose-leaf tea"}
+    ]},
     {name:"The Nightcap", note:"Contains almond cookies (tree nuts).", price:120, img: "/assets/img/0B0_5067-750w.jpg", images:[
       "/assets/img/0B0_5067-750w.jpg",
       "/assets/img/the-nightcap-1-1500w.jpg",
@@ -405,33 +426,41 @@
   var currentGallery = [];
   var currentIndex = 0;
 
-  function renderGallery(product) {
-    var images = galleryFor(product, currentVariant);
-    var main = document.getElementById('modalImg');
-    var strip = document.getElementById('modalThumbs');
-    if (!main || !images.length) return;
-    currentGallery = images;
+  /* ─── One gallery painter, two surfaces ───
+     The modal on /shop and the twenty one product pages show the same
+     photographs and must agree about which ones belong to the colourway on
+     screen. Both call this; onShow reports the index back so each surface can
+     keep its own lightbox position.
+
+     The strip is rebuilt from the images every time rather than toggled,
+     because a colourway change replaces the photographs, not just the one on
+     top: the product page used to swap the main shot and leave the strip
+     underneath showing the other colour's box. */
+  function paintGallery(main, strip, cls, images, onShow) {
+    if (!main || !images.length) return function() {};
 
     var show = function(i) {
-      currentIndex = i;
       main.src = images[i].src;
       main.alt = images[i].alt;
-      if (!strip) return;
-      strip.querySelectorAll('.modal-thumb').forEach(function(t, j) {
-        t.classList.toggle('active', j === i);
-        t.setAttribute('aria-current', j === i ? 'true' : 'false');
-      });
+      if (strip) {
+        strip.querySelectorAll('.' + cls).forEach(function(t, j) {
+          t.classList.toggle('active', j === i);
+          t.setAttribute('aria-current', j === i ? 'true' : 'false');
+        });
+      }
+      if (onShow) onShow(i);
     };
 
     if (strip) {
       if (images.length > 1) {
         strip.innerHTML = images.map(function(img, i) {
-          return '<button type="button" class="modal-thumb' + (i === 0 ? ' active' : '') + '" data-img="' + i +
-                 '" aria-label="Show ' + escapeHtml(img.alt) + '"><img src="' + escapeHtml(img.src) +
-                 '" alt="" loading="lazy"></button>';
+          return '<button type="button" class="' + cls + (i === 0 ? ' active' : '') +
+                 '" data-img="' + i + '" aria-label="Show photograph ' + (i + 1) + ' of ' +
+                 images.length + ' of ' + escapeHtml(img.alt) + '">' +
+                 '<img src="' + escapeHtml(img.src) + '" alt="" loading="lazy"></button>';
         }).join('');
         strip.hidden = false;
-        strip.querySelectorAll('.modal-thumb').forEach(function(btn) {
+        strip.querySelectorAll('.' + cls).forEach(function(btn) {
           btn.addEventListener('click', function() { show(parseInt(this.dataset.img, 10)); });
         });
       } else {
@@ -440,6 +469,20 @@
       }
     }
     show(0);
+    return show;
+  }
+
+  function renderGallery(product) {
+    var images = galleryFor(product, currentVariant);
+    if (!images.length) return;
+    currentGallery = images;
+    paintGallery(
+      document.getElementById('modalImg'),
+      document.getElementById('modalThumbs'),
+      'modal-thumb',
+      images,
+      function(i) { currentIndex = i; }
+    );
   }
 
   /* ─── The handwritten card ───
@@ -1213,26 +1256,23 @@
     });
   }
 
+  var pdRepaint = null;
   var pdArticle = document.querySelector('.pd[data-product]');
   var pdMainImg = document.getElementById('pdImg');
   if (pdArticle && pdMainImg) {
-    var pdProduct = allProducts.find(function(p) { return p.name === pdArticle.dataset.product; });
-    var pdImages = pdProduct ? galleryFor(pdProduct, null) : [{ src: pdMainImg.src, alt: pdMainImg.alt }];
+    var pdGalleryProduct = allProducts.find(function(p) { return p.name === pdArticle.dataset.product; });
+    var pdStrip = pdArticle.querySelector('.pd-thumbs');
+    var pdImages = [{ src: pdMainImg.src, alt: pdMainImg.alt }];
     var pdAt = 0;
 
-    var pdShow = function(i) {
-      pdAt = i;
-      pdMainImg.src = pdImages[i].src;
-      pdMainImg.alt = pdImages[i].alt;
-      document.querySelectorAll('.pd-thumb').forEach(function(t, j) {
-        t.classList.toggle('active', j === i);
-        t.setAttribute('aria-current', j === i ? 'true' : 'false');
-      });
+    /* Exposed so the colourway buttons below can repaint the strip. */
+    pdRepaint = function(variant) {
+      if (!pdGalleryProduct) return;
+      pdImages = galleryFor(pdGalleryProduct, variant);
+      if (!pdImages.length) return;
+      paintGallery(pdMainImg, pdStrip, 'pd-thumb', pdImages, function(i) { pdAt = i; });
     };
-
-    document.querySelectorAll('.pd-thumb').forEach(function(btn, j) {
-      btn.addEventListener('click', function() { pdShow(j); });
-    });
+    pdRepaint((pdGalleryProduct && pdGalleryProduct.variants && pdGalleryProduct.variants[0]) || null);
 
     pdMainImg.addEventListener('click', function() {
       openLightbox(pdImages, pdAt, pdMainImg);
@@ -1378,7 +1418,10 @@
         pdRoot.querySelectorAll('.pd-variant').forEach(function(b) {
           b.classList.toggle('active', b === btn);
         });
-        if (pdImg && v.img) { pdImg.src = v.img; }
+        /* The colourway is a different set of photographs, not a different
+           first photograph, so the strip is rebuilt with it. */
+        if (pdRepaint) pdRepaint(v);
+        else if (pdImg && v.img) { pdImg.src = v.img; }
         /* The tea is the one line that differs between the colourways. */
         if (pdContents && v.tea) {
           var items = pdContents.querySelectorAll('li');
