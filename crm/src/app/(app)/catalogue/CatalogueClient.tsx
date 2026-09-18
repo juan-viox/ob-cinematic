@@ -456,7 +456,7 @@ export default function CatalogueClient({
                         {i.description && <div className="text-xs max-w-md truncate" style={{ color: 'var(--muted)' }}>{i.description}</div>}
                       </td>
                       <td style={{ color: 'var(--muted)' }}>{usageByItem.get(i.id) ?? 0} box{(usageByItem.get(i.id) ?? 0) === 1 ? '' : 'es'}</td>
-                      <td className="text-right" style={{ color: 'var(--muted)' }}>{i.unit_cost === null || i.unit_cost === undefined ? '—' : formatCurrency(Number(i.unit_cost))}</td>
+                      <td className="text-right" style={{ color: 'var(--muted)' }}>{i.unit_cost === null || i.unit_cost === undefined ? '–' : formatCurrency(Number(i.unit_cost))}</td>
                       <td className="text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button onClick={() => adjustStock({ kind: 'item', id: i.id, organization_id: i.organization_id }, -1, 'adjustment')} className="btn btn-ghost btn-icon btn-sm"><Minus className="w-3 h-3" /></button>
@@ -464,11 +464,11 @@ export default function CatalogueClient({
                           <button onClick={() => adjustStock({ kind: 'item', id: i.id, organization_id: i.organization_id }, 1, 'received')} className="btn btn-ghost btn-icon btn-sm"><Plus className="w-3 h-3" /></button>
                         </div>
                       </td>
-                      <td className="text-right tabular-nums" style={{ color: 'var(--muted)' }}>{i.reorder_at || '—'}</td>
+                      <td className="text-right tabular-nums" style={{ color: 'var(--muted)' }}>{i.reorder_at || '–'}</td>
                       <td style={{ color: 'var(--muted)' }} className="max-w-[160px] truncate">
                         {i.supplier_url ? (
                           <a href={i.supplier_url} target="_blank" rel="noreferrer" className="hover:underline">{i.supplier || 'Link'}</a>
-                        ) : (i.supplier || '—')}
+                        ) : (i.supplier || '–')}
                       </td>
                       <td>
                         <button onClick={() => startEdit(i, 'item')} className="p-1.5 rounded-md hover:bg-[var(--surface-2)]" style={{ color: 'var(--muted)' }}>

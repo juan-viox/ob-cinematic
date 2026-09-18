@@ -19,10 +19,25 @@ const selfAuthenticatedApi = ['/api/v1/ingest', '/api/v1/agent', '/api/v1/eleven
 const NOT_CONFIGURED_HTML = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>OccasionsBox CRM</title>
 <meta name="robots" content="noindex">
-<style>body{font-family:system-ui,sans-serif;max-width:40rem;margin:4rem auto;padding:0 1rem;color:#2C3E50;line-height:1.5}</style>
+<style>
+body{font-family:system-ui,sans-serif;max-width:40rem;margin:4rem auto;padding:0 1rem;color:#2C3E50;line-height:1.6}
+h1{font-size:1.5rem;margin:0 0 .75rem}
+code{background:#F4F1EA;padding:.1rem .35rem;border-radius:3px;font-size:.95em}
+ul{padding-left:1.25rem}
+li{margin:.35rem 0}
+p.note{color:#6b7280;font-size:.925rem}
+</style>
 </head><body>
-<h1>OccasionsBox CRM is not configured yet</h1>
-<p>OccasionsBox CRM is not configured yet — add the Supabase environment variables in Vercel.</p>
+<h1>The CRM has no database connection yet</h1>
+<p>Add these to the <code>ob-crm</code> project in Vercel, then redeploy:</p>
+<ul>
+<li><code>NEXT_PUBLIC_SUPABASE_URL</code></li>
+<li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
+<li><code>SUPABASE_SERVICE_ROLE_KEY</code></li>
+</ul>
+<p class="note">The first two clear this page. Without the third the CRM loads and then
+fails every save, so add all three together. Both values for the first two are in
+Supabase under Settings, API.</p>
 </body></html>`
 
 /** Host-agnostic redirect: relative Location header including the basePath. */

@@ -52,7 +52,7 @@ export default function ProposalDetailClient({
         deal_id: proposal.deal_id ?? null,
         type: 'note',
         title: `Proposal ${proposal.proposal_number} approved`,
-        description: `${proposal.title} — ${formatCurrency(Number(proposal.total))}`,
+        description: `${proposal.title} · ${formatCurrency(Number(proposal.total))}`,
         status: 'completed',
         completed_at: new Date().toISOString(),
         metadata: { proposal_id: proposal.id },

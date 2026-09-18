@@ -96,11 +96,11 @@ export default function ProposalsClient({ proposals }: { proposals: Proposal[] }
                     </td>
                     <td className="max-w-[220px] truncate">{p.title}</td>
                     <td style={{ color: 'var(--muted)' }}>
-                      {p.contact ? `${p.contact.first_name} ${p.contact.last_name ?? ''}` : p.company?.name ?? '—'}
+                      {p.contact ? `${p.contact.first_name} ${p.contact.last_name ?? ''}` : p.company?.name ?? '–'}
                     </td>
                     <td><span className="badge" style={{ background: s.bg, color: s.color }}>{s.label}</span></td>
                     <td style={{ color: 'var(--muted)' }}>{formatDate(p.issue_date)}</td>
-                    <td style={{ color: 'var(--muted)' }}>{p.needed_by ? formatDate(p.needed_by) : '—'}</td>
+                    <td style={{ color: 'var(--muted)' }}>{p.needed_by ? formatDate(p.needed_by) : '–'}</td>
                     <td className="text-right font-semibold">{formatCurrency(Number(p.total))}</td>
                   </tr>
                 )

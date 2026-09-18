@@ -123,7 +123,7 @@ function orderTitle(prefix: string, lines: OrderLine[], totalUnits: number): str
     .map((line) => `${lineLabel(line)} x${line.quantity}`)
     .join(', ')
   const rest = lines.length - 2
-  return `${prefix}: ${totalUnits} boxes — ${head}${rest > 0 ? ` +${rest} more` : ''}`
+  return `${prefix}: ${totalUnits} boxes · ${head}${rest > 0 ? ` +${rest} more` : ''}`
 }
 
 /** Existing deal for this PayPal order id within the org, if any. */

@@ -133,7 +133,7 @@ export async function POST(request: Request) {
       ? new Date(data.metadata.start_time_unix_secs * 1000).toISOString()
       : new Date().toISOString()
 
-    const description = [summary, transcript ? `\n— Transcript —\n${transcript}` : null].filter(Boolean).join('\n')
+    const description = [summary, transcript ? `\nTranscript\n${transcript}` : null].filter(Boolean).join('\n')
 
     const activityId = await createActivity(supabase, {
       orgId,
