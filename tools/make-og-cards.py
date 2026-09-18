@@ -53,6 +53,28 @@ def slugify(name):
 for product_name, img in catalogue():
     CARDS[f"products/{slugify(product_name)}"] = (f"site{img}", 0.50)
 
+
+def journal():
+    """Every journal post, read from the same files the build publishes from,
+    so a new post gets a share card without anyone remembering to add one."""
+    out = []
+    for f in sorted((ROOT / "tools/posts").glob("*.html")):
+        head = re.search(r"^\s*<!--([\s\S]*?)-->", f.read_text())
+        if not head:
+            raise SystemExit(f"{f.name}: no metadata comment")
+        meta = dict(re.findall(r"^\s*([a-zA-Z]+)\s*:\s*(.+?)\s*$",
+                               head.group(1), re.M))
+        if "image" not in meta:
+            raise SystemExit(f"{f.name}: no image in the metadata comment")
+        out.append((f.stem, meta["image"]))
+    return out
+
+
+# A post shared to LinkedIn or texted to a client shows that post's photograph,
+# cropped here to the same 1.91:1 frame as every other card on the site.
+for slug, img in journal():
+    CARDS[f"journal/{slug}"] = (f"site{img}", 0.50)
+
 OUT.mkdir(parents=True, exist_ok=True)
 for name, (src, focus) in CARDS.items():
     im = Image.open(ROOT / src).convert("RGB")

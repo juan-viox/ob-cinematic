@@ -72,7 +72,8 @@ const OG = {
   contact: ['/assets/og/contact.jpg',
     'An open Occasions Box with an olive wood board, a gold spoon and a soy candle'],
 };
-const ogFor = (page) => page.post ? [page.post.image, page.post.imageAlt]
+const ogFor = (page) => page.post
+  ? [`/assets/og/journal/${page.post.slug}.jpg`, page.post.imageAlt]
   : page.product
   ? [`/assets/og/products/${slugify(page.product.name)}.jpg`,
      `The ${page.product.name} gift box from Occasions Box`]
@@ -664,7 +665,7 @@ ${post.body}
   </div>
 
   <div class="jr-post-foot">
-    <p class="jr-post-cta">Looking for a gift like the ones above?
+    <p class="jr-post-cta">Occasions Box curates custom gift boxes from our studio in Fort Lee, New Jersey.
       <a href="/shop">See the boxes</a> or <a href="/contact">tell us about the occasion</a>.</p>
   </div>
 ${others.length ? `
@@ -693,7 +694,7 @@ const JOURNAL_PAGES = POSTS.length ? [
   },
   ...POSTS.map((post) => ({
     slug: `journal/${post.slug}`, url: `/journal/${post.slug}`, nav: 'journal',
-    title: `${post.title} | Occasions Box`,
+    title: post.seoTitle || `${post.title} | Occasions Box`,
     desc: post.summary,
     sections: [], html: postBody(post), post,
   })),
@@ -747,7 +748,7 @@ function render(page) {
 <link rel="canonical" href="${canonical}">
 <meta property="og:title" content="${esc(page.title)}">
 <meta property="og:description" content="${esc(page.desc)}">
-<meta property="og:type" content="website">
+<meta property="og:type" content="${page.post ? 'article' : 'website'}">
 <meta property="og:url" content="${canonical}">
 <meta property="og:site_name" content="Occasions Box">
 <meta property="og:locale" content="en_US">

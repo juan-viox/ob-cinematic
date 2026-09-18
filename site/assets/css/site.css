@@ -2190,6 +2190,7 @@ body:not(.home) .nav.scrolled .nav-logo img { height: 38px; }
    caps the line length, so the elements only need rhythm. */
 .jr-post-body { font-family: var(--sans); font-size: 16.5px; line-height: 1.8; color: var(--text-light); }
 .jr-post-body p { margin: 0 0 22px; }
+.jr-post-body b, .jr-post-body strong { font-weight: 600; color: var(--text); }
 .jr-post-body h2 {
   font-family: var(--serif); font-size: 27px; font-weight: 400; line-height: 1.25;
   color: var(--text); margin: 44px 0 14px;
