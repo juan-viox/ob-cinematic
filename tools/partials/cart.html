@@ -12,11 +12,19 @@
     </div>
 
     <footer class="cart-foot" id="cartFoot" hidden>
-      <div class="cart-total">
+      <div class="cart-line">
         <span>Subtotal</span>
-        <b id="cartSubtotal">$0.00</b>
+        <span id="cartSubtotal">$0.00</span>
       </div>
-      <p class="cart-note">Card, PayPal or Venmo. Shipping is calculated at checkout. Every box arrives gift ready with a handwritten 5x7 note inside.</p>
+      <div class="cart-line">
+        <span>Processing &amp; Handling <small>(3%)</small></span>
+        <span id="cartFee">$0.00</span>
+      </div>
+      <div class="cart-total">
+        <span>Total</span>
+        <b id="cartDue">$0.00</b>
+      </div>
+      <p class="cart-note">Card, PayPal or Venmo. Shipping is calculated at checkout. A 3% processing and handling fee applies to every order. Every box arrives gift ready with a handwritten 5x7 note inside.</p>
       <p class="cart-card-warning" id="cartCardWarning" role="status" hidden></p>
       <div id="paypal-button-container"></div>
       <button type="button" class="cart-continue" id="cartContinue">Continue shopping</button>

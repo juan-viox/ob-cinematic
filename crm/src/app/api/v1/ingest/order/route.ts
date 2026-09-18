@@ -207,6 +207,15 @@ export async function POST(request: Request) {
     const parsedLines = parseLines(body.items ?? body.lineItems)
     if (typeof parsedLines === 'string') return jsonError(request, parsedLines, 400)
 
+    // Processing and handling rides alongside the line items rather than
+    // inside them, so the cart total is the items plus this and the books can
+    // still tell the sale from the cost of taking the money.
+    const feeRaw = body.processingFee ?? body.handlingAmount
+    const processingFee = feeRaw === undefined || feeRaw === null || feeRaw === '' ? 0 : num(feeRaw)
+    if (processingFee === null || processingFee < 0 || processingFee > 100_000) {
+      return jsonError(request, 'processingFee must be a non-negative number', 400)
+    }
+
     const statedAmount = body.amount === undefined || body.amount === null || body.amount === ''
       ? null
       : num(body.amount)
@@ -216,15 +225,20 @@ export async function POST(request: Request) {
 
     let lines: OrderLine[]
     let amount: number
+    /** The line items alone. `amount` is this plus processing, and it is what
+     *  PayPal captured, so verification has to compare against `amount`. */
+    let itemsTotal: number
 
     if (parsedLines) {
       lines = parsedLines
-      amount = linesTotal(lines)
+      itemsTotal = linesTotal(lines)
+      amount = Math.round((itemsTotal + processingFee) * 100) / 100
       // The cart and the total are two claims about the same purchase.
       if (statedAmount !== null && Math.abs(statedAmount - amount) > 0.005) {
         return jsonError(
           request,
-          `amount ${statedAmount.toFixed(2)} does not match the items total ${amount.toFixed(2)}`,
+          `amount ${statedAmount.toFixed(2)} does not match the items total ${itemsTotal.toFixed(2)} plus ` +
+            `processing ${processingFee.toFixed(2)}`,
           400
         )
       }
@@ -246,6 +260,7 @@ export async function POST(request: Request) {
       }
 
       amount = statedAmount
+      itemsTotal = Math.round((statedAmount - processingFee) * 100) / 100
       lines = [
         {
           name: productName,
@@ -405,7 +420,8 @@ export async function POST(request: Request) {
       shipToName: shipToName ?? payerName,
       shipToAddress,
       currency,
-      subtotal: amount,
+      subtotal: itemsTotal,
+      handlingAmount: processingFee,
       total: amount,
       verified,
       verifiedBy,

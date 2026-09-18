@@ -987,6 +987,32 @@
     }, 0);
   }
 
+  /* ─── Processing and handling ───
+     Every card and wallet takes a cut, and at PayPal's US rate that is 3.49%
+     plus 49 cents on a checkout sale. This recovers most of it.
+
+     It is charged on every order, whatever the buyer pays with, and that is
+     deliberate rather than incidental. PayPal's own User Agreement says a
+     seller "will not impose a surcharge or any other fee for accepting PayPal
+     as a payment method", and in the same breath allows a handling fee "as
+     long as the handling fee does not operate as a surcharge and is not
+     higher than the handling fee you charge for non-PayPal transactions".
+     A fee that appears only when someone reaches for PayPal is the first
+     thing; a flat fee on the sale is the second. Charging it uniformly also
+     keeps us clear of the card network rule against surcharging debit cards,
+     and of the states that ban surcharging outright, neither of which reaches
+     a fee that is not conditioned on how the buyer pays.
+
+     One rate, one label, one place to change either. */
+  var PROCESSING_RATE = 0.03;
+  var PROCESSING_LABEL = 'Processing & Handling';
+
+  /* Rounded once on the whole order rather than per line, so three boxes are
+     charged what one order costs instead of three separate roundings. */
+  function processingCents(baseCents) {
+    return Math.round(baseCents * PROCESSING_RATE);
+  }
+
   function money(cents) {
     return '$' + (cents / 100).toFixed(2);
   }
@@ -1080,8 +1106,14 @@
     if (empty) empty.hidden = resolved.length > 0;
     if (foot) foot.hidden = resolved.length === 0;
 
+    var subCents = subtotalCents(resolved);
+    var feeCents = processingCents(subCents);
     var subtotal = document.getElementById('cartSubtotal');
-    if (subtotal) subtotal.textContent = money(subtotalCents(resolved));
+    if (subtotal) subtotal.textContent = money(subCents);
+    var feeEl = document.getElementById('cartFee');
+    if (feeEl) feeEl.textContent = money(feeCents);
+    var dueEl = document.getElementById('cartDue');
+    if (dueEl) dueEl.textContent = money(subCents + feeCents);
 
     var missing = linesMissingCard(resolved);
     var warn = document.getElementById('cartCardWarning');
@@ -1145,7 +1177,11 @@
       },
       createOrder: function(data, actions) {
         var resolved = resolveCart();
-        var total = (subtotalCents(resolved) / 100).toFixed(2);
+        var itemCents = subtotalCents(resolved);
+        var feeCents = processingCents(itemCents);
+        var items = (itemCents / 100).toFixed(2);
+        var handling = (feeCents / 100).toFixed(2);
+        var total = ((itemCents + feeCents) / 100).toFixed(2);
         var units = cartUnits(resolved);
         var description = resolved.length === 1
           ? resolved[0].label + ' Gift Box'
@@ -1156,7 +1192,10 @@
             amount: {
               value: total,
               currency_code: 'USD',
-              breakdown: { item_total: { value: total, currency_code: 'USD' } }
+              breakdown: {
+                item_total: { value: items, currency_code: 'USD' },
+                handling: { value: handling, currency_code: 'USD' }
+              }
             },
             items: resolved.map(function(r) {
               var note = [r.line.card, r.line.message && '"' + r.line.message + '"']
@@ -1177,6 +1216,7 @@
         // report to the CRM has to be what was actually paid for.
         var resolved = resolveCart();
         var cents = subtotalCents(resolved);
+        var fee = processingCents(cents);
         return actions.order.capture().then(function(details) {
           closeCart();
           // Guest checkout / some funding sources return a payer without a name object.
@@ -1187,7 +1227,7 @@
           saveCart();
           renderCart();
           var unit = (details && details.purchase_units && details.purchase_units[0]) || {};
-          recordOrder(data.orderID, payer, resolved, cents, unit.shipping || null);
+          recordOrder(data.orderID, payer, resolved, cents, fee, unit.shipping || null);
         });
       },
       onError: function(err) {
@@ -1198,7 +1238,7 @@
 
   /* Payment has already succeeded by the time this runs, so a CRM failure is
      reported to us and softened for the buyer, never treated as a failed sale. */
-  function recordOrder(paypalOrderId, payer, resolved, cents, shipping) {
+  function recordOrder(paypalOrderId, payer, resolved, cents, feeCents, shipping) {
     if (!CRM_CONFIG.enabled || !CRM_CONFIG.apiUrl) return;
     var payerName = [payer.name && payer.name.given_name, payer.name && payer.name.surname]
       .filter(Boolean).join(' ');
@@ -1217,7 +1257,10 @@
             quantity: r.line.qty
           };
         }),
-        amount: cents / 100,
+        amount: (cents + feeCents) / 100,
+        subtotal: cents / 100,
+        processingFee: feeCents / 100,
+        processingLabel: PROCESSING_LABEL,
         currency: 'USD',
         paypalOrderId: paypalOrderId,
         payerEmail: payer.email_address || '',

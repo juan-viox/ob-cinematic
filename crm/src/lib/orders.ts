@@ -35,6 +35,8 @@ export interface CreateOrderInput {
   giftMessage?: string | null
   currency: string
   subtotal: number
+  /** Processing and handling, charged uniformly on every order. */
+  handlingAmount?: number
   shippingAmount?: number
   taxAmount?: number
   total: number
@@ -134,6 +136,7 @@ export async function createOrder(
       gift_message: input.giftMessage ?? null,
       currency: input.currency,
       subtotal: input.subtotal,
+      handling_amount: input.handlingAmount ?? 0,
       shipping_amount: input.shippingAmount ?? 0,
       tax_amount: input.taxAmount ?? 0,
       total: input.total,

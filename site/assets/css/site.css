@@ -1969,6 +1969,16 @@ body:not(.home) .nav.scrolled .nav-logo img { height: 38px; }
   border-top: 1px solid var(--border); background: var(--bg-alt);
 }
 .cart-foot[hidden] { display: none; }
+/* The lines above the total: subtotal, then the processing and handling
+   fee, set quieter than the figure they add up to. */
+.cart-line {
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-family: var(--sans); font-size: 13px; color: var(--muted);
+  padding: 4px 0; font-variant-numeric: tabular-nums;
+}
+.cart-line small { font-size: 11px; opacity: 0.75; }
+.cart-line + .cart-total { margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
+
 .cart-total {
   display: flex; align-items: baseline; justify-content: space-between;
   font-family: var(--sans); font-size: 12px;

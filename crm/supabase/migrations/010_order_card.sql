@@ -25,3 +25,18 @@ COMMENT ON COLUMN order_items.card IS
   'Which printed 5x7 card the buyer chose, or the blank one. Null on orders placed before the shop asked.';
 COMMENT ON COLUMN order_items.card_message IS
   'What the buyer asked to be handwritten inside the card. Null or empty means the card speaks for itself.';
+
+-- Processing and handling, charged on every order whatever the buyer pays
+-- with. It is its own column rather than folded into the total because the
+-- books need to tell the sale apart from the cost of taking the money: the
+-- line items are revenue, this is a pass-through that lands straight back
+-- with the processor.
+--
+-- orders already carries subtotal, discount_amount, shipping_amount and
+-- tax_amount beside total, so this sits with them and defaults to zero for
+-- every order placed before the shop charged it.
+
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS handling_amount numeric(12,2) NOT NULL DEFAULT 0;
+
+COMMENT ON COLUMN orders.handling_amount IS
+  'Processing and handling charged on the order. Uniform across payment methods, so it is a handling fee and not a card surcharge. Zero on orders placed before the shop charged it.';
