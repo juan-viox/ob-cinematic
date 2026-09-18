@@ -49,12 +49,23 @@ page and it must never go in the repository.</p>
 </body></html>`
 }
 
-/** Host-agnostic redirect: relative Location header including the basePath. */
-function redirectTo(path: string) {
-  return new NextResponse(null, {
-    status: 307,
-    headers: { Location: `${BASE_PATH}${path}` },
-  })
+/**
+ * Redirect to a path inside the CRM.
+ *
+ * This used to hand-build the response with a relative Location header, to
+ * dodge the basePath being applied twice. Next parses that header with
+ * `new URL(value)`, which has no base to resolve against, so every redirect
+ * threw ERR_INVALID_URL and took the whole middleware with it: an
+ * unauthenticated visit to any page answered 500
+ * MIDDLEWARE_INVOCATION_FAILED instead of showing the login screen.
+ *
+ * An absolute URL built from the request origin is what Next expects. The
+ * basePath is applied here rather than by Next, because NextResponse.redirect
+ * uses the URL exactly as given.
+ */
+function redirectTo(request: NextRequest, path: string) {
+  const url = new URL(`${BASE_PATH}${path}`, request.nextUrl.origin)
+  return NextResponse.redirect(url, 307)
 }
 
 export async function middleware(request: NextRequest) {
@@ -130,14 +141,14 @@ export async function middleware(request: NextRequest) {
   // ── 5. Portal routes: require auth, redirect to portal-login ──
   if (pathname.startsWith('/portal')) {
     if (!user) {
-      return redirectTo('/portal-login')
+      return redirectTo(request, '/portal-login')
     }
     return supabaseResponse
   }
 
   // ── 6. All other routes: require auth ──
   if (!user) {
-    return redirectTo('/login')
+    return redirectTo(request, '/login')
   }
 
   return supabaseResponse
