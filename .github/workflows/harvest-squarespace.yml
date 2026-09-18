@@ -39,6 +39,10 @@ permissions:
 jobs:
   harvest:
     runs-on: ubuntu-latest
+    # The first run hung for nine minutes on a fetch with no timeout,
+    # and a GitHub App token cannot cancel a run, so the job carries its
+    # own ceiling rather than relying on being able to stop it.
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:

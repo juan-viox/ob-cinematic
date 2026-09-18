@@ -37,9 +37,12 @@ function targets() {
   return [...seen.entries()].map(([slug, sources]) => ({ slug, sources }));
 }
 
+const FETCH_TIMEOUT = 20_000;
+
 async function get(url, asJson) {
   const res = await fetch(url, {
     redirect: 'follow',
+    signal: AbortSignal.timeout(FETCH_TIMEOUT),
     headers: { 'user-agent': 'occasionsbox-migration (+https://github.com/juan-viox/ob-cinematic)' },
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -76,6 +79,7 @@ for (const [n, t] of targets().entries()) {
   if (LIMIT && n >= LIMIT) { console.log(`Stopping after ${LIMIT} (limit set).`); break; }
 
   let found = null;
+  console.log(`[${n + 1}] ${t.slug} ...`);
   for (const source of t.sources) {
     const url = `${SITE}/shop/${source}`;
     try {
@@ -128,7 +132,9 @@ for (const line of fresh) {
   const [name, url] = line.split('\t');
   if (existsSync(`${DEST}/${name}`)) continue;
   try {
-    execFileSync('curl', ['-fL', '--retry', '3', '--retry-delay', '2', '-sS', '-o', '/tmp/dl', url]);
+    execFileSync('curl', ['-fL', '--retry', '2', '--retry-delay', '2',
+      '--connect-timeout', '15', '--max-time', '60', '-sS', '-o', '/tmp/dl', url],
+      { timeout: 90_000 });
     execFileSync('convert', ['/tmp/dl[0]', `${DEST}/${name}`]);
   } catch (e) {
     console.log(`::error::could not fetch ${name}: ${e.message}`);
