@@ -101,7 +101,7 @@ export default function TopBar({
         </nav>
       </div>
 
-      {/* Center: Search — opens CommandPalette */}
+      {/* Center: Search, which opens CommandPalette */}
       <button
         onClick={() => {
           document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))

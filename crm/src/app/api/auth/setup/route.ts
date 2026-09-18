@@ -6,7 +6,7 @@ import crmConfig from '@/crm.config'
 /**
  * POST /api/auth/setup
  *
- * Creates the caller's profile. The user is derived from the session cookie —
+ * Creates the caller's profile. The user is derived from the session cookie,
  * any userId in the body is ignored.
  *
  * Bootstrap rule: if no profile exists yet, the caller becomes 'owner' and the
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Find or create the organization (slug from crm.config — never "first org")
+    // Find or create the organization (slug from crm.config, never "first org")
     let orgId: string
     const { data: existingOrg } = await admin
       .from('organizations')

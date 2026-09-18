@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { renderProposalHtml } from '@/lib/proposal-html'
 import type { Proposal, ProposalItem } from '@/types'
 
-/** GET /api/v1/proposals/{id}/print — the proposal as a printable page. */
+/** GET /api/v1/proposals/{id}/print: the proposal as a printable page. */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession()
   if (!session.ok) return session.response

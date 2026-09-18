@@ -101,7 +101,7 @@ function parseLines(v: unknown): OrderLine[] | string | null {
   return lines
 }
 
-/** "Host's Delight · Rose" — the colourway is part of what was bought. */
+/** "Host's Delight · Rose". The colourway is part of what was bought. */
 function lineLabel(line: OrderLine): string {
   return line.variant ? `${line.name} \u00b7 ${line.variant}` : line.name
 }
@@ -164,7 +164,7 @@ export function OPTIONS(request: Request) {
  *   { productName, amount, quantity?, currency?, paypalOrderId, … }
  *
  * The order total is computed from the lines, in cents, and an `amount` sent
- * alongside them must agree with it to the penny — the cart and the total are
+ * alongside them must agree with it to the penny; the cart and the total are
  * two claims about the same purchase, and a mismatch means one of them is
  * wrong. Idempotent on paypalOrderId.
  *

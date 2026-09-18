@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/check-no-em-dash.mjs",
     "build": "next build",
+    "check:dashes": "node scripts/check-no-em-dash.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
