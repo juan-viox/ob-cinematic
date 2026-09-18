@@ -710,7 +710,12 @@ const navFor = (page) => {
     .replaceAll('{{A_CUSTOM}}', mark('custom-gifting'))
     .replaceAll('{{A_CONCIERGE}}', mark('concierge'))
     .replaceAll('{{A_ABOUT}}', mark('about'))
-    .replaceAll('{{A_CONTACT}}', mark('contact'));
+    .replaceAll('{{A_CONTACT}}', mark('contact'))
+    /* The journal is only in the nav once there is something to read. */
+    .replaceAll('{{JOURNAL_NAV}}', POSTS.length
+      ? `\n    <a href="/journal"${mark('journal')}>Journal</a>` : '')
+    .replaceAll('{{JOURNAL_MOBILE}}', POSTS.length
+      ? '\n  <a href="/journal" onclick="toggleMobile()">Journal</a>' : '');
 };
 
 const headerFor = (page) => page.header

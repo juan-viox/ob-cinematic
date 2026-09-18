@@ -1768,11 +1768,19 @@ body.page-concierge #concierge { padding-top: 64px; }
   .concierge-includes { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* The nav carries six items plus a CTA. Below 1024 they crowd the wordmark,
-   so the hamburger takes over there rather than at the old 768. */
-@media (max-width: 1150px) {
+/* The nav carries six links plus a CTA since the journal opened. Below 1024
+   they crowd the wordmark, so the hamburger takes over there rather than at
+   the old 768; the extra link also moved this tightening up from 1150, where
+   the logo and the links came within 5px of touching. */
+@media (max-width: 1200px) {
   .nav-links { gap: 22px; }
   .nav-links a { font-size: 12px; }
+}
+/* One more step before the hamburger: at 1060 the seventh item put the links
+   within 7px of the wordmark again. */
+@media (max-width: 1090px) {
+  .nav-links { gap: 16px; }
+  .nav-links a { font-size: 11.5px; }
 }
 @media (max-width: 1024px) {
   .nav-links { display: none; }
