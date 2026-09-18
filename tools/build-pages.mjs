@@ -605,11 +605,24 @@ function loadPosts() {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(meta.date)) {
       throw new Error(`tools/posts/${file}: date must be YYYY-MM-DD, got ${meta.date}`);
     }
+    if (meta.order !== undefined && !/^[1-9]\d*$/.test(meta.order)) {
+      throw new Error(`tools/posts/${file}: order must be a positive whole number, got ${meta.order}`);
+    }
     return { ...meta, slug: file.replace(/\.html$/, ''), body: raw.slice(head[0].length).trim() };
   });
 
-  /* Newest first, which is what a reader and a crawler both expect. */
-  return posts.sort((a, b) => b.date.localeCompare(a.date));
+  /* Newest first is what a reader and a crawler both expect, and it is the
+     right default for a journal that fills up over time. It is the wrong
+     answer on the day several posts go live together: the dates are all the
+     same, and even when they are not, "published first" and "shown first"
+     point in opposite directions. An explicit order wins where it is given,
+     so the sequence a piece was written to be read in survives the dates.
+     Posts without one fall in behind, newest first. */
+  return posts.sort((a, b) => {
+    const ao = a.order ? Number(a.order) : Infinity;
+    const bo = b.order ? Number(b.order) : Infinity;
+    return ao !== bo ? ao - bo : b.date.localeCompare(a.date);
+  });
 }
 const POSTS = loadPosts();
 
