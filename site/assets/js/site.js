@@ -123,7 +123,14 @@
      The CRM lives on its own host, so this is cross-origin: the ingest
      routes answer the preflight and allow occasionsbox.com (crm/src/lib/ingest.ts).
      ═══════════════════════════════════════════ */
-  var CRM_CONFIG = { apiUrl: 'https://crm.occasionsbox.com/api/v1/ingest', enabled: true };
+  var CRM_CONFIG = {
+    apiUrl: 'https://crm.occasionsbox.com/api/v1/ingest',
+    /* Stripe Checkout is hosted by Stripe; the CRM creates the session
+       (it holds the secret key and prices the cart from the catalogue)
+       and records the order when Stripe's webhook confirms payment. */
+    stripeCheckoutUrl: 'https://crm.occasionsbox.com/api/v1/checkout/stripe',
+    enabled: true
+  };
 
   /* ─── Toast Notifications ─── */
   function showToast(msg, type) {
@@ -918,6 +925,7 @@
   var MAX_LINES = 20;
   var cart = [];
   var paypalMounted = false;
+  var stripeMounted = false;
 
   function readStoredCart() {
     try {
@@ -1126,6 +1134,8 @@
     }
     var pay = document.getElementById('paypal-button-container');
     if (pay) pay.classList.toggle('is-blocked', missing.length > 0);
+    var stripeBtn = document.getElementById('stripeCheckout');
+    if (stripeBtn) stripeBtn.classList.toggle('is-blocked', missing.length > 0);
   }
 
   function openCart() {
@@ -1136,6 +1146,7 @@
     requestAnimationFrame(function() { overlay.classList.add('open'); });
     document.body.style.overflow = 'hidden';
     mountCheckout();
+    mountStripe();
     var close = document.getElementById('cartClose');
     if (close) close.focus();
   }
@@ -1235,6 +1246,87 @@
         showToast('Payment error. Please try again.', 'error');
       }
     }).render('#paypal-button-container');
+  }
+
+  /* ─── Stripe Checkout ───
+     The card button asks the CRM for a hosted Checkout Session and sends the
+     buyer there. Nothing about the payment is decided in this browser: the
+     CRM prices the cart from the catalogue, Stripe takes the card, and
+     Stripe's webhook tells the CRM when it is paid. The buyer comes back to
+     /shop with ?checkout=success or ?checkout=cancelled. */
+  function mountStripe() {
+    var btn = document.getElementById('stripeCheckout');
+    if (!btn || stripeMounted) return;
+    stripeMounted = true;
+    var label = btn.textContent;
+    btn.addEventListener('click', function() {
+      var resolved = resolveCart();
+      if (!resolved.length) return;
+      var missing = linesMissingCard(resolved);
+      if (missing.length) {
+        showToast('Choose a card for every box first. Each one is handwritten.', 'error');
+        var first = document.querySelector('.cart-item-card.needs-card .cart-card-select');
+        if (first) first.focus();
+        return;
+      }
+      if (!CRM_CONFIG.enabled || !CRM_CONFIG.stripeCheckoutUrl) return;
+      btn.disabled = true;
+      btn.textContent = 'Taking you to checkout\u2026';
+      fetch(CRM_CONFIG.stripeCheckoutUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: resolved.map(function(r) {
+            return {
+              name: r.line.name,
+              variant: r.line.variant || '',
+              card: r.line.card || '',
+              message: r.line.message || '',
+              unitAmount: r.price,
+              quantity: r.line.qty
+            };
+          })
+        })
+      })
+      .then(function(res) {
+        return res.json().catch(function() { return {}; }).then(function(data) {
+          if (!res.ok || !data || !data.url) {
+            throw new Error((data && data.error) || 'Card checkout is unavailable right now.');
+          }
+          window.location.assign(data.url);
+        });
+      })
+      .catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = label;
+        showToast((err && err.message) || 'Card checkout is unavailable right now. PayPal still works.', 'error');
+      });
+    });
+  }
+
+  /* Back from Stripe. Success empties the cart, because Stripe has the money
+     and the CRM has the order; cancel leaves it exactly as it was. The
+     parameters are dropped from the address bar so a refresh does not
+     repeat the message. */
+  function handleCheckoutReturn() {
+    var params;
+    try { params = new URLSearchParams(window.location.search); } catch (e) { return; }
+    var state = params.get('checkout');
+    if (!state) return;
+    if (state === 'success') {
+      cart = [];
+      saveCart();
+      renderCart();
+      showToast('Order confirmed! Thank you. Your receipt is on its way from Stripe.', 'success');
+    } else if (state === 'cancelled') {
+      showToast('Checkout cancelled. Your cart is still here.', 'error');
+    }
+    params.delete('checkout');
+    params.delete('session_id');
+    var rest = params.toString();
+    try {
+      window.history.replaceState(null, '', window.location.pathname + (rest ? '?' + rest : '') + window.location.hash);
+    } catch (e) { /* older browsers keep the parameters; nothing breaks */ }
   }
 
   /* Payment has already succeeded by the time this runs, so a CRM failure is
@@ -1579,6 +1671,7 @@
 
   cart = readStoredCart();
   renderCart();
+  handleCheckoutReturn();
   if (cartOverlayEl && window.location.hash === '#cart') openCart();
 
   /* ─── Contact Form → CRM Lead ─── */

@@ -120,7 +120,7 @@ export default function OrdersClient({ orders: initial }: { orders: Order[] }) {
         </div>
         <div className="card flex items-center gap-3">
           <div className="p-2.5 rounded-lg" style={{ background: 'rgba(253,203,110,0.15)' }}><AlertTriangle className="w-5 h-5" style={{ color: 'var(--warning)' }} /></div>
-          <div><p className="text-sm" style={{ color: 'var(--muted)' }}>Need checking in PayPal</p><p className="text-2xl font-bold">{unverified}</p></div>
+          <div><p className="text-sm" style={{ color: 'var(--muted)' }}>Need checking with the processor</p><p className="text-2xl font-bold">{unverified}</p></div>
         </div>
       </div>
 
@@ -271,10 +271,14 @@ export default function OrdersClient({ orders: initial }: { orders: Order[] }) {
 
                     {o.payment_reference && (
                       <p className="text-xs" style={{ color: 'var(--muted)' }}>
-                        {o.payment_provider ?? 'PayPal'} {o.payment_reference}
-                        {o.payment_provider === 'paypal' && (
+                        {o.payment_provider === 'stripe' ? 'Stripe' : 'PayPal'} {o.payment_reference}
+                        {(o.payment_provider === 'paypal' || o.payment_provider === 'stripe') && (
                           <a
-                            href={`https://www.paypal.com/activity/payment/${o.payment_reference}`}
+                            href={
+                              o.payment_provider === 'stripe'
+                                ? `https://dashboard.stripe.com/payments/${o.payment_reference}`
+                                : `https://www.paypal.com/activity/payment/${o.payment_reference}`
+                            }
                             target="_blank"
                             rel="noreferrer"
                             className="inline-flex items-center gap-1 ml-2 hover:underline"

@@ -2007,8 +2007,28 @@ body:not(.home) .nav.scrolled .nav-logo img { height: 38px; }
 }
 .cart-continue:hover { border-color: var(--gold); color: var(--gold-dark); }
 
+/* The card button sits under PayPal's own buttons at the same height, so the
+   two ways to pay read as one choice rather than a main one and an afterthought. */
+.cart-or {
+  display: flex; align-items: center; gap: 10px; margin: 12px 0 10px;
+  font-family: var(--sans); font-size: 10.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+}
+.cart-or::before, .cart-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.cart-stripe {
+  display: block; width: 100%; height: 45px; padding: 0 16px; cursor: pointer;
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: #fff; background: var(--text); border: 1px solid var(--text);
+  border-radius: 100px;
+  transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+}
+.cart-stripe:hover { background: var(--gold-dark); border-color: var(--gold-dark); }
+.cart-stripe[disabled] { opacity: 0.6; cursor: wait; }
+.cart-stripe.is-blocked { opacity: 0.4; pointer-events: none; filter: grayscale(0.6); }
+
 .nav-cart:focus-visible, .cart-close:focus-visible, .cart-step:focus-visible,
-.cart-remove:focus-visible, .cart-continue:focus-visible, .modal-add:focus-visible {
+.cart-remove:focus-visible, .cart-continue:focus-visible, .cart-stripe:focus-visible, .modal-add:focus-visible {
   outline: 2px solid var(--gold-dark); outline-offset: 2px;
 }
 

@@ -33,6 +33,8 @@ export interface CreateOrderInput {
   shipToName?: string | null
   shipToAddress?: Record<string, string> | null
   giftMessage?: string | null
+  /** The date the buyer needs it in hand, YYYY-MM-DD, when they gave one. */
+  neededBy?: string | null
   currency: string
   subtotal: number
   /** Processing and handling, charged uniformly on every order. */
@@ -134,6 +136,7 @@ export async function createOrder(
       ship_to_name: input.shipToName ?? null,
       ship_to_address: input.shipToAddress ?? null,
       gift_message: input.giftMessage ?? null,
+      needed_by: input.neededBy ?? null,
       currency: input.currency,
       subtotal: input.subtotal,
       handling_amount: input.handlingAmount ?? 0,

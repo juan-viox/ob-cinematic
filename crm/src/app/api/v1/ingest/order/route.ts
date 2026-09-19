@@ -1,14 +1,10 @@
 import {
-  LIMITS,
   authorizeIngest,
-  createActivity,
   email,
   errorResponse,
   fullName,
-  getFirstStageId,
   getIngestClient,
   getOrgId,
-  getStageIdByName,
   handleOptions,
   isSpam,
   jsonError,
@@ -16,36 +12,15 @@ import {
   num,
   phone,
   readJsonBody,
-  splitName,
   str,
-  upsertContact,
+  LIMITS,
 } from '@/lib/ingest'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { getPayPalConfig, verifyPayPalOrder } from '@/lib/paypal'
-import { createOrder, formatAddress, normaliseAddress } from '@/lib/orders'
-
-/** Stage a captured (paid) order lands in; falls back to the first stage. */
-const ORDER_STAGE_NAME = 'Approved'
+import { normaliseAddress } from '@/lib/orders'
+import { linesTotal, parseCartLines, recordPaidOrder, type OrderLine } from '@/lib/record-order'
 
 /** PayPal order ids are alphanumeric (e.g. 5O190127TN364715T); keep the check strict. */
 const PAYPAL_ORDER_ID_RE = /^[A-Za-z0-9_-]{4,64}$/
-
-/** A cart of 50 distinct boxes is already far past anything we would ship
- *  unreviewed; beyond that it is a malformed or hostile body, not an order. */
-const MAX_LINES = 50
-
-/** One line of an order: a product, its colourway, unit price and count. */
-interface OrderLine {
-  name: string
-  variant: string | null
-  /** Which printed 5x7 card the buyer chose, or the blank one. */
-  card: string | null
-  /** What they asked to be handwritten inside it. Named to match OrderLine
-   *  in lib/orders, because `lines` is handed to createOrder unchanged. */
-  cardMessage: string | null
-  unitAmount: number
-  quantity: number
-}
 
 /** Marker written into deals.notes so the order can be found again (idempotency). */
 function orderMarker(paypalOrderId: string): string {
@@ -64,101 +39,6 @@ function currencyCode(v: unknown): string | null {
   if (typeof v !== 'string') return null
   const s = v.trim().toUpperCase()
   return /^[A-Z]{3}$/.test(s) ? s : null
-}
-
-/**
- * Parses the cart. Returns null when the caller sent no items at all (the
- * older single-product body, which is still accepted), the line array when
- * they are well formed, or a message describing the first bad line.
- */
-function parseLines(v: unknown): OrderLine[] | string | null {
-  if (v === undefined || v === null) return null
-  if (!Array.isArray(v)) return 'items must be an array of order lines'
-  if (v.length === 0) return 'items must contain at least one line'
-  if (v.length > MAX_LINES) return `items may contain at most ${MAX_LINES} lines`
-
-  const lines: OrderLine[] = []
-  for (let i = 0; i < v.length; i++) {
-    const raw = v[i]
-    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-      return `items[${i}] must be an object`
-    }
-    const row = raw as Record<string, unknown>
-
-    const name = str(row.name ?? row.productName ?? row.product, LIMITS.title)
-    if (!name) return `items[${i}].name is required`
-
-    const unitAmount = num(row.unitAmount ?? row.unit_amount ?? row.price)
-    if (unitAmount === null || unitAmount < 0 || unitAmount > 1_000_000) {
-      return `items[${i}].unitAmount must be a non-negative number`
-    }
-
-    const qtyRaw =
-      row.quantity === undefined || row.quantity === null || row.quantity === ''
-        ? 1
-        : num(row.quantity)
-    if (qtyRaw === null || !Number.isInteger(qtyRaw) || qtyRaw < 1 || qtyRaw > 10_000) {
-      return `items[${i}].quantity must be a positive integer`
-    }
-
-    lines.push({
-      name,
-      variant: str(row.variant, LIMITS.name),
-      card: str(row.card, LIMITS.name),
-      cardMessage: str(row.message ?? row.cardMessage, LIMITS.title),
-      unitAmount,
-      quantity: qtyRaw,
-    })
-  }
-  return lines
-}
-
-/** "Host's Delight · Rose". The colourway is part of what was bought. */
-function lineLabel(line: OrderLine): string {
-  return line.variant ? `${line.name} \u00b7 ${line.variant}` : line.name
-}
-
-/** Money adds up in cents. 105.10 × 3 in floats does not. */
-function linesTotal(lines: OrderLine[]): number {
-  const cents = lines.reduce(
-    (sum, line) => sum + Math.round(line.unitAmount * 100) * line.quantity,
-    0
-  )
-  return cents / 100
-}
-
-/** A deal title someone can read in a list view without opening it. */
-function orderTitle(prefix: string, lines: OrderLine[], totalUnits: number): string {
-  if (lines.length === 1) return `${prefix}: ${lineLabel(lines[0])} x${lines[0].quantity}`
-  const head = lines
-    .slice(0, 2)
-    .map((line) => `${lineLabel(line)} x${line.quantity}`)
-    .join(', ')
-  const rest = lines.length - 2
-  return `${prefix}: ${totalUnits} boxes · ${head}${rest > 0 ? ` +${rest} more` : ''}`
-}
-
-/** Existing deal for this PayPal order id within the org, if any. */
-async function findExistingOrderDeal(
-  supabase: SupabaseClient,
-  orgId: string,
-  paypalOrderId: string
-): Promise<string | null> {
-  const marker = orderMarker(paypalOrderId)
-  const { data, error } = await supabase
-    .from('deals')
-    .select('id, notes')
-    .eq('organization_id', orgId)
-    .ilike('notes', `%${marker}%`)
-    .limit(5)
-  if (error) {
-    console.error('[ingest:order] idempotency lookup failed:', error.message)
-    return null
-  }
-  const rows = (data ?? []) as Array<{ id: string; notes: string | null }>
-  // ilike treats "_" as a wildcard; confirm the exact marker in code.
-  const match = rows.find((row) => (row.notes ?? '').includes(marker))
-  return match?.id ?? null
 }
 
 export function OPTIONS(request: Request) {
@@ -190,6 +70,9 @@ export function OPTIONS(request: Request) {
  *  - No PayPal credentials, origin-only caller → recorded as
  *    "Unverified order: …" in the FIRST stage (not Approved, no 100%
  *    probability) so the team confirms it in PayPal before fulfilling.
+ *
+ * Stripe orders never come through here: Stripe reports them itself to
+ * /api/v1/webhooks/stripe. Both end in lib/record-order.
  */
 export async function POST(request: Request) {
   try {
@@ -204,7 +87,7 @@ export async function POST(request: Request) {
       return jsonError(request, 'A valid paypalOrderId is required', 400)
     }
 
-    const parsedLines = parseLines(body.items ?? body.lineItems)
+    const parsedLines = parseCartLines(body.items ?? body.lineItems)
     if (typeof parsedLines === 'string') return jsonError(request, parsedLines, 400)
 
     // Processing and handling rides alongside the line items rather than
@@ -277,8 +160,6 @@ export async function POST(request: Request) {
       return jsonError(request, 'amount must be a non-negative number', 400)
     }
 
-    const totalUnits = lines.reduce((sum, line) => sum + line.quantity, 0)
-
     const currency = currencyCode(body.currency)
     if (!currency) return jsonError(request, 'currency must be a 3-letter ISO code', 400)
 
@@ -318,238 +199,34 @@ export async function POST(request: Request) {
       verifiedBy = 'api_key'
     }
 
-    const { firstName, lastName } = splitName(payerName)
-
     const supabase = getIngestClient()
     const orgId = await getOrgId(supabase)
 
-    // Idempotency: same PayPal order id → same deal, no duplicate writes.
-    const existingDealId = await findExistingOrderDeal(supabase, orgId, paypalOrderId)
-    if (existingDealId) {
-      return jsonOk(request, { success: true, dealId: existingDealId, duplicate: true })
-    }
-
-    // Contact (optional: PayPal normally provides payer email, but record the order regardless).
-    let contactId: string | null = null
-    let contactCreated = false
-    if (payerEmail || payerName) {
-      const contact = await upsertContact(supabase, {
-        orgId,
-        trusted: auth.via === 'api_key',
-        email: payerEmail,
-        firstName,
-        lastName,
-        source: 'web_form',
-      })
-      contactId = contact.id
-      contactCreated = contact.created
-    }
-
-    const payerLabel = fullName(firstName, lastName) || payerEmail || 'Guest'
-    const amountLabel = `${amount.toFixed(2)} ${currency}`
-    const summary =
-      lines.length === 1
-        ? `${lineLabel(lines[0])} x${lines[0].quantity}`
-        : `${totalUnits} boxes across ${lines.length} products`
-    const stageId = verified
-      ? await getStageIdByName(supabase, orgId, ORDER_STAGE_NAME)
-      : await getFirstStageId(supabase, orgId)
-    if (!stageId) {
-      console.error('[ingest:order] no deal stages configured for org', orgId)
-      return jsonError(request, 'CRM pipeline is not configured yet', 503)
-    }
-
-    // The packing list lives in the notes, one line per product, because that
-    // is what whoever fulfils the order actually needs to read.
-    const itemLines = lines.map(
-      (line) =>
-        `  ${lineLabel(line)} x${line.quantity} - ${(Math.round(line.unitAmount * 100) * line.quantity / 100).toFixed(2)} ${currency}` +
-        (line.quantity > 1 ? ` (${line.unitAmount.toFixed(2)} each)` : '')
-    )
-    const shipLine = formatAddress(shipToAddress)
-    const notes = [
-      orderMarker(paypalOrderId),
-      'Items:',
-      ...itemLines,
-      `Total: ${amountLabel}`,
-      `Payer: ${payerLabel}${payerEmail && payerLabel !== payerEmail ? ` <${payerEmail}>` : ''}`,
-      shipLine ? `Ship to: ${shipToName ? `${shipToName}, ` : ''}${shipLine}` : null,
-      `Status: ${status}`,
-      verified
-        ? `Verified: ${verifiedBy === 'paypal' ? 'PayPal API' : 'trusted API key'}`
-        : 'UNVERIFIED: reported by the website only - confirm this order in PayPal before fulfilling.',
-    ].filter(Boolean).join('\n')
-
-    const titlePrefix = verified ? 'Order' : 'Unverified order'
-    const dealRow: Record<string, unknown> = {
-      organization_id: orgId,
-      contact_id: contactId,
-      stage_id: stageId,
-      title: orderTitle(titlePrefix, lines, totalUnits).slice(0, LIMITS.title),
+    const result = await recordPaidOrder(supabase, orgId, {
+      provider: 'paypal',
+      reference: paypalOrderId,
+      marker: orderMarker(paypalOrderId),
+      lines,
+      itemsTotal,
+      processingFee,
       amount,
-      close_date: new Date().toISOString().slice(0, 10),
-      notes,
-    }
-    if (verified) dealRow.probability = 100
-
-    const { data: deal, error: dealError } = await supabase
-      .from('deals')
-      .insert(dealRow)
-      .select('id')
-      .single()
-
-    if (dealError || !deal) {
-      console.error('[ingest:order] deal insert failed:', dealError?.message)
-      return jsonError(request, 'Unable to save order', 500)
-    }
-    const dealId = deal.id as string
-
-    // The order itself: line items linked to the catalogue, the shipping
-    // address, and a stock movement for every product the team counts.
-    const order = await createOrder(supabase, {
-      orgId,
-      source: 'website',
-      contactId,
-      dealId,
-      paymentStatus: verified ? 'paid' : 'unverified',
-      paymentProvider: 'paypal',
-      paymentReference: paypalOrderId,
-      payerName,
-      payerEmail,
-      payerPhone,
-      shipToName: shipToName ?? payerName,
-      shipToAddress,
       currency,
-      subtotal: itemsTotal,
-      handlingAmount: processingFee,
-      total: amount,
+      payerEmail,
+      payerName,
+      payerPhone,
+      shipToName,
+      shipToAddress,
       verified,
       verifiedBy,
-      notes,
-      metadata: { via: auth.via, paypalOrderId },
-      lines,
+      via: auth.via,
+      trustedContact: auth.via === 'api_key',
     })
 
-    // Every sale gets an invoice in the same OB sequence as the hand-issued
-    // ones, so the books hold one numbered document per payment. 'paid' when
-    // PayPal confirmed the capture, otherwise 'sent', which the invoices page
-    // counts as pending until someone confirms it in PayPal. Never fatal: the
-    // order is already saved, and a missing invoice is visible and fixable.
-    let invoiceId: string | null = null
-    let invoiceNumber: string | null = null
-    if (!order.duplicate) {
-      const { data: allocated, error: numberError } = await supabase.rpc('next_document_number', {
-        p_org: orgId,
-        p_kind: 'invoice',
-        p_prefix: 'OB',
-      })
-      if (numberError || typeof allocated !== 'string') {
-        console.error('[ingest:order] invoice number failed:', numberError?.message)
-      } else {
-        const today = new Date().toISOString().slice(0, 10)
-        const { data: invoice, error: invoiceError } = await supabase
-          .from('invoices')
-          .insert({
-            organization_id: orgId,
-            contact_id: contactId,
-            deal_id: dealId,
-            invoice_number: allocated,
-            status: verified ? 'paid' : 'sent',
-            issue_date: today,
-            due_date: today,
-            subtotal: amount,
-            tax_rate: 0,
-            tax_amount: 0,
-            total: amount,
-            notes: `Order ${order.orderNumber}. PayPal ${paypalOrderId}. ${
-              verified ? 'Paid at checkout.' : 'Reported by the website; confirm in PayPal before fulfilling.'
-            }`,
-          })
-          .select('id')
-          .single()
-        if (invoiceError || !invoice) {
-          console.error('[ingest:order] invoice insert failed:', invoiceError?.message)
-        } else {
-          invoiceId = invoice.id as string
-          invoiceNumber = allocated
-          const items = lines.map((line, i) => ({
-            invoice_id: invoiceId,
-            description: lineLabel(line),
-            quantity: line.quantity,
-            unit_price: line.unitAmount,
-            total: Math.round(line.unitAmount * 100 * line.quantity) / 100,
-            sort_order: i,
-          }))
-          if (processingFee > 0) {
-            items.push({
-              invoice_id: invoiceId,
-              description: 'Processing & Handling',
-              quantity: 1,
-              unit_price: processingFee,
-              total: processingFee,
-              sort_order: lines.length,
-            })
-          }
-          const { error: itemsError } = await supabase.from('invoice_items').insert(items)
-          if (itemsError) console.error('[ingest:order] invoice items failed:', itemsError.message)
-          await supabase
-            .from('orders')
-            .update({ metadata: { via: auth.via, paypalOrderId, invoiceId, invoiceNumber } })
-            .eq('id', order.id)
-        }
-      }
+    if (result.duplicate) {
+      return jsonOk(request, { success: true, dealId: result.dealId, duplicate: true })
     }
 
-    const activityId = await createActivity(supabase, {
-      orgId,
-      contactId,
-      dealId,
-      type: 'note',
-      title: verified
-        ? `Order ${order.orderNumber} captured (PayPal ${paypalOrderId})`
-        : `Order ${order.orderNumber} reported, unverified (PayPal ${paypalOrderId})`,
-      description: `${summary} - ${amountLabel} ${verified ? 'paid by' : 'reported by'} ${payerLabel}`,
-      status: 'completed',
-      completedAt: new Date().toISOString(),
-      metadata: {
-        paypalOrderId,
-        orderId: order.id,
-        orderNumber: order.orderNumber,
-        invoiceNumber,
-        items: lines,
-        // Kept so anything reading the old shape still finds something sensible.
-        productName: lines.length === 1 ? lines[0].name : summary,
-        quantity: totalUnits,
-        amount,
-        currency,
-        payerEmail,
-        payerName,
-        shipTo: shipToAddress,
-        status,
-        via: auth.via,
-        verified,
-        verifiedBy,
-        unmatchedLines: order.unmatchedLines,
-      },
-    })
-
-    if (order.unmatchedLines.length) {
-      console.warn('[ingest:order] lines with no catalogue match:', order.unmatchedLines.join(', '))
-    }
-
-    return jsonOk(request, {
-      success: true,
-      orderId: order.id,
-      orderNumber: order.orderNumber,
-      invoiceId,
-      invoiceNumber,
-      dealId,
-      contactId,
-      activityId,
-      created: contactCreated,
-      duplicate: false,
-      verified,
-    })
+    return jsonOk(request, { success: true, ...result })
   } catch (err) {
     return errorResponse(request, err, 'order')
   }
