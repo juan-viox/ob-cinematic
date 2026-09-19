@@ -132,6 +132,9 @@ By hand instead:
    `ELEVENLABS_AGENT_ID`). A cron in `vercel.json` calls
    `/api/v1/cron/elevenlabs` every five minutes, which pulls her recent
    conversations from the ElevenLabs API and files any the CRM has not seen.
+   Set `CRON_SECRET` as well: Vercel sends it as an `Authorization: Bearer`
+   header on every scheduled run, and without it the route refuses its own
+   cron with a 401 and nothing is ever synced.
    `ELEVENLABS_WEBHOOK_SECRET` is the faster path for the same thing and is
    worth adding when somebody can create the post-call webhook in the
    ElevenLabs dashboard, but nothing depends on it: both routes end in

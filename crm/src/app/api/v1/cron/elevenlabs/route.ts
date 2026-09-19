@@ -18,10 +18,17 @@ import { syncConversations } from '@/lib/elevenlabs-sync'
  * Idempotent on conversation_id, so running it twice files nothing twice.
  */
 
-/** Vercel signs its own cron requests; a bearer secret covers other callers. */
+/**
+ * Only a caller holding a secret gets in.
+ *
+ * Vercel sends `Authorization: Bearer $CRON_SECRET` on every scheduled run,
+ * so CRON_SECRET must be set for the schedule to work at all: without it
+ * Vercel sends no credential and this route refuses its own cron. The
+ * x-vercel-cron header is NOT a credential, whatever it looks like: this URL
+ * is public, so anyone could send that header and make the CRM hammer the
+ * ElevenLabs API. The site key is accepted too, for triggering a run by hand.
+ */
 function authorized(request: Request): boolean {
-  if (request.headers.get('x-vercel-cron')) return true
-
   const cronSecret = process.env.CRON_SECRET?.trim()
   if (cronSecret) {
     const header = request.headers.get('authorization') ?? ''
