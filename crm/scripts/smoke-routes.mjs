@@ -101,6 +101,13 @@ for (const p of PUBLIC) {
   check(legacy.status === 400, `/admin/api/v1/ingest/order still reaches the ingest route (${legacy.status})`);
 }
 
+/* Document numbers come from server-side counters behind a session. Signed
+   out, the routes must refuse with a JSON 401 rather than 404 or redirect. */
+for (const p of ['/api/v1/invoices/number', '/api/v1/proposals/number']) {
+  const r = await fetch(`${BASE}${p}`, { method: 'POST', redirect: 'manual' });
+  check(r.status === 401, `${p} refuses a signed-out caller with 401 (${r.status})`);
+}
+
 // ── Playwright ────────────────────────────────────────────────────────────
 /* Playwright is not a dependency of this package; it is installed globally in
    this environment, and a bare specifier does not resolve from here. The first
