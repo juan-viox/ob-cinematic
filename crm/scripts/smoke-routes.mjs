@@ -88,6 +88,19 @@ for (const p of PUBLIC) {
   check(r.status === 200, `${PREFIX}${p} is reachable without a session (${r.status})`);
 }
 
+/* The legacy /admin/api/* prefix must reach the same route as /api/*: Olivia's
+   ElevenLabs tools still call it. Both should answer the same validation error
+   for an empty body from an allowed origin, and neither should 404 or bounce
+   to the login page. */
+{
+  const opts = { method: 'POST', redirect: 'manual',
+    headers: { origin: 'https://occasionsbox.com', 'content-type': 'application/json' }, body: '{}' };
+  const direct = await fetch(`${BASE}/api/v1/ingest/order`, opts);
+  const legacy = await fetch(`${BASE}/admin/api/v1/ingest/order`, opts);
+  check(direct.status === 400, `/api/v1/ingest/order validates an empty body (${direct.status})`);
+  check(legacy.status === 400, `/admin/api/v1/ingest/order still reaches the ingest route (${legacy.status})`);
+}
+
 // ── Playwright ────────────────────────────────────────────────────────────
 /* Playwright is not a dependency of this package; it is installed globally in
    this environment, and a bare specifier does not resolve from here. The first

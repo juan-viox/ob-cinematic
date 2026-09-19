@@ -92,6 +92,19 @@ export async function middleware(request: NextRequest) {
     })
   }
 
+  // ── 0b. The old /admin/api/* URLs keep answering ──
+  // The CRM lived under /admin until September 2026, and Olivia's ElevenLabs
+  // tools still carry that prefix in their webhook URLs. Their configs hold a
+  // literal API key, so they are not something to rewrite from a chat session;
+  // the prefix is dropped here instead, before any auth logic, and the request
+  // continues as a plain API call. Pages under /admin get no such treatment:
+  // occasionsbox.com/admin already redirects to this host.
+  if (pathname.startsWith('/admin/api/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.slice('/admin'.length)
+    return NextResponse.rewrite(url)
+  }
+
   // ── 1. Always allow public paths ──
   if (publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     return NextResponse.next({ request })
