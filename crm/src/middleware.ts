@@ -14,7 +14,7 @@ const publicPaths = ['/login', '/signup', '/auth/callback', '/portal-login', '/p
  * Origin allowlist, ElevenLabs signature, or a proposal's public token)
  * instead of with a session cookie.
  */
-const selfAuthenticatedApi = ['/api/v1/ingest', '/api/v1/agent', '/api/v1/elevenlabs', '/api/v1/public', '/api/v1/checkout', '/api/v1/webhooks']
+const selfAuthenticatedApi = ['/api/v1/ingest', '/api/v1/agent', '/api/v1/elevenlabs', '/api/v1/public', '/api/v1/checkout', '/api/v1/webhooks', '/api/v1/cron']
 
 /**
  * Names the variables that are actually missing rather than a fixed list, so
