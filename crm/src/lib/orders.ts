@@ -54,18 +54,18 @@ export interface CreateOrderResult {
   unmatchedLines: string[]
 }
 
-/** A sequential, per-organisation order number (OB-0001). */
+/** A sequential, per-organisation order number (ORD-0001). Invoices keep OB. */
 export async function nextOrderNumber(supabase: SupabaseClient, orgId: string): Promise<string> {
   const { data, error } = await supabase.rpc('next_document_number', {
     p_org: orgId,
     p_kind: 'order',
-    p_prefix: 'OB',
+    p_prefix: 'ORD',
   })
   if (error || typeof data !== 'string') {
     // The counter is a convenience, not a gate: fall back to a timestamped
     // number rather than lose a paid order.
     console.error('[orders] next_document_number failed:', error?.message)
-    return `OB-${Date.now().toString().slice(-8)}`
+    return `ORD-${Date.now().toString().slice(-8)}`
   }
   return data
 }

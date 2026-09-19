@@ -18,7 +18,8 @@ const crmConfig = {
     lightColor: '#FAFAF8',
     displayFont: 'Cormorant Garamond',
     bodyFont: 'Outfit',
-    logoUrl: null as string | null,
+    // Served by the CRM itself; absolute so it also works inside emails.
+    logoUrl: 'https://crm.occasionsbox.com/ob-logo-gold.png' as string | null,
   },
 
   // CRM Settings

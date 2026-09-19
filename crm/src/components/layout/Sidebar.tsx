@@ -39,6 +39,7 @@ import ThemeToggle from '@/components/shared/ThemeToggle'
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/outreach', label: 'Outreach', icon: Megaphone },
+  { href: '/olivia', label: 'Olivia', icon: Bot },
   { href: '/leads', label: 'Leads', icon: UserPlus },
   { href: '/contacts', label: 'Contacts', icon: Users },
   { href: '/companies', label: 'Companies', icon: Building2 },

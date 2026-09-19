@@ -227,7 +227,7 @@ export default function InvoiceDetailPage() {
           </div>
           {Number(invoice.tax_rate) > 0 && (
             <div className="flex items-center justify-between text-sm">
-              <span style={{ color: 'var(--muted)' }}>Tax ({invoice.tax_rate}%)</span>
+              <span style={{ color: 'var(--muted)' }}>Tax ({Number(invoice.tax_rate)}%)</span>
               <span>{formatCurrency(Number(invoice.tax_amount))}</span>
             </div>
           )}
