@@ -48,7 +48,8 @@ host-agnostic (relative `Location` headers that include the base path).
    rejected with a 503 and nothing is filed). Optionally `RESEND_API_KEY`,
    `RESEND_FROM_EMAIL`, `ALLOWED_ORIGINS`, `NEXT_PUBLIC_APP_URL` (if set it
    **must** end in `/admin`), `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET` and
-   `PAYPAL_ENV`. Never set `NEXT_PUBLIC_BASE_PATH`: it is hard-coded in
+   `PAYPAL_ENV`, and `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` for card
+   checkout through Stripe. Never set `NEXT_PUBLIC_BASE_PATH`: it is hard-coded in
    `next.config.ts` and injected at build time.
 
    Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are
@@ -114,6 +115,23 @@ By hand instead:
    orders are verified against PayPal before they are recorded as paid.
    Without them, orders reported by the website are filed as
    "Unverified order: …" in the first pipeline stage.
+5. Stripe, for the "Pay with card" button in the cart: in the Stripe
+   dashboard copy the secret key into `STRIPE_SECRET_KEY`, then under
+   Developers → Webhooks add an endpoint for
+   `https://crm.occasionsbox.com/api/v1/webhooks/stripe` listening to
+   `checkout.session.completed` (and
+   `checkout.session.async_payment_succeeded`), and copy its signing secret
+   into `STRIPE_WEBHOOK_SECRET`. The shop posts the cart to
+   `/api/v1/checkout/stripe`, which prices every line from the catalogue and
+   sends the buyer to Stripe's hosted page; the webhook is the only thing
+   that records the order, so without the signing secret buyers are charged
+   and nothing lands in `/orders`.
+6. The email after every call Olivia takes: set `RESEND_API_KEY`,
+   `RESEND_FROM_EMAIL` (an address on a domain verified in Resend) and,
+   optionally, `CALL_NOTIFY_EMAILS` (comma separated; defaults to the
+   business email in `crm.config.ts`). The post-call webhook mails the caller,
+   the summary, what Olivia booked and the transcript, with "Follow up:" in
+   the subject when she booked nothing.
 
 ## Local development
 

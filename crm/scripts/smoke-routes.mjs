@@ -108,6 +108,20 @@ for (const p of ['/api/v1/invoices/number', '/api/v1/proposals/number']) {
   check(r.status === 401, `${p} refuses a signed-out caller with 401 (${r.status})`);
 }
 
+/* Stripe: the checkout route validates the cart before it looks for keys, so
+   an empty body is a 400 wherever it runs; the webhook refuses everything
+   without its signing secret (503) or with a bad signature (400). Neither
+   may 401 or bounce to the login page. */
+{
+  const checkout = await fetch(`${BASE}/api/v1/checkout/stripe`, { method: 'POST', redirect: 'manual',
+    headers: { origin: 'https://occasionsbox.com', 'content-type': 'application/json' }, body: '{}' });
+  check(checkout.status === 400, `/api/v1/checkout/stripe validates an empty cart (${checkout.status})`);
+  const hook = await fetch(`${BASE}/api/v1/webhooks/stripe`, { method: 'POST', redirect: 'manual',
+    headers: { 'content-type': 'application/json' }, body: '{}' });
+  check(hook.status === 503 || hook.status === 400,
+    `/api/v1/webhooks/stripe refuses an unsigned event (${hook.status})`);
+}
+
 // ── Playwright ────────────────────────────────────────────────────────────
 /* Playwright is not a dependency of this package; it is installed globally in
    this environment, and a bare specifier does not resolve from here. The first

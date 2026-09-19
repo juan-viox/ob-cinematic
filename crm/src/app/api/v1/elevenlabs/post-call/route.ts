@@ -10,6 +10,7 @@ import {
   upsertContact,
 } from '@/lib/ingest'
 import { transcriptToText, verifyElevenLabsSignature, type PostCallPayload } from '@/lib/elevenlabs'
+import { sendCallNotice } from '@/lib/call-notify'
 
 /**
  * POST /api/v1/elevenlabs/post-call
@@ -159,7 +160,27 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json({ ok: true, activityId, contactId })
+    // The team hears about every conversation by email, so a call that
+    // booked nothing still gets a human follow up. Failure is logged, never
+    // returned: ElevenLabs would retry and file the call twice.
+    const emailed = await sendCallNotice({
+      conversationId,
+      kind: phoneCall ? 'call' : 'chat',
+      startedAt,
+      durationSecs: duration,
+      callerPhone: capturedPhone ?? callerPhone,
+      callerName: capturedName,
+      callerEmail: capturedEmail,
+      title: titleBits || null,
+      summary,
+      transcript,
+      toolsUsed: [...toolsUsed],
+      callSuccessful: data.analysis?.call_successful ?? null,
+      contactId,
+      activityId,
+    })
+
+    return NextResponse.json({ ok: true, activityId, contactId, emailed })
   } catch (err) {
     console.error('[elevenlabs:post-call]', err instanceof Error ? err.message : err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
