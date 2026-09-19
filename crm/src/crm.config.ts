@@ -35,7 +35,7 @@ const crmConfig = {
     timezone: 'America/New_York',
   },
 
-  // Marketing Site Integration (occasionsbox.com posts to /admin/api/v1/ingest/*)
+  // Marketing Site Integration (occasionsbox.com posts to https://crm.occasionsbox.com/api/v1/ingest/*)
   siteIntegration: {
     enabled: true,
     siteUrl: 'https://occasionsbox.com',

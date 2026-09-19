@@ -45,7 +45,7 @@ function loadEnvLocal() {
 }
 
 function parsePerson(arg) {
-  // email:role:Full Name — the name may contain colons? No: split on the first two.
+  // email:role:Full Name. The name may contain colons? No: split on the first two.
   const first = arg.indexOf(':')
   if (first === -1) return { email: arg.trim(), role: 'admin', name: '' }
   const second = arg.indexOf(':', first + 1)
@@ -134,7 +134,7 @@ async function main() {
         data: { full_name: person.name || undefined },
       })
       if (error) {
-        console.error(`  ${person.email}: invite failed — ${error.message}`)
+        console.error(`  ${person.email}: invite failed: ${error.message}`)
         continue
       }
       user = invited.user
@@ -149,11 +149,11 @@ async function main() {
       const { error } = await admin.from('profiles').insert({
         id: user.id, organization_id: orgId, full_name: person.name || null, role: person.role,
       })
-      if (error) console.error(`  ${person.email}: could not create the profile — ${error.message}`)
+      if (error) console.error(`  ${person.email}: could not create the profile: ${error.message}`)
       else console.log(`    profile created as ${person.role}.`)
     } else if (updateRoles && profile.role !== person.role) {
       const { error } = await admin.from('profiles').update({ role: person.role, full_name: person.name || null }).eq('id', user.id)
-      if (error) console.error(`  ${person.email}: could not change the role — ${error.message}`)
+      if (error) console.error(`  ${person.email}: could not change the role: ${error.message}`)
       else console.log(`    role changed ${profile.role} → ${person.role}.`)
     } else {
       console.log(`    profile already there (${profile.role}).`)
@@ -161,7 +161,7 @@ async function main() {
   }
 
   console.log('\nDone. An invited person never sets a password: the link signs them straight in.')
-  console.log('So on any later visit they use "Send Magic Link" on /admin/login, not the password box.')
+  console.log('So on any later visit they use "Send Magic Link" on /login, not the password box.')
   console.log('Anyone who did not get an email uses that same button. There is no "Forgot password" page.')
   console.log('Turn off public sign-ups once everyone is in: Supabase → Authentication → Sign In / Providers →')
   console.log('"Allow new users to sign up" off. It is a project-wide setting, not a per-provider one.')

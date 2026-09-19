@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
 
-// The CRM is mounted under /admin. It is reached directly at
-// https://ob-crm-vio-x-bergsify.vercel.app/admin and through the marketing
-// site's rewrite at https://occasionsbox.com/admin. See src/lib/url.ts for
-// the helpers that apply this prefix to fetch() URLs and raw Location headers.
-const BASE_PATH = "/admin";
+// The CRM is served at the root of its own host, https://crm.occasionsbox.com.
+// It used to be mounted under /admin and reached through the marketing site's
+// rewrite at https://occasionsbox.com/admin; that path now redirects here.
+// BASE_PATH stays as the single switch: set it to "/prefix" and every fetch()
+// URL and raw Location header follows (see src/lib/url.ts). Empty means none.
+const BASE_PATH = "";
 
 // The Supabase project the CRM talks to. The URL is a public endpoint, not a
 // secret, so it is a default here and one less thing to paste; a value set in
@@ -18,7 +19,8 @@ const BASE_PATH = "/admin";
 const SUPABASE_URL = "https://wztawjcxezojoqvpxvoa.supabase.co";
 
 const nextConfig: NextConfig = {
-  basePath: BASE_PATH,
+  // Only set when there is one; an empty basePath means none.
+  ...(BASE_PATH ? { basePath: BASE_PATH } : {}),
   env: {
     NEXT_PUBLIC_BASE_PATH: BASE_PATH,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || SUPABASE_URL,

@@ -120,9 +120,10 @@
 
   /* ═══════════════════════════════════════════
      CRM & PAYMENT CONFIGURATION
-     Same-origin through the /admin rewrite (OccasionsBox CRM ingest API)
+     The CRM lives on its own host, so this is cross-origin: the ingest
+     routes answer the preflight and allow occasionsbox.com (crm/src/lib/ingest.ts).
      ═══════════════════════════════════════════ */
-  var CRM_CONFIG = { apiUrl: '/admin/api/v1/ingest', enabled: true };
+  var CRM_CONFIG = { apiUrl: 'https://crm.occasionsbox.com/api/v1/ingest', enabled: true };
 
   /* ─── Toast Notifications ─── */
   function showToast(msg, type) {
