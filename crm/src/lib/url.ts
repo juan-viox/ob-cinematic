@@ -1,7 +1,7 @@
 /**
  * URL helpers for the CRM's basePath mount.
  *
- * The CRM is served under `/admin` (see next.config.ts). Next.js auto-prefixes
+ * The CRM's basePath is set in next.config.ts (empty today). Next.js auto-prefixes
  * <Link href>, router.push(), redirect() and NextResponse.redirect(URL), but it
  * does NOT prefix plain fetch('/api/...') calls, raw `Location` headers, or
  * URLs built from window.location.origin. Use these helpers for those.

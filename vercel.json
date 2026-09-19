@@ -154,16 +154,16 @@
       "source": "/shop/besweetdeluxe2",
       "destination": "/shop",
       "permanent": true
-    }
-  ],
-  "rewrites": [
+    },
     {
       "source": "/admin",
-      "destination": "https://ob-crm-vio-x-bergsify.vercel.app/admin"
+      "destination": "https://crm.occasionsbox.com/",
+      "permanent": true
     },
     {
       "source": "/admin/:path*",
-      "destination": "https://ob-crm-vio-x-bergsify.vercel.app/admin/:path*"
+      "destination": "https://crm.occasionsbox.com/:path*",
+      "permanent": true
     }
   ]
 }

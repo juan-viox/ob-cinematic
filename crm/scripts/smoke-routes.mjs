@@ -36,7 +36,9 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const BASE = process.env.SMOKE_BASE || 'http://127.0.0.1:3100';
-const PREFIX = '/admin';
+/** The CRM's basePath: empty now that it lives at the root of
+    crm.occasionsbox.com. Override with SMOKE_PREFIX if a prefix returns. */
+const PREFIX = process.env.SMOKE_PREFIX ?? '';
 const STUB_PORT = Number(process.env.STUB_PORT || 54321);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
