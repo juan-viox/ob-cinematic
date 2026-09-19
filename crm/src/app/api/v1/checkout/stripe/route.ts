@@ -67,8 +67,16 @@ export async function POST(request: Request) {
       return jsonError(request, `items may contain at most ${MAX_CHECKOUT_LINES} lines`, 400)
     }
 
+    // Both halves or neither. The session is what takes the money and the
+    // webhook is what records the order, so a secret key without a signing
+    // secret is a shop that can charge a buyer and keep no record of what
+    // they bought. Refuse the session instead: PayPal still works, and the
+    // button says so.
     const stripe = getStripeConfig()
-    if (!stripe) {
+    if (!stripe || !stripe.webhookSecret) {
+      if (stripe) {
+        console.error('[checkout:stripe] STRIPE_WEBHOOK_SECRET is not set; refusing to take a payment we cannot record')
+      }
       return jsonError(request, 'Card checkout is not set up yet. Please pay with PayPal.', 503)
     }
 
