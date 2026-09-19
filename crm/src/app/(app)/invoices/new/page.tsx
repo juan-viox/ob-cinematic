@@ -317,7 +317,7 @@ export default function NewInvoicePage() {
                 type="number"
                 min="0"
                 max="100"
-                step="0.01"
+                step="0.001"
                 value={taxRate}
                 onChange={e => setTaxRate(parseFloat(e.target.value) || 0)}
                 className="w-24 text-sm"

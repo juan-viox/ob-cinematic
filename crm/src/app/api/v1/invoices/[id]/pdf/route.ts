@@ -37,6 +37,7 @@ export async function GET(
     const lineItems = items ?? []
     const biz = crmConfig
     const branding = crmConfig.branding
+    const logoUrl = branding.logoUrl
 
     // Escape every value interpolated into the HTML (DB rows and config alike).
     const esc = (v: unknown): string =>
@@ -113,6 +114,13 @@ export async function GET(
       margin-bottom: 40px;
       padding-bottom: 24px;
       border-bottom: 2px solid ${primary};
+    }
+
+    .biz-logo {
+      display: block;
+      height: 44px;
+      width: auto;
+      margin-bottom: 10px;
     }
 
     .biz-name {
@@ -325,7 +333,7 @@ export async function GET(
 
   <div class="header">
     <div>
-      <div class="biz-name">${esc(biz.name)}</div>
+      ${logoUrl ? `<img class="biz-logo" src="${esc(logoUrl)}" alt="${esc(biz.name)}">` : `<div class="biz-name">${esc(biz.name)}</div>`}
       <div class="biz-info">
         ${esc(biz.address)}<br>
         ${esc(biz.phone)}<br>
@@ -392,7 +400,7 @@ export async function GET(
       ${
         Number(invoice.tax_rate) > 0
           ? `<div class="totals-row">
-        <span>Tax (${esc(invoice.tax_rate)}%)</span>
+        <span>Tax (${esc(String(Number(invoice.tax_rate)))}%)</span>
         <span>${formatMoney(Number(invoice.tax_amount))}</span>
       </div>`
           : ''

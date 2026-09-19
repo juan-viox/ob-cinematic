@@ -45,7 +45,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 /** Every page a signed-out visitor might land on, by link or by bookmark. */
 const GUARDED = [
   '', '/dashboard', '/orders', '/catalogue', '/occasions', '/proposals',
-  '/outreach', '/settings', '/contacts', '/companies', '/deals', '/invoices',
+  '/outreach', '/olivia', '/settings', '/contacts', '/companies', '/deals', '/invoices',
   '/reports', '/tasks', '/leads', '/activities', '/emails', '/products',
   '/calendar', '/automations', '/sites',
 ];
@@ -54,7 +54,7 @@ const GUARDED = [
 const PUBLIC = ['/login', '/signup'];
 
 /** The handful worth the cost of a full browser render while signed in. */
-const AUTHED_IN_BROWSER = ['/dashboard', '/orders', '/catalogue', '/settings'];
+const AUTHED_IN_BROWSER = ['/dashboard', '/orders', '/catalogue', '/settings', '/olivia'];
 
 /* Each section registers itself as it runs. A section that quietly does not
    run is the failure mode that hid the missing browser pass, so silence is

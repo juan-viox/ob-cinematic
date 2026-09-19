@@ -430,6 +430,76 @@ export async function POST(request: Request) {
       lines,
     })
 
+    // Every sale gets an invoice in the same OB sequence as the hand-issued
+    // ones, so the books hold one numbered document per payment. 'paid' when
+    // PayPal confirmed the capture, otherwise 'sent', which the invoices page
+    // counts as pending until someone confirms it in PayPal. Never fatal: the
+    // order is already saved, and a missing invoice is visible and fixable.
+    let invoiceId: string | null = null
+    let invoiceNumber: string | null = null
+    if (!order.duplicate) {
+      const { data: allocated, error: numberError } = await supabase.rpc('next_document_number', {
+        p_org: orgId,
+        p_kind: 'invoice',
+        p_prefix: 'OB',
+      })
+      if (numberError || typeof allocated !== 'string') {
+        console.error('[ingest:order] invoice number failed:', numberError?.message)
+      } else {
+        const today = new Date().toISOString().slice(0, 10)
+        const { data: invoice, error: invoiceError } = await supabase
+          .from('invoices')
+          .insert({
+            organization_id: orgId,
+            contact_id: contactId,
+            deal_id: dealId,
+            invoice_number: allocated,
+            status: verified ? 'paid' : 'sent',
+            issue_date: today,
+            due_date: today,
+            subtotal: amount,
+            tax_rate: 0,
+            tax_amount: 0,
+            total: amount,
+            notes: `Order ${order.orderNumber}. PayPal ${paypalOrderId}. ${
+              verified ? 'Paid at checkout.' : 'Reported by the website; confirm in PayPal before fulfilling.'
+            }`,
+          })
+          .select('id')
+          .single()
+        if (invoiceError || !invoice) {
+          console.error('[ingest:order] invoice insert failed:', invoiceError?.message)
+        } else {
+          invoiceId = invoice.id as string
+          invoiceNumber = allocated
+          const items = lines.map((line, i) => ({
+            invoice_id: invoiceId,
+            description: lineLabel(line),
+            quantity: line.quantity,
+            unit_price: line.unitAmount,
+            total: Math.round(line.unitAmount * 100 * line.quantity) / 100,
+            sort_order: i,
+          }))
+          if (processingFee > 0) {
+            items.push({
+              invoice_id: invoiceId,
+              description: 'Processing & Handling',
+              quantity: 1,
+              unit_price: processingFee,
+              total: processingFee,
+              sort_order: lines.length,
+            })
+          }
+          const { error: itemsError } = await supabase.from('invoice_items').insert(items)
+          if (itemsError) console.error('[ingest:order] invoice items failed:', itemsError.message)
+          await supabase
+            .from('orders')
+            .update({ metadata: { via: auth.via, paypalOrderId, invoiceId, invoiceNumber } })
+            .eq('id', order.id)
+        }
+      }
+    }
+
     const activityId = await createActivity(supabase, {
       orgId,
       contactId,
@@ -445,6 +515,7 @@ export async function POST(request: Request) {
         paypalOrderId,
         orderId: order.id,
         orderNumber: order.orderNumber,
+        invoiceNumber,
         items: lines,
         // Kept so anything reading the old shape still finds something sensible.
         productName: lines.length === 1 ? lines[0].name : summary,
@@ -470,6 +541,8 @@ export async function POST(request: Request) {
       success: true,
       orderId: order.id,
       orderNumber: order.orderNumber,
+      invoiceId,
+      invoiceNumber,
       dealId,
       contactId,
       activityId,
