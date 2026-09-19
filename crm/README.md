@@ -128,7 +128,16 @@ By hand instead:
    unless BOTH are set, so a half-configured Stripe never takes a payment the
    CRM cannot record; until then the button says card checkout is not set up
    yet and PayPal keeps working.
-6. The email after every call Olivia takes: set `RESEND_API_KEY`,
+6. Olivia's calls: set `ELEVENLABS_API_KEY` (and optionally
+   `ELEVENLABS_AGENT_ID`). A cron in `vercel.json` calls
+   `/api/v1/cron/elevenlabs` every five minutes, which pulls her recent
+   conversations from the ElevenLabs API and files any the CRM has not seen.
+   `ELEVENLABS_WEBHOOK_SECRET` is the faster path for the same thing and is
+   worth adding when somebody can create the post-call webhook in the
+   ElevenLabs dashboard, but nothing depends on it: both routes end in
+   `lib/record-conversation` and both are idempotent on the conversation id,
+   so a call filed by one is never filed again by the other.
+7. The email after every call Olivia takes: set `RESEND_API_KEY`,
    `RESEND_FROM_EMAIL` (an address on a domain verified in Resend) and,
    optionally, `CALL_NOTIFY_EMAILS` (comma separated; defaults to the
    business email in `crm.config.ts`). The post-call webhook mails the caller,

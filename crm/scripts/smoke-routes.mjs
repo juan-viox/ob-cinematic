@@ -122,6 +122,14 @@ for (const p of ['/api/v1/invoices/number', '/api/v1/proposals/number']) {
     `/api/v1/webhooks/stripe refuses an unsigned event (${hook.status})`);
 }
 
+/* The ElevenLabs sync runs on a schedule and can be triggered by hand with
+   the site key. Unauthorised, it must refuse with a JSON 401 rather than
+   bounce to the login page or 404. */
+{
+  const cron = await fetch(`${BASE}/api/v1/cron/elevenlabs`, { redirect: 'manual' });
+  check(cron.status === 401, `/api/v1/cron/elevenlabs refuses an unauthorised caller (${cron.status})`);
+}
+
 // ── Playwright ────────────────────────────────────────────────────────────
 /* Playwright is not a dependency of this package; it is installed globally in
    this environment, and a bare specifier does not resolve from here. The first
