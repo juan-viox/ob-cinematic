@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Trash2, Loader2, Save } from 'lucide-react'
 import { formatCurrency, getOrgId } from '@/lib/utils'
+import { withBasePath } from '@/lib/url'
 import type { Contact, Product } from '@/types'
 
 interface LineItem {
@@ -41,19 +42,14 @@ export default function NewInvoicePage() {
   useEffect(() => {
     let cancelled = false
     async function loadData() {
-      const [contactsRes, productsRes, invoiceCountRes] = await Promise.all([
+      const [contactsRes, productsRes] = await Promise.all([
         supabase.from('contacts').select('*').order('first_name'),
         supabase.from('products').select('*').eq('is_active', true).order('name'),
-        supabase.from('invoices').select('id', { count: 'exact', head: true }),
       ])
       if (cancelled) return
 
       setContacts((contactsRes.data ?? []) as Contact[])
       setProducts((productsRes.data ?? []) as Product[])
-
-      // Auto-generate invoice number
-      const count = invoiceCountRes.count ?? 0
-      setInvoiceNumber(`INV-${String(count + 1).padStart(4, '0')}`)
 
       setLoading(false)
     }
@@ -102,7 +98,6 @@ export default function NewInvoicePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!invoiceNumber.trim()) { setError('Invoice number is required'); return }
     if (items.every(i => !i.description)) { setError('Add at least one line item'); return }
 
     setSaving(true)
@@ -115,13 +110,31 @@ export default function NewInvoicePage() {
       return
     }
 
+    // The number comes from the server-side counter unless one was typed in.
+    // It is allocated on save rather than on load, so an abandoned form does
+    // not leave a gap in the sequence.
+    let number = invoiceNumber.trim()
+    if (!number) {
+      try {
+        const res = await fetch(withBasePath('/api/v1/invoices/number'), { method: 'POST' })
+        const json = (await res.json()) as { number?: string; error?: string }
+        if (!res.ok || !json.number) throw new Error(json.error ?? 'Could not allocate an invoice number')
+        number = json.number
+        setInvoiceNumber(number)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Could not allocate an invoice number')
+        setSaving(false)
+        return
+      }
+    }
+
     // Create invoice
     const { data: invoice, error: invError } = await supabase
       .from('invoices')
       .insert({
         organization_id: orgId,
         contact_id: contactId || null,
-        invoice_number: invoiceNumber,
+        invoice_number: number,
         issue_date: issueDate,
         due_date: dueDate || null,
         subtotal,
@@ -187,8 +200,8 @@ export default function NewInvoicePage() {
           <h2 className="text-lg font-semibold mb-4">Invoice Details</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <label>Invoice # *</label>
-              <input value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} className="w-full" required />
+              <label>Invoice #</label>
+              <input value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} className="w-full" placeholder="Next in sequence, allocated on save" />
             </div>
             <div>
               <label>Contact</label>
