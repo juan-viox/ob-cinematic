@@ -124,8 +124,10 @@ By hand instead:
    into `STRIPE_WEBHOOK_SECRET`. The shop posts the cart to
    `/api/v1/checkout/stripe`, which prices every line from the catalogue and
    sends the buyer to Stripe's hosted page; the webhook is the only thing
-   that records the order, so without the signing secret buyers are charged
-   and nothing lands in `/orders`.
+   that records the order. The checkout route refuses to create a session
+   unless BOTH are set, so a half-configured Stripe never takes a payment the
+   CRM cannot record; until then the button says card checkout is not set up
+   yet and PayPal keeps working.
 6. The email after every call Olivia takes: set `RESEND_API_KEY`,
    `RESEND_FROM_EMAIL` (an address on a domain verified in Resend) and,
    optionally, `CALL_NOTIFY_EMAILS` (comma separated; defaults to the
