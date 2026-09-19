@@ -140,7 +140,18 @@ By hand instead:
    ElevenLabs dashboard, but nothing depends on it: both routes end in
    `lib/record-conversation` and both are idempotent on the conversation id,
    so a call filed by one is never filed again by the other.
-7. The email after every call Olivia takes: set `RESEND_API_KEY`,
+7. Texting customers about their orders: set `TWILIO_ACCOUNT_SID`,
+   `TWILIO_AUTH_TOKEN` and either `TWILIO_FROM_NUMBER` or, better,
+   `TWILIO_MESSAGING_SERVICE_SID`. A paid order texts the buyer straight
+   away; marking an order confirmed, shipped or delivered on `/orders` texts
+   them again, with the carrier and tracking on the shipped one. Point
+   Twilio's "A message comes in" webhook for that number at
+   `https://crm.occasionsbox.com/api/v1/webhooks/twilio/sms` so STOP is
+   honoured: it is refused unless Twilio's signature checks out, and a STOP
+   is recorded against both the number and the contact. Register the number
+   for A2P 10DLC first; US carriers filter unregistered application traffic,
+   so messages can be accepted by Twilio and never arrive.
+8. The email after every call Olivia takes: set `RESEND_API_KEY`,
    `RESEND_FROM_EMAIL` (an address on a domain verified in Resend) and,
    optionally, `CALL_NOTIFY_EMAILS` (comma separated; defaults to the
    business email in `crm.config.ts`). The post-call webhook mails the caller,

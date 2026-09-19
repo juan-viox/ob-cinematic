@@ -23,6 +23,7 @@ import {
   upsertContact,
 } from '@/lib/ingest'
 import { createOrder, formatAddress, type OrderLineInput } from '@/lib/orders'
+import { orderConfirmedText, sendSms } from '@/lib/sms'
 
 /** Stage a verified (paid) order lands in; falls back to the first stage. */
 const ORDER_STAGE_NAME = 'Approved'
@@ -443,6 +444,24 @@ export async function recordPaidOrder(
       unmatchedLines: order.unmatchedLines,
     },
   })
+
+  // The customer hears from us the moment the money lands, not whenever
+  // somebody next opens the CRM. Never fatal: the sale is saved, and a text
+  // that could not go out is recorded on the timeline with the reason.
+  if (!order.duplicate) {
+    await sendSms(supabase, {
+      orgId,
+      to: input.payerPhone,
+      body: orderConfirmedText({
+        orderNumber: order.orderNumber,
+        firstName,
+      }),
+      contactId,
+      dealId,
+      kind: 'order_confirmed',
+      metadata: { orderId: order.id, orderNumber: order.orderNumber, provider: input.provider },
+    })
+  }
 
   if (order.unmatchedLines.length) {
     console.warn('[orders] lines with no catalogue match:', order.unmatchedLines.join(', '))

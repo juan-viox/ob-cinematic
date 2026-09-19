@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 import {
   ShoppingBag, Search, Truck, CheckCircle2, AlertTriangle, PackageCheck,
   Loader2, ExternalLink, MapPin,
@@ -39,7 +38,6 @@ export default function OrdersClient({ orders: initial }: { orders: Order[] }) {
   const [busy, setBusy] = useState<string | null>(null)
   const [tracking, setTracking] = useState<Record<string, { carrier: string; number: string }>>({})
   const [error, setError] = useState('')
-  const supabase = createClient()
 
   const q = search.trim().toLowerCase()
   const shown = useMemo(
@@ -67,17 +65,50 @@ export default function OrdersClient({ orders: initial }: { orders: Order[] }) {
   async function setStatus(order: Order, status: OrderFulfillmentStatus) {
     setBusy(order.id)
     setError('')
-    const patch: Record<string, unknown> = { fulfillment_status: status }
+    /* The move goes through the API rather than straight to the database,
+       because confirming, shipping and delivering also text the customer and
+       the Twilio credentials must never reach a browser. */
+    const t = tracking[order.id]
+    let res: Response
+    try {
+      res = await fetch(`/api/v1/orders/${order.id}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, carrier: t?.carrier ?? null, trackingNumber: t?.number ?? null }),
+      })
+    } catch {
+      setError('Could not reach the server. Try again.')
+      setBusy(null)
+      return
+    }
+    const data = (await res.json().catch(() => null)) as
+      | { ok?: boolean; error?: string; carrier?: string | null; trackingNumber?: string | null; sms?: { sent: boolean; reason?: string } | null }
+      | null
+    if (!res.ok || !data?.ok) {
+      setError(data?.error ?? 'Could not update the order')
+      setBusy(null)
+      return
+    }
+
+    const patch: Partial<Order> = { fulfillment_status: status }
     if (status === 'shipped') {
       patch.shipped_at = new Date().toISOString()
-      const t = tracking[order.id]
-      if (t?.carrier) patch.carrier = t.carrier
-      if (t?.number) patch.tracking_number = t.number
+      patch.carrier = data.carrier ?? order.carrier
+      patch.tracking_number = data.trackingNumber ?? order.tracking_number
     }
     if (status === 'delivered') patch.delivered_at = new Date().toISOString()
-    const { error: err } = await supabase.from('orders').update(patch).eq('id', order.id)
-    if (err) { setError(err.message); setBusy(null); return }
-    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, ...(patch as Partial<Order>) } : o)))
+    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, ...patch } : o)))
+
+    /* Say plainly when the customer was not texted. Silence here would read
+       as "they know", and they would not. */
+    if (data.sms && !data.sms.sent) {
+      const why =
+        data.sms.reason === 'opted_out' ? 'they asked us to stop texting'
+        : data.sms.reason === 'no_number' ? 'there is no mobile number on the order'
+        : data.sms.reason === 'not_configured' ? 'texting is not set up yet'
+        : 'the message could not be sent'
+      setError(`Order updated, but the customer was not texted: ${why}.`)
+    }
     setBusy(null)
   }
 
