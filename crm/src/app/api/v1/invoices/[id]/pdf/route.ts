@@ -37,7 +37,7 @@ export async function GET(
     const lineItems = items ?? []
     const biz = crmConfig
     const branding = crmConfig.branding
-    const logoUrl = branding.logoUrl
+    const logoUrl = branding.invoiceLogoUrl ?? branding.logoUrl
 
     // Escape every value interpolated into the HTML (DB rows and config alike).
     const esc = (v: unknown): string =>

@@ -3,6 +3,7 @@
 import Script from 'next/script'
 import { createElement } from 'react'
 import { Bot, Phone, Mail } from 'lucide-react'
+import crmConfig from '@/crm.config'
 
 /* Olivia's ElevenLabs agent id. It is a public identifier (it is in the shop's
    page source too); what keeps the widget from being embedded elsewhere is the
@@ -38,7 +39,7 @@ export default function OliviaPage() {
         <h2 className="font-semibold">Where else she is</h2>
         <p className="text-sm flex items-center gap-2">
           <Phone className="w-4 h-4" style={{ color: 'var(--accent)' }} />
-          (551) 245-7492, the Occasions Box line
+          {crmConfig.phone}, the Occasions Box line
         </p>
         <p className="text-sm flex items-center gap-2">
           <Mail className="w-4 h-4" style={{ color: 'var(--accent)' }} />
