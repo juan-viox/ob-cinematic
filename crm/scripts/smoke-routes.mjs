@@ -130,6 +130,24 @@ for (const p of ['/api/v1/invoices/number', '/api/v1/proposals/number']) {
   check(cron.status === 401, `/api/v1/cron/elevenlabs refuses an unauthorised caller (${cron.status})`);
 }
 
+/* Texting. The inbound Twilio webhook must refuse anything it cannot prove
+   came from Twilio: 503 with no credentials configured, 403 for a bad
+   signature. The order routes that text a customer are session-only and must
+   answer a JSON 401 rather than bounce to the login page. */
+{
+  const hook = await fetch(`${BASE}/api/v1/webhooks/twilio/sms`, { method: 'POST', redirect: 'manual',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'From=%2B15551234567&Body=STOP' });
+  check(hook.status === 503 || hook.status === 403,
+    `/api/v1/webhooks/twilio/sms refuses an unsigned delivery (${hook.status})`);
+
+  const id = '00000000-0000-4000-8000-000000000123';
+  for (const path of [`/api/v1/orders/${id}/status`, `/api/v1/orders/${id}/sms`]) {
+    const r = await fetch(`${BASE}${path}`, { method: 'POST', redirect: 'manual',
+      headers: { 'content-type': 'application/json' }, body: '{}' });
+    check(r.status === 401, `${path} refuses a signed-out caller with 401 (${r.status})`);
+  }
+}
+
 // ── Playwright ────────────────────────────────────────────────────────────
 /* Playwright is not a dependency of this package; it is installed globally in
    this environment, and a bare specifier does not resolve from here. The first
