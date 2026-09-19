@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   ShoppingBag, Search, Truck, CheckCircle2, AlertTriangle, PackageCheck,
-  Loader2, ExternalLink, MapPin,
+  Loader2, ExternalLink, MapPin, MessageSquare,
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { formatAddress } from '@/lib/orders'
@@ -37,6 +37,9 @@ export default function OrdersClient({ orders: initial }: { orders: Order[] }) {
   const [open, setOpen] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const [tracking, setTracking] = useState<Record<string, { carrier: string; number: string }>>({})
+  const [note, setNote] = useState<Record<string, string>>({})
+  const [texting, setTexting] = useState<string | null>(null)
+  const [sent, setSent] = useState<Record<string, string>>({})
   const [error, setError] = useState('')
 
   const q = search.trim().toLowerCase()
@@ -110,6 +113,36 @@ export default function OrdersClient({ orders: initial }: { orders: Order[] }) {
       setError(`Order updated, but the customer was not texted: ${why}.`)
     }
     setBusy(null)
+  }
+
+  /* A text in their own words, for everything the milestones do not cover:
+     a delay, a question about the card, a box that went out early. */
+  async function textCustomer(order: Order) {
+    const message = (note[order.id] ?? '').trim()
+    if (!message) return
+    setTexting(order.id)
+    setError('')
+    let res: Response
+    try {
+      res = await fetch(`/api/v1/orders/${order.id}/sms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+      })
+    } catch {
+      setError('Could not reach the server. Try again.')
+      setTexting(null)
+      return
+    }
+    const data = (await res.json().catch(() => null)) as { ok?: boolean; error?: string } | null
+    if (!res.ok || !data?.ok) {
+      setError(data?.error ?? 'The message could not be sent')
+      setTexting(null)
+      return
+    }
+    setNote({ ...note, [order.id]: '' })
+    setSent({ ...sent, [order.id]: 'Sent.' })
+    setTexting(null)
   }
 
   if (orders.length === 0) {
@@ -297,6 +330,36 @@ export default function OrdersClient({ orders: initial }: { orders: Order[] }) {
                             {s.label}
                           </button>
                         ))}
+                      </div>
+
+                      <div className="mt-4">
+                        <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--muted)' }}>Text the customer</h4>
+                        {o.payer_phone ? (
+                          <>
+                            <div className="flex gap-2">
+                              <input
+                                placeholder="Anything they should know…"
+                                maxLength={300}
+                                value={note[o.id] ?? ''}
+                                onChange={(e) => { setNote({ ...note, [o.id]: e.target.value }); setSent({ ...sent, [o.id]: '' }) }}
+                                className="text-sm"
+                              />
+                              <button
+                                onClick={() => textCustomer(o)}
+                                disabled={texting === o.id || !(note[o.id] ?? '').trim()}
+                                className="btn btn-secondary btn-sm whitespace-nowrap"
+                              >
+                                {texting === o.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MessageSquare className="w-3.5 h-3.5" />}
+                                Send
+                              </button>
+                            </div>
+                            <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
+                              {sent[o.id] ? sent[o.id] : `Goes to ${o.payer_phone}. Confirming, shipping and delivering already text them.`}
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-sm" style={{ color: 'var(--muted)' }}>No mobile number came with this order, so there is nobody to text.</p>
+                        )}
                       </div>
                     </div>
 
