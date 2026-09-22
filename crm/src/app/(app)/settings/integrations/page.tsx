@@ -1,174 +1,394 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Key, Eye, EyeOff, Check, ExternalLink, Plug } from 'lucide-react'
+/**
+ * What is connected, and what breaks while it is not.
+ *
+ * This page used to be a form. It collected API keys into the browser's
+ * localStorage and showed a green "Connected" badge once you typed one.
+ * Nothing on the server ever read them, so the badge was a lie, the key never
+ * left that one browser, and the screen whose entire job is to tell you
+ * whether payments work was inviting somebody to paste a live payment secret
+ * somewhere it would never be used.
+ *
+ * It reports now instead of collecting. Secrets belong in the hosting
+ * environment, which is the only place the running code can read them, so the
+ * page says which are present, what each one is for, and what is broken while
+ * it is missing. The one thing it can do beyond reporting is ask PayPal
+ * whether the credentials actually work — because "unverified order" is the
+ * same symptom for three very different mistakes, and guessing between them
+ * over a real customer's payment is how an afternoon disappears.
+ */
+
+import { useCallback, useEffect, useState } from 'react'
+import { AlertTriangle, Check, ExternalLink, Loader2, Minus, RefreshCw, Search, X } from 'lucide-react'
+import { withBasePath } from '@/lib/url'
+
+interface Field {
+  key: string
+  label: string
+  present: boolean
+  value?: string | null
+  required: boolean
+  note?: string
+}
 
 interface Integration {
   id: string
   name: string
-  description: string
-  keyPlaceholder: string
+  what: string
+  consequence: string
   docsUrl: string
-  icon: string
-  fields: { id: string; label: string; placeholder: string; type?: string }[]
+  fields: Field[]
 }
 
-const INTEGRATIONS: Integration[] = [
-  {
-    id: 'blotato',
-    name: 'Blotato',
-    description: 'Social media management: publish to Instagram, Facebook, LinkedIn, X, and TikTok from VioX CRM',
-    keyPlaceholder: 'blotato_...',
-    docsUrl: 'https://blotato.com',
-    icon: '📱',
-    fields: [
-      { id: 'api_key', label: 'API Key', placeholder: 'Enter Blotato API key' },
-      { id: 'workspace_id', label: 'Workspace ID', placeholder: 'Your Blotato workspace ID' },
-    ]
-  },
-  {
-    id: 'stripe',
-    name: 'Stripe',
-    description: 'Payment processing: invoicing, workshop payments, and subscription billing',
-    keyPlaceholder: 'sk_live_...',
-    docsUrl: 'https://dashboard.stripe.com/apikeys',
-    icon: '💳',
-    fields: [
-      { id: 'secret_key', label: 'Secret Key', placeholder: 'sk_live_...' },
-      { id: 'publishable_key', label: 'Publishable Key', placeholder: 'pk_live_...' },
-      { id: 'webhook_secret', label: 'Webhook Secret', placeholder: 'whsec_...' },
-    ]
-  },
-  {
-    id: 'twilio',
-    name: 'Twilio',
-    description: 'Phone integration: powers the AI voice agents on cinematic sites',
-    keyPlaceholder: 'AC...',
-    docsUrl: 'https://console.twilio.com/',
-    icon: '📞',
-    fields: [
-      { id: 'account_sid', label: 'Account SID', placeholder: 'AC...' },
-      { id: 'auth_token', label: 'Auth Token', placeholder: 'Enter Twilio auth token' },
-    ]
-  },
-  {
-    id: 'resend',
-    name: 'Resend',
-    description: 'Email delivery: transactional emails, campaigns, and automated follow-ups',
-    keyPlaceholder: 're_...',
-    docsUrl: 'https://resend.com/api-keys',
-    icon: '✉️',
-    fields: [
-      { id: 'api_key', label: 'API Key', placeholder: 're_...' },
-      { id: 'from_email', label: 'From Email', placeholder: 'hello@yourdomain.com', type: 'email' },
-    ]
-  },
-]
+interface Probe {
+  configured: boolean
+  env: 'live' | 'sandbox'
+  envExplicit: boolean
+  host: string
+  clientId: string | null
+  matchesShop: boolean | null
+  credentialsOk: boolean | null
+  problem: string | null
+}
+
+interface PayPalOrder {
+  id: string
+  status: string
+  completed: boolean
+  amount: number | null
+  currency: string | null
+  payerEmail: string | null
+  payerName: string | null
+  shipToName: string | null
+  shipToAddress: Record<string, unknown> | null
+}
+
+interface CheckResult {
+  probe: Probe
+  order: PayPalOrder | null
+  error?: string
+}
+
+/** Missing and required is a problem; missing and optional is a choice. */
+function healthOf(i: Integration): 'ok' | 'broken' | 'partial' {
+  const missingRequired = i.fields.filter((f) => f.required && !f.present)
+  if (missingRequired.length === 0) return 'ok'
+  if (missingRequired.length === i.fields.filter((f) => f.required).length) return 'broken'
+  return 'partial'
+}
+
+const STATUS_STYLE: Record<'ok' | 'broken' | 'partial', { label: string; color: string; bg: string }> = {
+  ok: { label: 'Connected', color: 'var(--success, #00b894)', bg: 'rgba(0,184,148,0.14)' },
+  partial: { label: 'Incomplete', color: '#fdcb6e', bg: 'rgba(253,203,110,0.16)' },
+  broken: { label: 'Not connected', color: 'var(--danger, #e17055)', bg: 'rgba(225,112,85,0.14)' },
+}
 
 export default function IntegrationsPage() {
-  const [values, setValues] = useState<Record<string, Record<string, string>>>({})
-  const [visibility, setVisibility] = useState<Record<string, boolean>>({})
-  const [saved, setSaved] = useState<Record<string, boolean>>({})
+  const [integrations, setIntegrations] = useState<Integration[] | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const stored = localStorage.getItem('viox-crm-integrations')
-    if (stored) setValues(JSON.parse(stored))
+  const load = useCallback(async () => {
+    setLoadError(null)
+    try {
+      const res = await fetch(withBasePath('/api/v1/settings/integrations'), { cache: 'no-store' })
+      if (!res.ok) throw new Error(`The server answered ${res.status}`)
+      const json = (await res.json()) as { integrations: Integration[] }
+      setIntegrations(json.integrations)
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Could not read the configuration')
+    }
   }, [])
 
-  function updateField(integrationId: string, fieldId: string, value: string) {
-    setValues(prev => ({
-      ...prev,
-      [integrationId]: { ...(prev[integrationId] || {}), [fieldId]: value }
-    }))
-    setSaved(prev => ({ ...prev, [integrationId]: false }))
-  }
+  useEffect(() => {
+    load()
+  }, [load])
 
-  function saveIntegration(integrationId: string) {
-    localStorage.setItem('viox-crm-integrations', JSON.stringify(values))
-    setSaved(prev => ({ ...prev, [integrationId]: true }))
-    setTimeout(() => setSaved(prev => ({ ...prev, [integrationId]: false })), 2000)
-  }
-
-  function isConnected(integrationId: string) {
-    const fields = values[integrationId]
-    return fields && Object.values(fields).some(v => v && v.length > 5)
-  }
+  const broken = (integrations ?? []).filter((i) => healthOf(i) !== 'ok')
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-[var(--text)]">Integrations</h1>
-        <p className="text-sm text-[var(--muted)] mt-1">
-          Connect third-party services to power payments, email campaigns, social media, and phone.
-        </p>
+    <div className="space-y-6 max-w-4xl">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-[var(--text)]">Integrations</h1>
+          <p className="text-sm text-[var(--muted)] mt-1">
+            What the CRM is connected to right now, read from the server. Keys are set on the hosting
+            project, not typed here — this page tells you whether they arrived.
+          </p>
+        </div>
+        <button
+          onClick={load}
+          className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--accent)]/40 transition-colors"
+        >
+          <RefreshCw size={14} />
+          Refresh
+        </button>
       </div>
 
-      <div className="grid gap-4">
-        {INTEGRATIONS.map(integration => (
-          <div
-            key={integration.id}
-            className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 hover:border-[var(--accent)]/30 transition-colors"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{integration.icon}</span>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-[var(--text)]">{integration.name}</h3>
-                    {isConnected(integration.id) && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--success)]/15 text-[var(--success)]">
-                        Connected
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-[var(--muted)] mt-0.5">{integration.description}</p>
-                </div>
-              </div>
-              <a href={integration.docsUrl} target="_blank" rel="noopener noreferrer" className="text-[var(--muted)] hover:text-[var(--accent)]">
-                <ExternalLink size={16} />
-              </a>
-            </div>
+      {loadError && (
+        <div
+          className="rounded-xl p-4 text-sm"
+          style={{ background: 'rgba(225,112,85,0.10)', border: '1px solid rgba(225,112,85,0.35)' }}
+        >
+          <p className="font-medium text-[var(--text)]">Could not read the configuration</p>
+          <p className="text-[var(--muted)] mt-1">{loadError}</p>
+        </div>
+      )}
 
-            <div className="space-y-3">
-              {integration.fields.map(field => (
-                <div key={field.id}>
-                  <label className="text-xs text-[var(--muted)] mb-1 block">{field.label}</label>
-                  <div className="relative">
-                    <input
-                      type={field.type || (visibility[`${integration.id}-${field.id}`] ? 'text' : 'password')}
-                      value={values[integration.id]?.[field.id] || ''}
-                      onChange={(e) => updateField(integration.id, field.id, e.target.value)}
-                      placeholder={field.placeholder}
-                      className="w-full px-3 py-2.5 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] placeholder:text-[var(--muted)]/50 focus:border-[var(--accent)] focus:outline-none transition-colors pr-10"
-                    />
-                    {!field.type && (
-                      <button
-                        onClick={() => setVisibility(prev => ({ ...prev, [`${integration.id}-${field.id}`]: !prev[`${integration.id}-${field.id}`] }))}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--text)]"
-                      >
-                        {visibility[`${integration.id}-${field.id}`] ? <EyeOff size={14} /> : <Eye size={14} />}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={() => saveIntegration(integration.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  saved[integration.id]
-                    ? 'bg-[var(--success)]/20 text-[var(--success)]'
-                    : 'bg-[var(--accent)] text-white hover:opacity-90'
-                }`}
-              >
-                {saved[integration.id] ? 'Saved!' : 'Save'}
-              </button>
-            </div>
+      {integrations && broken.length > 0 && (
+        <div
+          className="rounded-xl p-4 flex items-start gap-3"
+          style={{ background: 'rgba(253,203,110,0.10)', border: '1px solid rgba(253,203,110,0.35)' }}
+        >
+          <AlertTriangle size={18} className="shrink-0 mt-0.5" style={{ color: '#fdcb6e' }} />
+          <div className="text-sm">
+            <p className="font-medium text-[var(--text)]">
+              {broken.length === 1 ? 'One integration needs attention' : `${broken.length} integrations need attention`}
+            </p>
+            <p className="text-[var(--muted)] mt-1">
+              {broken.map((i) => i.name).join(', ')}. Each card below says what stops working until it is set.
+            </p>
           </div>
+        </div>
+      )}
+
+      {!integrations && !loadError && (
+        <div className="flex items-center gap-2 text-sm text-[var(--muted)] py-8">
+          <Loader2 size={16} className="animate-spin" />
+          Reading the server configuration…
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {(integrations ?? []).map((integration) => (
+          <IntegrationCard key={integration.id} integration={integration} />
         ))}
       </div>
+
+      {integrations && (
+        <p className="text-xs text-[var(--muted)] leading-relaxed pt-2">
+          To change any of these, set the named variable on the <code>ob-crm</code> project in Vercel
+          (Settings → Environment Variables) and redeploy. Values marked as a secret are never shown here,
+          or anywhere else in the CRM.
+        </p>
+      )}
+    </div>
+  )
+}
+
+function IntegrationCard({ integration }: { integration: Integration }) {
+  const health = healthOf(integration)
+  const style = STATUS_STYLE[health]
+
+  return (
+    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="font-medium text-[var(--text)]">{integration.name}</h2>
+            <span
+              className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+              style={{ background: style.bg, color: style.color }}
+            >
+              {style.label}
+            </span>
+          </div>
+          <p className="text-xs text-[var(--muted)] mt-1">{integration.what}</p>
+        </div>
+        <a
+          href={integration.docsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 text-[var(--muted)] hover:text-[var(--accent)]"
+          title="Where these come from"
+        >
+          <ExternalLink size={16} />
+        </a>
+      </div>
+
+      {health !== 'ok' && (
+        <p
+          className="text-xs rounded-lg px-3 py-2 mb-4"
+          style={{ background: 'rgba(225,112,85,0.08)', color: 'var(--text)' }}
+        >
+          <span className="font-medium">While this is unset: </span>
+          {integration.consequence}
+        </p>
+      )}
+
+      <div className="space-y-2">
+        {integration.fields.map((field) => (
+          <FieldRow key={field.key} field={field} />
+        ))}
+      </div>
+
+      {integration.id === 'paypal' && <PayPalTester />}
+    </div>
+  )
+}
+
+function FieldRow({ field }: { field: Field }) {
+  const icon = field.present ? (
+    <Check size={13} style={{ color: 'var(--success, #00b894)' }} />
+  ) : field.required ? (
+    <X size={13} style={{ color: 'var(--danger, #e17055)' }} />
+  ) : (
+    <Minus size={13} style={{ color: 'var(--muted)' }} />
+  )
+
+  return (
+    <div className="flex items-start gap-2.5 text-sm">
+      <span className="shrink-0 mt-1">{icon}</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span className="text-[var(--text)]">{field.label}</span>
+          <code className="text-[10px] text-[var(--muted)]">{field.key}</code>
+          {!field.required && !field.present && (
+            <span className="text-[10px] text-[var(--muted)]">optional</span>
+          )}
+        </div>
+        {field.value != null && (
+          <p className="text-xs text-[var(--muted)] mt-0.5 break-words">{field.value}</p>
+        )}
+        {field.present && field.value == null && (
+          <p className="text-xs text-[var(--muted)] mt-0.5">Set (hidden)</p>
+        )}
+        {field.note && <p className="text-[11px] text-[var(--muted)] mt-0.5 italic">{field.note}</p>}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The two questions worth asking PayPal directly.
+ *
+ * "Do these keys work" can be answered with no order and no money. "Does
+ * PayPal know this order" needs a real one, and is the only thing that proves
+ * the credentials belong to the merchant who actually took the payment —
+ * which is the failure the credentials check cannot see.
+ */
+function PayPalTester() {
+  const [result, setResult] = useState<CheckResult | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [orderId, setOrderId] = useState('')
+
+  async function run(id?: string) {
+    setBusy(true)
+    setError(null)
+    try {
+      const url = withBasePath(`/api/v1/paypal/check${id ? `?orderId=${encodeURIComponent(id)}` : ''}`)
+      const res = await fetch(url, { cache: 'no-store' })
+      const json = (await res.json()) as CheckResult
+      setResult(json)
+      if (json.error) setError(json.error)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'The check could not run')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const probe = result?.probe
+  const credentialsGood = probe?.configured && probe.credentialsOk && !probe.problem
+
+  return (
+    <div className="mt-5 pt-4 border-t border-[var(--border)] space-y-3">
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={() => run()}
+          disabled={busy}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-[var(--accent)] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+        >
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+          Test the connection
+        </button>
+        <span className="text-xs text-[var(--muted)]">Asks PayPal directly. Costs nothing, changes nothing.</span>
+      </div>
+
+      {probe && (
+        <div
+          className="rounded-lg p-3 text-xs space-y-1.5"
+          style={{
+            background: credentialsGood ? 'rgba(0,184,148,0.08)' : 'rgba(225,112,85,0.08)',
+            border: `1px solid ${credentialsGood ? 'rgba(0,184,148,0.3)' : 'rgba(225,112,85,0.3)'}`,
+          }}
+        >
+          <p className="font-medium text-[var(--text)]">
+            {credentialsGood
+              ? `PayPal accepted these credentials on ${probe.env}.`
+              : probe.configured
+                ? 'PayPal is connected, but something is off.'
+                : 'PayPal is not connected.'}
+          </p>
+          {probe.problem && <p className="text-[var(--muted)] leading-relaxed">{probe.problem}</p>}
+          {probe.clientId && (
+            <p className="text-[var(--muted)] break-all">
+              Client ID: <code>{probe.clientId}</code>
+              {probe.matchesShop === true && ' — matches the shop'}
+              {probe.matchesShop === false && ' — does NOT match the shop'}
+            </p>
+          )}
+        </div>
+      )}
+
+      {credentialsGood && (
+        <div className="space-y-2">
+          <p className="text-xs text-[var(--muted)]">
+            Now prove it against a real payment: paste a PayPal order id and see what PayPal says about it.
+          </p>
+          <div className="flex gap-2">
+            <input
+              id="paypal-order-id"
+              value={orderId}
+              onChange={(e) => setOrderId(e.target.value)}
+              placeholder="e.g. 5O190127TN364715T"
+              className="flex-1 px-3 py-2 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] placeholder:text-[var(--muted)]/50 focus:border-[var(--accent)] focus:outline-none"
+            />
+            <button
+              onClick={() => run(orderId.trim())}
+              disabled={busy || orderId.trim().length < 4}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm border border-[var(--border)] text-[var(--text)] hover:border-[var(--accent)]/40 disabled:opacity-40 transition-colors"
+            >
+              <Search size={14} />
+              Look it up
+            </button>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <p
+          className="text-xs rounded-lg px-3 py-2 leading-relaxed"
+          style={{ background: 'rgba(225,112,85,0.10)', color: 'var(--text)' }}
+        >
+          {error}
+        </p>
+      )}
+
+      {result?.order && (
+        <div
+          className="rounded-lg p-3 text-xs space-y-1"
+          style={{
+            background: result.order.completed ? 'rgba(0,184,148,0.08)' : 'rgba(253,203,110,0.10)',
+            border: `1px solid ${result.order.completed ? 'rgba(0,184,148,0.3)' : 'rgba(253,203,110,0.35)'}`,
+          }}
+        >
+          <p className="font-medium text-[var(--text)]">
+            {result.order.completed
+              ? 'PayPal confirms this order was completed.'
+              : `PayPal has this order, but its status is ${result.order.status || 'unknown'}, not COMPLETED.`}
+          </p>
+          <p className="text-[var(--muted)]">
+            {result.order.amount != null && `${result.order.amount.toFixed(2)} ${result.order.currency ?? ''} · `}
+            {result.order.payerName ?? 'no payer name'}
+            {result.order.payerEmail ? ` · ${result.order.payerEmail}` : ''}
+          </p>
+          {result.order.shipToName && (
+            <p className="text-[var(--muted)]">Ships to {result.order.shipToName}</p>
+          )}
+        </div>
+      )}
     </div>
   )
 }
