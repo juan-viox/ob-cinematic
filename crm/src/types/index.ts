@@ -258,6 +258,11 @@ export interface CatalogueProduct extends Omit<Product, 'description'> {
   stock_on_hand: number
   reorder_at: number
   sort_order: number
+  /** Packed weight in whole ounces. Null until someone weighs the box. */
+  ship_weight_oz?: number | null
+  ship_length_in?: number | null
+  ship_width_in?: number | null
+  ship_height_in?: number | null
   updated_at?: string
 }
 
