@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import {
   Package, Boxes, Search, Pencil, Save, X, Loader2, AlertTriangle,
-  Plus, Minus, Layers, CircleDollarSign,
+  Plus, Minus, Layers, CircleDollarSign, Scale,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import type { CatalogueProduct, InventoryItem, ProductComponent } from '@/types'
@@ -24,6 +24,31 @@ type TabKey = (typeof TABS)[number]['key']
 function inTab(category: string, tab: TabKey): boolean {
   if (tab === 'tier') return category === 'tier' || category === 'service'
   return category === tab
+}
+
+/** A blank shipping field means "not measured", which is not the same as zero. */
+function optionalWhole(v: string): number | null {
+  const n = Math.round(Number(v))
+  return v.trim() === '' || !Number.isFinite(n) || n <= 0 ? null : n
+}
+
+function optionalMeasure(v: string): number | null {
+  const n = Number(v)
+  return v.trim() === '' || !Number.isFinite(n) || n <= 0 ? null : Math.round(n * 100) / 100
+}
+
+/** Ounces read as pounds once a box is heavier than a pound, which they all are. */
+function weightLabel(oz?: number | null): string | null {
+  if (oz == null || oz <= 0) return null
+  if (oz < 16) return `${oz} oz`
+  const lb = Math.floor(oz / 16)
+  const rest = oz % 16
+  return rest ? `${lb} lb ${rest} oz` : `${lb} lb`
+}
+
+/** Only a physical box needs a carton; a service or an add-on never ships. */
+function needsWeighing(p: CatalogueProduct): boolean {
+  return p.is_active && p.category === 'box' && p.ship_weight_oz == null
 }
 
 export default function CatalogueClient({
@@ -72,6 +97,7 @@ export default function CatalogueClient({
   )
 
   const lowStockProducts = products.filter((p) => p.track_stock && p.stock_on_hand <= p.reorder_at)
+  const unweighed = products.filter(needsWeighing)
   const lowStockItems = items.filter((i) => i.is_active && i.reorder_at > 0 && i.on_hand <= i.reorder_at)
 
   function startEdit(row: CatalogueProduct | InventoryItem, kind: 'product' | 'item') {
@@ -88,6 +114,10 @@ export default function CatalogueClient({
         track_stock: p.track_stock ? '1' : '',
         stock_on_hand: String(p.stock_on_hand ?? 0),
         reorder_at: String(p.reorder_at ?? 0),
+        ship_weight_oz: p.ship_weight_oz == null ? '' : String(p.ship_weight_oz),
+        ship_length_in: p.ship_length_in == null ? '' : String(p.ship_length_in),
+        ship_width_in: p.ship_width_in == null ? '' : String(p.ship_width_in),
+        ship_height_in: p.ship_height_in == null ? '' : String(p.ship_height_in),
         is_active: p.is_active ? '1' : '',
       })
     } else {
@@ -116,6 +146,13 @@ export default function CatalogueClient({
       description: draft.description.trim() || null,
       track_stock: draft.track_stock === '1',
       reorder_at: Math.max(0, Math.round(Number(draft.reorder_at) || 0)),
+      // Blank stays null: "not weighed yet" is a fact worth keeping, and a
+      // box saved as 0 oz would sail past the carrier check and be rated
+      // as if it were empty.
+      ship_weight_oz: optionalWhole(draft.ship_weight_oz),
+      ship_length_in: optionalMeasure(draft.ship_length_in),
+      ship_width_in: optionalMeasure(draft.ship_width_in),
+      ship_height_in: optionalMeasure(draft.ship_height_in),
       is_active: draft.is_active === '1',
     }
     const { error: err } = await supabase.from('products').update(patch).eq('id', p.id)
@@ -212,6 +249,27 @@ export default function CatalogueClient({
         </div>
       )}
 
+      {unweighed.length > 0 && (
+        <div
+          className="card mb-6 flex items-start gap-3"
+          style={{ borderColor: 'rgba(116,185,255,0.35)', background: 'rgba(116,185,255,0.06)' }}
+        >
+          <Scale className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--accent-light)' }} />
+          <div className="text-sm">
+            <p className="font-semibold mb-1">
+              {unweighed.length} box{unweighed.length === 1 ? '' : 'es'} have never been weighed
+            </p>
+            <p style={{ color: 'var(--muted)' }}>
+              A carrier cannot price a label without a packed weight. Put one on a scale, then edit it here.
+            </p>
+            <p className="mt-1" style={{ color: 'var(--muted)' }}>
+              {unweighed.slice(0, 8).map((p) => p.name).join(' · ')}
+              {unweighed.length > 8 && ` and ${unweighed.length - 8} more`}
+            </p>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="p-3 rounded-lg text-sm mb-4" style={{ background: 'rgba(225,112,85,0.1)', color: 'var(--danger)' }}>
           {error}
@@ -295,6 +353,54 @@ export default function CatalogueClient({
                             Active
                           </label>
                         </div>
+                        {p.category === 'box' && (
+                          <>
+                            <div className="col-span-2 md:col-span-4 pt-1">
+                              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
+                                Shipping
+                              </p>
+                              <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+                                Packed weight, box and filler included. A carrier cannot price a label without it.
+                              </p>
+                            </div>
+                            <div>
+                              <label>Weight (oz)</label>
+                              <input
+                                type="number" min="1" step="1"
+                                value={draft.ship_weight_oz}
+                                onChange={(e) => setDraft({ ...draft, ship_weight_oz: e.target.value })}
+                                className="w-full" placeholder="not weighed"
+                              />
+                            </div>
+                            <div>
+                              <label>Length (in)</label>
+                              <input
+                                type="number" min="0" step="0.25"
+                                value={draft.ship_length_in}
+                                onChange={(e) => setDraft({ ...draft, ship_length_in: e.target.value })}
+                                className="w-full" placeholder="optional"
+                              />
+                            </div>
+                            <div>
+                              <label>Width (in)</label>
+                              <input
+                                type="number" min="0" step="0.25"
+                                value={draft.ship_width_in}
+                                onChange={(e) => setDraft({ ...draft, ship_width_in: e.target.value })}
+                                className="w-full" placeholder="optional"
+                              />
+                            </div>
+                            <div>
+                              <label>Height (in)</label>
+                              <input
+                                type="number" min="0" step="0.25"
+                                value={draft.ship_height_in}
+                                onChange={(e) => setDraft({ ...draft, ship_height_in: e.target.value })}
+                                className="w-full" placeholder="optional"
+                              />
+                            </div>
+                          </>
+                        )}
                         <div className="col-span-2 md:col-span-4">
                           <label>Description</label>
                           <textarea rows={2} value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} className="w-full" />
@@ -359,6 +465,13 @@ export default function CatalogueClient({
                             </div>
                           ) : (
                             <span className="text-xs" style={{ color: 'var(--muted)' }}>Built to order</span>
+                          )}
+
+                          {p.category === 'box' && (
+                            <span className="flex items-center gap-1.5 text-xs" style={{ color: needsWeighing(p) ? 'var(--accent-light)' : 'var(--muted)' }}>
+                              <Scale className="w-3.5 h-3.5" />
+                              {weightLabel(p.ship_weight_oz) ?? 'not weighed'}
+                            </span>
                           )}
 
                           {parts.length > 0 && (
