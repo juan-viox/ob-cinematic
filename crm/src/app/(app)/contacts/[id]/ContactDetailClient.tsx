@@ -23,6 +23,7 @@ import FileAttachments from '@/components/shared/FileAttachments'
 import NotesPanel from '@/components/shared/NotesPanel'
 import CustomFieldsRenderer from '@/components/shared/CustomFieldsRenderer'
 import { formatDate, formatCurrency } from '@/lib/utils'
+import TagEditor, { type TagChip } from '@/components/shared/TagEditor'
 
 const tabs = [
   { key: 'activity', label: 'Activity', icon: Activity },
@@ -42,10 +43,12 @@ export default function ContactDetailClient({
   contact,
   activities,
   deals,
+  tags = [],
 }: {
   contact: any
   activities: any[]
   deals: any[]
+  tags?: TagChip[]
 }) {
   const [activeTab, setActiveTab] = useState('activity')
   const containerRef = useRef<HTMLDivElement>(null)
@@ -265,6 +268,10 @@ export default function ContactDetailClient({
 
         {/* Right Sidebar - Contact Info Card */}
         <div className="space-y-4">
+          <div className="card">
+            <TagEditor entityType="contact" entityId={contact.id} initial={tags} />
+          </div>
+
           <div className="card">
             <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--muted)' }}>
               Contact Information
