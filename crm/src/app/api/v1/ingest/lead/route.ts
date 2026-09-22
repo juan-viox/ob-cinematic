@@ -20,6 +20,7 @@ import {
   upsertContact,
   type ContactSource,
 } from '@/lib/ingest'
+import { notifyTeam } from '@/lib/alerts'
 
 const LEAD_SOURCES: readonly ContactSource[] = ['web_form', 'voice_agent', 'referral']
 
@@ -140,6 +141,24 @@ export async function POST(request: Request) {
         email: emailValue,
         phone: phoneValue,
       },
+    })
+
+    // Somebody we have never heard from is asking a question. Alerted on both
+    // channels, after the record is safely written, and never fatal.
+    await notifyTeam(supabase, {
+      orgId,
+      kind: source === 'voice_agent' ? 'voice_call' : 'lead',
+      headline: company ? `${displayName} at ${company}` : displayName,
+      details: [
+        ['Came from', SOURCE_LABEL[source] ?? source],
+        ['Email', emailValue],
+        ['Phone', phoneValue],
+        ['Company', company],
+      ],
+      body: message,
+      path: '/leads',
+      entityType: 'contact',
+      entityId: contact.id,
     })
 
     return jsonOk(request, {

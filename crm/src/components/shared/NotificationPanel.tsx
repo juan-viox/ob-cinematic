@@ -14,6 +14,9 @@ import {
   Check,
   CheckCheck,
   Inbox,
+  PackageCheck,
+  CalendarClock,
+  PhoneCall,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { formatRelativeTime } from '@/lib/utils'
@@ -37,6 +40,11 @@ const typeConfig: Record<string, { icon: typeof Bell; color: string; bg: string 
   mention: { icon: AtSign, color: '#74b9ff', bg: 'rgba(116,185,255,0.12)' },
   assignment: { icon: ClipboardList, color: '#a29bfe', bg: 'rgba(162,155,254,0.12)' },
   system: { icon: Info, color: '#8888a0', bg: 'rgba(136,136,160,0.12)' },
+  // Things that arrive on their own. An order is money already taken, so it
+  // gets the one colour nothing else in this list uses.
+  new_order: { icon: PackageCheck, color: '#e17055', bg: 'rgba(225,112,85,0.14)' },
+  new_booking: { icon: CalendarClock, color: '#00b894', bg: 'rgba(0,184,148,0.12)' },
+  voice_call: { icon: PhoneCall, color: '#74b9ff', bg: 'rgba(116,185,255,0.12)' },
 }
 
 function getEntityRoute(entityType: string | null, entityId: string | null): string | null {

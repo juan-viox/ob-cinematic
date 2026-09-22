@@ -23,6 +23,7 @@ import {
   upsertContact,
 } from '@/lib/ingest'
 import { createOrder, formatAddress, type OrderLineInput } from '@/lib/orders'
+import { notifyTeam } from '@/lib/alerts'
 import { orderConfirmedText, sendSms } from '@/lib/sms'
 
 /** Stage a verified (paid) order lands in; falls back to the first stage. */
@@ -465,6 +466,39 @@ export async function recordPaidOrder(
 
   if (order.unmatchedLines.length) {
     console.warn('[orders] lines with no catalogue match:', order.unmatchedLines.join(', '))
+  }
+
+  // The team hears about it too. After the customer's text and after the sale
+  // is fully written, because notifyTeam never throws but this ordering means
+  // an alert cannot delay the confirmation the buyer is waiting on.
+  //
+  // Only for orders that are new to us: a duplicate webhook is the same sale
+  // arriving twice, and alerting on it teaches everybody to ignore alerts.
+  if (!order.duplicate) {
+    await notifyTeam(supabase, {
+      orgId,
+      kind: 'order',
+      headline: `${order.orderNumber} from ${payerLabel} for ${amountLabel}`,
+      details: [
+        ['Order', order.orderNumber],
+        ['Total', amountLabel],
+        ['Items', summary],
+        ['Customer', input.payerName ?? input.payerEmail ?? 'Not given'],
+        ['Email', input.payerEmail],
+        ['Phone', input.payerPhone],
+        ['Ship to', input.shipToAddress ? formatAddress(input.shipToAddress) : null],
+        ['Paid via', providerLabel],
+        // Worth saying out loud: an unverified order has not been checked
+        // against the payment provider, so it is not yet money in the bank.
+        ['Verified', verified ? 'Yes' : 'NO, confirm in PayPal before shipping'],
+        order.unmatchedLines.length
+          ? ['Stock warning', `Not in catalogue, no stock deducted: ${order.unmatchedLines.join(', ')}`]
+          : ['', ''],
+      ],
+      path: '/orders',
+      entityType: 'deal',
+      entityId: dealId,
+    })
   }
 
   return {
