@@ -5,7 +5,7 @@ import {
   AlertTriangle, CheckCircle, Loader2, Mail, Send, Tag as TagIcon, Users, Eye, Ban,
 } from 'lucide-react'
 import { withBasePath } from '@/lib/url'
-import { missingMergeFields, renderMerge } from '@/lib/campaign'
+import { missingMergeFields, renderMerge, TEST_TAG } from '@/lib/campaign'
 
 interface TagRow { id: string; name: string; color: string | null; count: number }
 interface TemplateRow { id: string; name: string; subject: string | null; body: string | null }
@@ -29,6 +29,8 @@ interface Audience {
   senderHelp: string | null
   from: string | null
   replyTo: string | null
+  testCount: number
+  testEmails: string[]
   recipients: Recipient[]
 }
 
@@ -68,6 +70,9 @@ export default function CampaignsClient({
   const [progress, setProgress] = useState<Progress | null>(null)
   const [error, setError] = useState('')
   const [done, setDone] = useState<Progress | null>(null)
+  /** A test must have gone out, and been looked at, before the real send unlocks. */
+  const [lastWasTest, setLastWasTest] = useState(false)
+  const [testPassed, setTestPassed] = useState(false)
 
   const usableTags = useMemo(() => tags.filter((t) => t.count > 0), [tags])
 
@@ -100,17 +105,35 @@ export default function CampaignsClient({
   const perContact = unresolved.filter((k) => PER_CONTACT.has(k.toLowerCase()))
   const genuinelyMissing = unresolved.filter((k) => !PER_CONTACT.has(k.toLowerCase()))
 
+  /**
+   * Any change to who or what is being sent re-locks the real send.
+   *
+   * An approval is of the message that was tested, not of the button. Edit a
+   * line after the test and the thing that was checked no longer exists.
+   */
+  function editDraft(fn: () => void) {
+    fn()
+    setTestPassed(false)
+  }
+
   function applyTemplate(id: string) {
     const t = templates.find((x) => x.id === id)
     if (!t) return
-    setSubject(t.subject ?? '')
-    setBody(t.body ?? '')
+    editDraft(() => {
+      setSubject(t.subject ?? '')
+      setBody(t.body ?? '')
+    })
   }
 
-  async function send() {
+  async function send(testOnly: boolean) {
     if (!audience || !tagId) return
     setSending(true); setError(''); setDone(null)
-    const totals: Progress = { processed: 0, total: audience.total, sent: 0, skipped: 0, failed: 0 }
+    setLastWasTest(testOnly)
+    const totals: Progress = {
+      processed: 0,
+      total: testOnly ? audience.testCount : audience.total,
+      sent: 0, skipped: 0, failed: 0,
+    }
     setProgress({ ...totals })
 
     let offset: number | null = 0
@@ -123,7 +146,7 @@ export default function CampaignsClient({
         const res = await fetch(withBasePath('/api/v1/email/campaign'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tagId, subject, body, offset }),
+          body: JSON.stringify({ tagId, subject, body, offset, testOnly }),
         })
         data = await res.json()
         if (!res.ok) { setError(data?.error ?? `Send failed (HTTP ${res.status})`); break }
@@ -145,8 +168,12 @@ export default function CampaignsClient({
   }
 
   const blocked = audience ? !audience.senderReady : false
-  const canSend = !!audience && sendable.length > 0 && subject.trim() !== '' && body.trim() !== ''
+  const ready = !!audience && subject.trim() !== '' && body.trim() !== ''
     && !blocked && genuinelyMissing.length === 0 && !sending
+  const canTest = ready && (audience?.testCount ?? 0) > 0
+  // The real send stays locked until a test has gone out and been confirmed
+  // by eye. Twenty-four strangers is not the place to discover a broken merge.
+  const canSend = ready && sendable.length > 0 && testPassed
 
   return (
     <div>
@@ -180,7 +207,7 @@ export default function CampaignsClient({
             <label className="flex items-center gap-2 mb-2 font-medium">
               <TagIcon className="w-4 h-4" style={{ color: 'var(--accent)' }} /> Who is this going to
             </label>
-            <select value={tagId} onChange={(e) => setTagId(e.target.value)} className="w-full">
+            <select value={tagId} onChange={(e) => editDraft(() => setTagId(e.target.value))} className="w-full">
               <option value="">Pick a tag</option>
               {usableTags.map((t) => (
                 <option key={t.id} value={t.id}>{t.name} ({t.count})</option>
@@ -205,12 +232,12 @@ export default function CampaignsClient({
             )}
             <div>
               <label>Subject</label>
-              <input value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full"
+              <input value={subject} onChange={(e) => editDraft(() => setSubject(e.target.value))} className="w-full"
                      placeholder="A local gifting resource for {{Company Name}}" />
             </div>
             <div>
               <label>Message</label>
-              <textarea rows={14} value={body} onChange={(e) => setBody(e.target.value)} className="w-full"
+              <textarea rows={14} value={body} onChange={(e) => editDraft(() => setBody(e.target.value))} className="w-full"
                         placeholder={'Hi {{First Name}},\n\n{{Personalized Opening}}\n\n...'} />
               <p className="text-xs mt-1.5" style={{ color: 'var(--muted)' }}>
                 Merge fields: <code>{'{{First Name}}'}</code> <code>{'{{Last Name}}'}</code>{' '}
@@ -297,14 +324,45 @@ export default function CampaignsClient({
             {done ? (
               <div className="text-center py-2">
                 <CheckCircle className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--success)' }} />
-                <p className="font-semibold">{done.sent} sent</p>
+                <p className="font-semibold">
+                  {lastWasTest ? `Test sent to ${done.sent}` : `${done.sent} sent`}
+                </p>
                 <p className="text-sm" style={{ color: 'var(--muted)' }}>
                   {done.skipped > 0 && `${done.skipped} skipped. `}
                   {done.failed > 0 && `${done.failed} failed.`}
                 </p>
-                <button onClick={() => { setDone(null); setProgress(null) }} className="btn btn-secondary btn-sm mt-3">
-                  Send another
-                </button>
+
+                {/* After a test, the next step is not another button press: it
+                    is going and reading the email. The real send stays locked
+                    until somebody says out loud that they did. */}
+                {lastWasTest && done.sent > 0 ? (
+                  <div className="mt-4 pt-4 text-left" style={{ borderTop: '1px solid var(--border)' }}>
+                    <p className="text-sm mb-2">Go and read it before anything else goes out.</p>
+                    <ul className="text-xs space-y-1 mb-3" style={{ color: 'var(--muted)' }}>
+                      {audience?.testEmails.map((e) => <li key={e}>{e}</li>)}
+                    </ul>
+                    <p className="text-xs mb-3" style={{ color: 'var(--muted)' }}>
+                      Check the name and company read correctly, that the reply address is right,
+                      and that the unsubscribe link at the bottom works.
+                    </p>
+                    <button
+                      onClick={() => { setTestPassed(true); setDone(null); setProgress(null) }}
+                      className="btn btn-secondary btn-sm w-full"
+                    >
+                      It looks right, unlock the real send
+                    </button>
+                    <button
+                      onClick={() => { setDone(null); setProgress(null) }}
+                      className="btn btn-ghost btn-sm w-full mt-2"
+                    >
+                      Something is wrong, let me edit it
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => { setDone(null); setProgress(null) }} className="btn btn-secondary btn-sm mt-3">
+                    Send another
+                  </button>
+                )}
               </div>
             ) : (
               <>
@@ -319,13 +377,29 @@ export default function CampaignsClient({
                     </p>
                   </div>
                 )}
-                <button onClick={send} disabled={!canSend} className="btn btn-primary w-full">
+                <button onClick={() => void send(true)} disabled={!canTest}
+                        className={testPassed ? 'btn btn-secondary w-full' : 'btn btn-primary w-full'}>
+                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                  {sending ? 'Sending' : `Send a test to ${audience?.testCount ?? 0}`}
+                </button>
+                {audience && audience.testCount > 0 && (
+                  <p className="text-xs mt-1.5 text-center" style={{ color: 'var(--muted)' }}>
+                    {audience.testEmails.join(', ')}
+                  </p>
+                )}
+
+                <button onClick={() => void send(false)} disabled={!canSend}
+                        className="btn btn-primary w-full mt-4"
+                        style={testPassed ? undefined : { opacity: 0.55 }}>
                   {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  {sending ? 'Sending' : `Send to ${sendable.length}`}
+                  {sending ? 'Sending' : `Send to all ${sendable.length}`}
                 </button>
                 <p className="text-xs mt-2 text-center" style={{ color: 'var(--muted)' }}>
-                  <Mail className="w-3 h-3 inline mr-1" />
-                  Send it to yourself first.
+                  {audience && audience.testCount === 0
+                    ? `Nobody on this tag also carries the "${TEST_TAG}" tag, so there is no inbox to test with.`
+                    : testPassed
+                      ? 'Test checked. This goes to everyone on the tag.'
+                      : 'Send the test first and read it. This unlocks once you confirm it looks right.'}
                 </p>
               </>
             )}
