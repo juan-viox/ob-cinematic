@@ -86,8 +86,17 @@ export function renderMerge(template: string, contact: MergeContact): string {
 
 /**
  * The placeholders a body uses that we cannot fill for a given contact.
- * The campaign screen calls this before sending so "Hi ," is caught while
- * it is still a draft.
+ *
+ * Two different disasters, one check. A placeholder with no field behind it
+ * goes out as the literal characters "{{Personalized Opening}}", because
+ * renderMerge leaves what it cannot resolve visible: right on a draft screen,
+ * indefensible in a stranger's inbox. A placeholder whose field exists but is
+ * empty is quieter and no better, and arrives as "Hi ,".
+ *
+ * The campaign screen calls this on the contact being previewed. The send
+ * route calls it over the whole audience, which is the one that counts: a
+ * hand-checked list of twenty-four never trips this, and a bought list of a
+ * hundred and fifty always does.
  */
 export function missingMergeFields(template: string, contact: MergeContact): string[] {
   const values = mergeValues(contact)
@@ -197,19 +206,11 @@ export function skipReason(c: CampaignRecipient): SkipReason | null {
  */
 export const TEST_TAG = 'Internal Test'
 
-/**
- * Everyone carrying a tag, with what a merge and an opt-out check both need.
- *
- * `restrictTag` narrows to recipients who ALSO carry that second tag. It is
- * how a test send works: same audience query, same merge, same code path as
- * the real thing, just intersected down to the seeds. A test that ran through
- * different code would prove nothing about the send that follows it.
- */
+/** Everyone carrying a tag, with what a merge and an opt-out check both need. */
 export async function recipientsForTag(
   supabase: SupabaseClient,
   orgId: string,
-  tagId: string,
-  restrictTag?: string | null
+  tagId: string
 ): Promise<CampaignRecipient[]> {
   const { data: links, error: linkError } = await supabase
     .from('entity_tags')
@@ -218,30 +219,49 @@ export async function recipientsForTag(
     .eq('entity_type', 'contact')
   if (linkError) throw new Error(linkError.message)
 
-  let ids = (links ?? []).map((l) => l.entity_id as string)
+  const ids = (links ?? []).map((l) => l.entity_id as string)
   if (!ids.length) return []
+  return loadContacts(supabase, orgId, ids)
+}
 
-  if (restrictTag) {
-    const { data: restrictRow } = await supabase
-      .from('tags')
-      .select('id')
-      .eq('organization_id', orgId)
-      .eq('name', restrictTag)
-      .maybeSingle()
-    // No such tag means no seeds, which must send to nobody rather than
-    // silently falling through to the whole list.
-    if (!restrictRow?.id) return []
-    const { data: restrictLinks } = await supabase
-      .from('entity_tags')
-      .select('entity_id')
-      .eq('tag_id', restrictRow.id)
-      .eq('entity_type', 'contact')
-    const allowed = new Set((restrictLinks ?? []).map((l) => l.entity_id as string))
-    ids = ids.filter((id) => allowed.has(id))
-    if (!ids.length) return []
-  }
+/**
+ * Our own inboxes, org-wide, whatever tag is being sent to.
+ *
+ * Deliberately not intersected with the campaign's tag. A seed is a place to
+ * deliver a proof copy, not a member of the audience, and requiring it to be
+ * on the list meant a tag of pure prospects could never be tested at all:
+ * the test button had nobody to write to, so the lock it guards never opened.
+ */
+export async function seedRecipients(
+  supabase: SupabaseClient,
+  orgId: string
+): Promise<CampaignRecipient[]> {
+  const { data: tag } = await supabase
+    .from('tags')
+    .select('id')
+    .eq('organization_id', orgId)
+    .eq('name', TEST_TAG)
+    .maybeSingle()
+  if (!tag?.id) return []
 
-  // Scoped to the org as well as the tag: entity_tags carries no
+  const { data: links } = await supabase
+    .from('entity_tags')
+    .select('entity_id')
+    .eq('tag_id', tag.id)
+    .eq('entity_type', 'contact')
+
+  const ids = (links ?? []).map((l) => l.entity_id as string)
+  if (!ids.length) return []
+  return loadContacts(supabase, orgId, ids)
+}
+
+/** Contacts by id, with what a merge and an opt-out check both need. */
+async function loadContacts(
+  supabase: SupabaseClient,
+  orgId: string,
+  ids: string[]
+): Promise<CampaignRecipient[]> {
+  // Scoped to the org as well as the ids: entity_tags carries no
   // organization_id of its own, so the contacts read is what enforces it.
   const { data, error } = await supabase
     .from('contacts')
