@@ -6,8 +6,10 @@ import {
   campaignFrom,
   campaignHtml,
   campaignReplyTo,
+  missingMergeFields,
   recipientsForTag,
   renderMerge,
+  seedRecipients,
   skipReason,
   TEST_TAG,
   unsubscribeUrl,
@@ -62,12 +64,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Could not read the audience' }, { status: 500 })
   }
 
-  // How many of them are our own seed inboxes, so the screen can offer a
-  // test send and say exactly who would get it.
+  // Our own inboxes, org-wide rather than intersected with this tag: a test
+  // proves the campaign by delivering a real prospect's copy to us, so a tag
+  // made purely of strangers is still testable.
   let seeds: CampaignRecipient[] = []
   try {
-    seeds = (await recipientsForTag(supabase, ctx.organizationId, tagId, TEST_TAG))
-      .filter((c) => skipReason(c) === null)
+    seeds = (await seedRecipients(supabase, ctx.organizationId)).filter((c) => skipReason(c) === null)
   } catch {
     seeds = []
   }
@@ -143,26 +145,83 @@ export async function POST(request: Request) {
   }
 
   const supabase = createAdminClient()
-  let all: CampaignRecipient[]
+  let audience: CampaignRecipient[]
   try {
-    all = await recipientsForTag(supabase, ctx.organizationId, tagId, testOnly ? TEST_TAG : null)
+    audience = await recipientsForTag(supabase, ctx.organizationId, tagId)
   } catch (err) {
     console.error('[campaign:send]', err instanceof Error ? err.message : err)
     return NextResponse.json({ error: 'Could not read the audience' }, { status: 500 })
   }
 
-  if (testOnly && all.length === 0) {
+  const realRecipients = audience.filter((c) => skipReason(c) === null)
+
+  // Checked over the whole audience even on a test, so a test genuinely
+  // clears the run that follows it rather than only the three seeds.
+  //
+  // Refused for the whole send rather than skipped per contact: half a list
+  // delivered and half withheld is worse to unpick than nothing sent at all,
+  // and the fix is usually one missing column in the import rather than one
+  // unlucky person.
+  const template = `${subject}\n${messageBody}`
+  const broken = realRecipients
+    .map((c) => ({ c, missing: missingMergeFields(template, c) }))
+    .filter((x) => x.missing.length > 0)
+
+  if (broken.length > 0) {
+    const shown = broken.slice(0, 8).map((x) => ({
+      name: [x.c.first_name, x.c.last_name].filter(Boolean).join(' ') || x.c.email,
+      email: x.c.email,
+      missing: x.missing,
+    }))
     return NextResponse.json(
-      { error: `No contact on this tag also carries "${TEST_TAG}", so there is nobody to test with. Nothing was sent.` },
+      {
+        error:
+          `${broken.length} ${broken.length === 1 ? 'contact has' : 'contacts have'} no value stored for a ` +
+          `placeholder this message uses, and would receive it with the braces still in the text. ` +
+          `Fill those fields in, or take the placeholder out of the message. Nothing was sent.`,
+        unresolved: shown,
+        unresolvedTotal: broken.length,
+      },
       { status: 400 }
     )
+  }
+
+  // A test delivers to our own inboxes but renders a real prospect's copy.
+  //
+  // Rendering the seed contact's own record instead would prove the pipeline
+  // works while showing nobody what the campaign actually says, which is the
+  // half that matters. The seed still supplies the address, the unsubscribe
+  // token and the activity row, so a click on the footer can never opt a real
+  // prospect out of a campaign they have not been sent yet.
+  let targets = realRecipients
+  let samples: CampaignRecipient[] = []
+  if (testOnly) {
+    try {
+      targets = (await seedRecipients(supabase, ctx.organizationId)).filter((c) => skipReason(c) === null)
+    } catch (err) {
+      console.error('[campaign:seeds]', err instanceof Error ? err.message : err)
+      return NextResponse.json({ error: 'Could not read the test inboxes' }, { status: 500 })
+    }
+    if (targets.length === 0) {
+      return NextResponse.json(
+        { error: `No contact carries the "${TEST_TAG}" tag, so there is no inbox to test with. Nothing was sent.` },
+        { status: 400 }
+      )
+    }
+    if (realRecipients.length === 0) {
+      return NextResponse.json(
+        { error: 'Nobody on this tag can receive email, so there is nothing to show in a test. Nothing was sent.' },
+        { status: 400 }
+      )
+    }
+    samples = realRecipients
   }
 
   // The From subdomain has no mailbox; a reply to it would bounce, and the
   // replies are the entire point of the campaign.
   const replyTo = campaignReplyTo()
   const origin = originOf(request)
-  const batch = all.slice(offset, offset + BATCH)
+  const batch = targets.slice(offset, offset + BATCH)
 
   let sent = 0
   let skipped = 0
@@ -176,9 +235,16 @@ export async function POST(request: Request) {
       continue
     }
 
+    // On a test the address is ours and the words are a real prospect's.
+    // Rotating the sample means three seeds show three different merges
+    // rather than the same one three times.
+    const mergeFrom = testOnly ? samples[(offset + i) % samples.length] : contact
+
     const unsubUrl = unsubscribeUrl(origin, contact.unsubscribe_token)
-    const mergedSubject = renderMerge(subject, contact)
-    const mergedBody = renderMerge(messageBody, contact)
+    const mergedSubject = testOnly
+      ? `[TEST] ${renderMerge(subject, mergeFrom)}`
+      : renderMerge(subject, mergeFrom)
+    const mergedBody = renderMerge(messageBody, mergeFrom)
 
     let ok = false
     let failure = 'send failed'
@@ -234,6 +300,9 @@ export async function POST(request: Request) {
         campaign: true,
         tagId,
         sent: ok,
+        // Marked so the real campaign's numbers are not inflated by proof
+        // copies, and so the row is legible to whoever reads it later.
+        ...(testOnly ? { test: true, renderedFor: mergeFrom.id } : {}),
         ...(ok ? {} : { reason: failure }),
       },
     })
@@ -247,10 +316,11 @@ export async function POST(request: Request) {
   const nextOffset = offset + batch.length
   return NextResponse.json({
     ok: true,
-    total: all.length,
+    testOnly,
+    total: targets.length,
     processed: nextOffset,
-    done: nextOffset >= all.length,
-    nextOffset: nextOffset >= all.length ? null : nextOffset,
+    done: nextOffset >= targets.length,
+    nextOffset: nextOffset >= targets.length ? null : nextOffset,
     sent,
     skipped,
     failures,

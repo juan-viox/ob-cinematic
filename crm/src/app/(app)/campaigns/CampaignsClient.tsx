@@ -36,6 +36,9 @@ interface Audience {
 
 interface Progress { processed: number; total: number; sent: number; skipped: number; failed: number }
 
+/** A contact the send refused because a placeholder has nothing behind it. */
+interface Unresolved { name: string | null; email: string | null; missing: string[] }
+
 const SKIP_LABEL: Record<NonNullable<Recipient['skip']>, string> = {
   no_email: 'no email address',
   opted_out: 'asked us to stop',
@@ -73,6 +76,8 @@ export default function CampaignsClient({
   /** A test must have gone out, and been looked at, before the real send unlocks. */
   const [lastWasTest, setLastWasTest] = useState(false)
   const [testPassed, setTestPassed] = useState(false)
+  const [unresolvedList, setUnresolvedList] = useState<Unresolved[]>([])
+  const [unresolvedTotal, setUnresolvedTotal] = useState(0)
 
   const usableTags = useMemo(() => tags.filter((t) => t.count > 0), [tags])
 
@@ -128,6 +133,7 @@ export default function CampaignsClient({
   async function send(testOnly: boolean) {
     if (!audience || !tagId) return
     setSending(true); setError(''); setDone(null)
+    setUnresolvedList([]); setUnresolvedTotal(0)
     setLastWasTest(testOnly)
     const totals: Progress = {
       processed: 0,
@@ -141,6 +147,7 @@ export default function CampaignsClient({
       let data: {
         error?: string; total?: number; processed?: number; nextOffset?: number | null
         sent?: number; skipped?: number; failures?: unknown[]
+        unresolved?: Unresolved[]; unresolvedTotal?: number
       }
       try {
         const res = await fetch(withBasePath('/api/v1/email/campaign'), {
@@ -149,7 +156,16 @@ export default function CampaignsClient({
           body: JSON.stringify({ tagId, subject, body, offset, testOnly }),
         })
         data = await res.json()
-        if (!res.ok) { setError(data?.error ?? `Send failed (HTTP ${res.status})`); break }
+        if (!res.ok) {
+          setError(data?.error ?? `Send failed (HTTP ${res.status})`)
+          // Naming the people is the difference between a wall the user
+          // stares at and a list they can go and fix.
+          if (Array.isArray(data?.unresolved)) {
+            setUnresolvedList(data.unresolved)
+            setUnresolvedTotal(data.unresolvedTotal ?? data.unresolved.length)
+          }
+          break
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Send failed')
         break
@@ -187,7 +203,29 @@ export default function CampaignsClient({
       {error && (
         <div className="card mb-6 flex items-start gap-3" style={{ borderColor: 'rgba(225,112,85,0.4)', background: 'rgba(225,112,85,0.07)' }}>
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'var(--danger)' }} />
-          <p className="text-sm">{error}</p>
+          <div className="text-sm">
+            <p>{error}</p>
+            {unresolvedList.length > 0 && (
+              <>
+                <ul className="mt-2 space-y-1 text-xs">
+                  {unresolvedList.map((u) => (
+                    <li key={u.email ?? u.name}>
+                      <span style={{ color: 'var(--text)' }}>{u.name || u.email}</span>
+                      {' · missing '}{u.missing.join(', ')}
+                    </li>
+                  ))}
+                </ul>
+                {unresolvedTotal > unresolvedList.length && (
+                  <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
+                    and {unresolvedTotal - unresolvedList.length} more.
+                  </p>
+                )}
+                <p className="text-xs mt-2" style={{ color: 'var(--muted)' }}>
+                  Open each contact and fill the field in, or take that placeholder out of the message.
+                </p>
+              </>
+            )}
+          </div>
         </div>
       )}
 
@@ -342,8 +380,9 @@ export default function CampaignsClient({
                       {audience?.testEmails.map((e) => <li key={e}>{e}</li>)}
                     </ul>
                     <p className="text-xs mb-3" style={{ color: 'var(--muted)' }}>
-                      Check the name and company read correctly, that the reply address is right,
-                      and that the unsubscribe link at the bottom works.
+                      Each copy is a real recipient&apos;s, subject prefixed [TEST]. Check the name and
+                      company read correctly, that nothing shows as {'{{double braces}}'}, that the reply
+                      address is right, and that the unsubscribe link at the bottom works.
                     </p>
                     <button
                       onClick={() => { setTestPassed(true); setDone(null); setProgress(null) }}
@@ -385,6 +424,8 @@ export default function CampaignsClient({
                 {audience && audience.testCount > 0 && (
                   <p className="text-xs mt-1.5 text-center" style={{ color: 'var(--muted)' }}>
                     {audience.testEmails.join(', ')}
+                    <br />
+                    Rendered with a real recipient&apos;s details, so you read what they read.
                   </p>
                 )}
 
@@ -396,7 +437,7 @@ export default function CampaignsClient({
                 </button>
                 <p className="text-xs mt-2 text-center" style={{ color: 'var(--muted)' }}>
                   {audience && audience.testCount === 0
-                    ? `Nobody on this tag also carries the "${TEST_TAG}" tag, so there is no inbox to test with.`
+                    ? `No contact carries the "${TEST_TAG}" tag, so there is no inbox to test with.`
                     : testPassed
                       ? 'Test checked. This goes to everyone on the tag.'
                       : 'Send the test first and read it. This unlocks once you confirm it looks right.'}
