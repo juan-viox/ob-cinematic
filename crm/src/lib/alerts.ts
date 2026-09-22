@@ -177,6 +177,18 @@ async function emailAlert(alert: TeamAlert): Promise<number> {
   return sent
 }
 
+/**
+ * Puts the alert on every team member's bell, and nothing else.
+ *
+ * Exported because a call Olivia took already has its own email, written for
+ * calls specifically and carrying the transcript. That mail is better than
+ * anything this file would generate, so calls take the bell from here and
+ * leave the email where it is; sending both would mean two emails per call.
+ */
+export async function notifyBell(supabase: SupabaseClient, alert: TeamAlert): Promise<number> {
+  return bellAlert(supabase, alert)
+}
+
 /** Puts the alert on every team member's bell. */
 async function bellAlert(supabase: SupabaseClient, alert: TeamAlert): Promise<number> {
   try {

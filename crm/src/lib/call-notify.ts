@@ -33,12 +33,34 @@ export interface CallNotice {
 
 const TRANSCRIPT_CHARS = 6000
 
+/**
+ * Everyone who should hear about a call.
+ *
+ * The union of the general alert list and this route's own older one, rather
+ * than a replacement. CALL_NOTIFY_EMAILS predates ALERT_EMAILS and points at
+ * a shared inbox; dropping it to "unify" would quietly stop mail somebody may
+ * still be watching. Adding to it cannot lose anything.
+ *
+ * Deduped case-insensitively, because the same address written two ways is
+ * two copies of the same email in the same inbox.
+ */
 function recipients(): string[] {
-  const raw = process.env.CALL_NOTIFY_EMAILS ?? crmConfig.email ?? ''
-  return raw
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s))
+  const raw = [
+    process.env.ALERT_EMAILS ?? '',
+    process.env.CALL_NOTIFY_EMAILS ?? crmConfig.email ?? '',
+  ].join(',')
+
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const part of raw.split(',')) {
+    const address = part.trim()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) continue
+    const key = address.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(address)
+  }
+  return out
 }
 
 function escapeHtml(s: string): string {
