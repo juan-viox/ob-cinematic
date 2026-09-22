@@ -17,6 +17,54 @@ export interface MergeContact {
   email?: string | null
   job_title?: string | null
   company?: { name?: string | null } | null
+  /** Per-contact custom field values, keyed by field_name. */
+  custom?: Record<string, string> | null
+}
+
+/**
+ * Placeholder keys are matched loosely on purpose.
+ *
+ * People write {{First Name}} and {{Company Name}} because that is how every
+ * other mail-merge tool spells them. Insisting on {{first_name}} would mean a
+ * draft that looks right, sends, and arrives with the placeholder still in it.
+ * So case, spaces, hyphens and surrounding whitespace are all normalised away
+ * before lookup.
+ */
+function normaliseKey(raw: string): string {
+  return raw.trim().toLowerCase().replace(/[\s-]+/g, '_')
+}
+
+/** Spellings of the same field that people reasonably reach for. */
+const ALIASES: Record<string, string> = {
+  company_name: 'company',
+  companyname: 'company',
+  firstname: 'first_name',
+  lastname: 'last_name',
+  title: 'job_title',
+  jobtitle: 'job_title',
+  personalized_opening: 'personalized_opening',
+  personalised_opening: 'personalized_opening',
+  relevant_gifting_use_case: 'gifting_use_case',
+  gifting_use_case: 'gifting_use_case',
+  use_case: 'gifting_use_case',
+}
+
+export function mergeValues(contact: MergeContact): Record<string, string> {
+  const first = (contact.first_name ?? '').trim()
+  const last = (contact.last_name ?? '').trim()
+  const values: Record<string, string> = {
+    first_name: first,
+    last_name: last,
+    full_name: [first, last].filter(Boolean).join(' '),
+    email: (contact.email ?? '').trim(),
+    job_title: (contact.job_title ?? '').trim(),
+    company: (contact.company?.name ?? '').trim(),
+  }
+  // Custom fields last so a per-contact value always wins.
+  for (const [k, v] of Object.entries(contact.custom ?? {})) {
+    values[normaliseKey(k)] = (v ?? '').trim()
+  }
+  return values
 }
 
 /**
@@ -28,16 +76,11 @@ export interface MergeContact {
  * two hundred of them have gone out.
  */
 export function renderMerge(template: string, contact: MergeContact): string {
-  const values: Record<string, string> = {
-    first_name: (contact.first_name ?? '').trim(),
-    last_name: (contact.last_name ?? '').trim(),
-    email: (contact.email ?? '').trim(),
-    job_title: (contact.job_title ?? '').trim(),
-    company: (contact.company?.name ?? '').trim(),
-  }
-  return template.replace(/\{\{\s*([a-z_]+)\s*\}\}/gi, (whole, rawKey: string) => {
-    const key = rawKey.toLowerCase()
-    return key in values ? values[key] : whole
+  const values = mergeValues(contact)
+  return template.replace(/\{\{([^{}]+)\}\}/g, (whole, rawKey: string) => {
+    const key = normaliseKey(rawKey)
+    const resolved = ALIASES[key] ?? key
+    return resolved in values ? values[resolved] : whole
   })
 }
 
@@ -47,14 +90,15 @@ export function renderMerge(template: string, contact: MergeContact): string {
  * it is still a draft.
  */
 export function missingMergeFields(template: string, contact: MergeContact): string[] {
-  const used = new Set<string>()
-  for (const m of template.matchAll(/\{\{\s*([a-z_]+)\s*\}\}/gi)) used.add(m[1].toLowerCase())
-  const missing: string[] = []
-  for (const key of used) {
-    const filled = renderMerge(`{{${key}}}`, contact)
-    if (filled === '' || filled === `{{${key}}}`) missing.push(key)
+  const values = mergeValues(contact)
+  const missing = new Set<string>()
+  for (const m of template.matchAll(/\{\{([^{}]+)\}\}/g)) {
+    const raw = m[1].trim()
+    const key = normaliseKey(raw)
+    const resolved = ALIASES[key] ?? key
+    if (!(resolved in values) || values[resolved] === '') missing.add(raw)
   }
-  return missing.sort()
+  return [...missing].sort()
 }
 
 /** Where the unsubscribe link points. Absolute, because it lives in an inbox. */
@@ -116,6 +160,8 @@ export interface CampaignRecipient {
   email_opt_out: boolean
   unsubscribe_token: string
   company: { name: string | null } | null
+  /** Custom field values keyed by field_name, for the per-contact placeholders. */
+  custom: Record<string, string>
 }
 
 /** Why a contact on the list is not getting this message. */
@@ -151,13 +197,39 @@ export async function recipientsForTag(
     .order('first_name')
   if (error) throw new Error(error.message)
 
-  return (data ?? []).map((row) => {
-    const r = row as unknown as Omit<CampaignRecipient, 'company'> & {
+  const contacts = (data ?? []).map((row) => {
+    const r = row as unknown as Omit<CampaignRecipient, 'company' | 'custom'> & {
       company: { name: string | null } | { name: string | null }[] | null
     }
     return {
       ...r,
       company: Array.isArray(r.company) ? (r.company[0] ?? null) : r.company,
+      custom: {} as Record<string, string>,
     }
   })
+
+  // Per-contact placeholders (the personalised opening, the use case) live in
+  // custom fields. Fetched in one query for the whole audience rather than one
+  // per recipient, which on a list of two hundred is the difference between a
+  // send that finishes and a function that times out.
+  if (contacts.length) {
+    const { data: values } = await supabase
+      .from('custom_field_values')
+      .select('entity_id, value, field:custom_field_definitions!inner(field_name, organization_id, entity_type)')
+      .eq('entity_type', 'contact')
+      .in('entity_id', contacts.map((c) => c.id))
+    const byId = new Map(contacts.map((c) => [c.id, c]))
+    for (const row of (values ?? []) as unknown as Array<{
+      entity_id: string
+      value: string | null
+      field: { field_name: string; organization_id: string; entity_type: string } | Array<{ field_name: string; organization_id: string; entity_type: string }>
+    }>) {
+      const def = Array.isArray(row.field) ? row.field[0] : row.field
+      if (!def || def.organization_id !== orgId || def.entity_type !== 'contact') continue
+      const c = byId.get(row.entity_id)
+      if (c) c.custom[def.field_name] = row.value ?? ''
+    }
+  }
+
+  return contacts
 }
