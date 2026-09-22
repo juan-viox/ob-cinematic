@@ -9,11 +9,16 @@
  * every real payment lands as "Unverified" and the lookup fails with a 404
  * that reads exactly like a mistyped order id.
  *
- * The shop's client id currently begins "BAA", which is PayPal's no-code
- * button integration rather than a REST app. If that id turns out not to
- * exist under Apps & Credentials, the fix is this: take the client id of the
- * REST app whose secret the CRM has, and put it on the shop. Then they match
- * by construction and verification cannot be pointed at the wrong merchant.
+ * As of 22 September 2026 they do match. The "Occasions Box" REST app under
+ * PayPal's Apps & Credentials, created 17 September 2026, carries the same
+ * client id the shop checks out with, so nothing needs swapping today. The
+ * "BAA" prefix had me expecting a no-code button integration that would not
+ * appear there at all; it is a REST app, and it is the one taking the money.
+ *
+ * This exists for the day that stops being true: a second app, a new PayPal
+ * account, a shop pointed somewhere else. Then take the client id of the REST
+ * app whose secret the CRM has and put it on the shop, so the two match by
+ * construction and verification cannot be aimed at the wrong merchant.
  *
  * Usage:
  *   node tools/set-paypal-client-id.mjs <new-client-id>

@@ -11,14 +11,17 @@
  * PAYPAL_ENV selects the API host: 'live' or 'production' → api-m.paypal.com,
  * anything else, INCLUDING UNSET → api-m.sandbox.paypal.com.
  *
- * Set it deliberately. The shop loads the PayPal SDK with a real client id
- * (site/shop.html and every site/shop/*.html use client-id=BAAxKYq3MeBz…, not
- * the `sb` sandbox placeholder), so if that id belongs to a live PayPal app,
- * leaving PAYPAL_ENV unset points verification at the sandbox and every real
- * order fails to verify and lands as "Unverified order: …". Confirm which
- * account issued that client id in the PayPal dashboard, then set this to
- * match. An earlier version of this comment claimed the site used client-id=sb;
- * it does not.
+ * Set it to live. This is confirmed, not assumed: the shop loads the PayPal
+ * SDK with client-id=BAAxKYq3MeBz…, and that id belongs to the "Occasions
+ * Box" app on the LIVE tab of PayPal's Apps & Credentials, created 17
+ * September 2026. Leaving PAYPAL_ENV unset points verification at the sandbox
+ * instead, where no real order exists, so every genuine payment fails to
+ * verify and lands as "Unverified order: …".
+ *
+ * Two earlier versions of this comment were wrong and are worth naming, since
+ * both cost time: one claimed the site used the `sb` sandbox placeholder, and
+ * one read the "BAA" prefix as a no-code button integration that would not be
+ * a REST app at all. It is a REST app, and it is the one that takes the money.
  */
 
 /**
@@ -34,7 +37,10 @@
  * fails with a 404 that reads exactly like a mistyped order id. That is a
  * genuinely confusing hour to lose, and comparing two strings prevents it.
  *
- * If the shop's SDK tag ever changes, change this with it.
+ * Confirmed matching as of 22 September 2026, against the client id shown for
+ * the "Occasions Box" REST app in PayPal's dashboard. If the shop's SDK tag
+ * ever changes, change this with it: tools/set-paypal-client-id.mjs does both
+ * at once so they cannot drift.
  */
 export const SHOP_PAYPAL_CLIENT_ID =
   'BAAxKYq3MeBz4sApUR0urJqOFrN8VZnJ9Oc5MUlUGlEo1Ts_fnFtZM7SixXtLZB6tSJiM_uql2IjEBA7Y0'
