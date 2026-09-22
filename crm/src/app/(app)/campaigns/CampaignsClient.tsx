@@ -27,6 +27,8 @@ interface Audience {
   noEmail: number
   senderReady: boolean
   senderHelp: string | null
+  from: string | null
+  replyTo: string | null
   recipients: Recipient[]
 }
 
@@ -242,6 +244,14 @@ export default function CampaignsClient({
                     {audience.optedOut > 0 && <li>{audience.optedOut} asked us to stop, skipped</li>}
                     {audience.noEmail > 0 && <li>{audience.noEmail} have no email address, skipped</li>}
                   </ul>
+                )}
+                {(audience.from || audience.replyTo) && (
+                  <div className="mt-3 pt-3 text-xs space-y-1" style={{ borderTop: '1px solid var(--border)', color: 'var(--muted)' }}>
+                    {audience.from && <p>From <span style={{ color: 'var(--text)' }}>{audience.from}</span></p>}
+                    {/* The sending subdomain has no mailbox, so where a reply
+                        lands is the thing worth checking before pressing send. */}
+                    {audience.replyTo && <p>Replies go to <span style={{ color: 'var(--text)' }}>{audience.replyTo}</span></p>}
+                  </div>
                 )}
               </>
             ) : (

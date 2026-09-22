@@ -5,6 +5,7 @@ import {
   CAMPAIGN_SENDER_HELP,
   campaignFrom,
   campaignHtml,
+  campaignReplyTo,
   recipientsForTag,
   renderMerge,
   skipReason,
@@ -70,6 +71,10 @@ export async function GET(request: Request) {
     // rather than letting them find out at the moment they press send.
     senderReady: campaignFrom() !== null,
     senderHelp: campaignFrom() === null ? CAMPAIGN_SENDER_HELP : null,
+    // Shown before sending: the From subdomain has no mailbox, so where a
+    // reply lands is worth seeing rather than assuming.
+    from: campaignFrom(),
+    replyTo: campaignReplyTo(),
     // Enough of each to preview a merge and to show who is being skipped.
     recipients: recipients.map((c) => ({
       id: c.id,
@@ -130,6 +135,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Could not read the audience' }, { status: 500 })
   }
 
+  // The From subdomain has no mailbox; a reply to it would bounce, and the
+  // replies are the entire point of the campaign.
+  const replyTo = campaignReplyTo()
   const origin = originOf(request)
   const batch = all.slice(offset, offset + BATCH)
 
@@ -160,6 +168,7 @@ export async function POST(request: Request) {
         },
         body: JSON.stringify({
           from,
+          ...(replyTo ? { reply_to: replyTo } : {}),
           to: [contact.email],
           subject: mergedSubject,
           html: campaignHtml(mergedBody, unsubUrl),

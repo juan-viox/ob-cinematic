@@ -124,6 +124,26 @@ export function campaignFrom(): string | null {
   return process.env.RESEND_CAMPAIGN_FROM_EMAIL?.trim() || null
 }
 
+/**
+ * Where a reply actually goes.
+ *
+ * The campaign sends from a subdomain that exists only to send. Nobody has a
+ * mailbox there, so a prospect who hits Reply would bounce, and the whole
+ * point of the campaign is the replies. Reply-To points at a real, watched
+ * address on the main domain instead.
+ *
+ * Falls back to the transactional sender, which is always a real mailbox.
+ * Unlike the From address this has no reason to be strict: any real inbox
+ * beats a guaranteed bounce.
+ */
+export function campaignReplyTo(): string | null {
+  return (
+    process.env.RESEND_CAMPAIGN_REPLY_TO?.trim() ||
+    process.env.RESEND_FROM_EMAIL?.trim() ||
+    null
+  )
+}
+
 /** What to tell somebody who has not set the campaign sender up yet. */
 export const CAMPAIGN_SENDER_HELP =
   'Campaigns need their own sending domain so a spam complaint can never reach the address ' +
