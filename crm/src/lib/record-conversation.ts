@@ -22,6 +22,7 @@ import {
 } from '@/lib/ingest'
 import { transcriptToText, type PostCallPayload } from '@/lib/elevenlabs'
 import { sendCallNotice } from '@/lib/call-notify'
+import { notifyBell } from '@/lib/alerts'
 
 export type ConversationData = NonNullable<PostCallPayload['data']>
 
@@ -182,6 +183,26 @@ export async function recordConversation(
       callSuccessful: data.analysis?.call_successful ?? null,
       contactId,
       activityId,
+    })
+
+    // The bell as well as the inbox. The email above is the better record of
+    // a call, so it keeps the writing; this only makes sure a call cannot be
+    // missed by somebody who is in the CRM rather than in their mail.
+    await notifyBell(supabase, {
+      orgId,
+      kind: 'voice_call',
+      headline: capturedName
+        ? `${capturedName} called`
+        : capturedPhone ?? callerPhone
+          ? `Call from ${capturedPhone ?? callerPhone}`
+          : 'Call captured',
+      details: [
+        ['About', titleBits || summary?.slice(0, 120) || null],
+        ['Phone', capturedPhone ?? callerPhone],
+        ['Email', capturedEmail],
+      ],
+      entityType: contactId ? 'contact' : null,
+      entityId: contactId,
     })
   }
 
