@@ -9,6 +9,7 @@ import {
   recipientsForTag,
   renderMerge,
   skipReason,
+  TEST_TAG,
   unsubscribeUrl,
   type CampaignRecipient,
 } from '@/lib/campaign'
@@ -61,10 +62,22 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Could not read the audience' }, { status: 500 })
   }
 
+  // How many of them are our own seed inboxes, so the screen can offer a
+  // test send and say exactly who would get it.
+  let seeds: CampaignRecipient[] = []
+  try {
+    seeds = (await recipientsForTag(supabase, ctx.organizationId, tagId, TEST_TAG))
+      .filter((c) => skipReason(c) === null)
+  } catch {
+    seeds = []
+  }
+
   const sendable = recipients.filter((c) => skipReason(c) === null)
   return NextResponse.json({
     total: recipients.length,
     sendable: sendable.length,
+    testCount: seeds.length,
+    testEmails: seeds.map((c) => c.email).filter(Boolean),
     optedOut: recipients.filter((c) => skipReason(c) === 'opted_out').length,
     noEmail: recipients.filter((c) => skipReason(c) === 'no_email').length,
     // The screen shows this as a blocker before anyone writes a draft,
@@ -104,6 +117,9 @@ export async function POST(request: Request) {
   const subject = typeof body.subject === 'string' ? body.subject.trim() : ''
   const messageBody = typeof body.body === 'string' ? body.body.trim() : ''
   const offset = Number.isInteger(body.offset) ? (body.offset as number) : 0
+  // A test send is the same audience, merge and code path, intersected down
+  // to the seed addresses. A test through different code proves nothing.
+  const testOnly = body.testOnly === true
 
   if (!tagId) return NextResponse.json({ error: 'tagId is required' }, { status: 400 })
   if (!subject) return NextResponse.json({ error: 'A subject is required' }, { status: 400 })
@@ -129,10 +145,17 @@ export async function POST(request: Request) {
   const supabase = createAdminClient()
   let all: CampaignRecipient[]
   try {
-    all = await recipientsForTag(supabase, ctx.organizationId, tagId)
+    all = await recipientsForTag(supabase, ctx.organizationId, tagId, testOnly ? TEST_TAG : null)
   } catch (err) {
     console.error('[campaign:send]', err instanceof Error ? err.message : err)
     return NextResponse.json({ error: 'Could not read the audience' }, { status: 500 })
+  }
+
+  if (testOnly && all.length === 0) {
+    return NextResponse.json(
+      { error: `No contact on this tag also carries "${TEST_TAG}", so there is nobody to test with. Nothing was sent.` },
+      { status: 400 }
+    )
   }
 
   // The From subdomain has no mailbox; a reply to it would bounce, and the

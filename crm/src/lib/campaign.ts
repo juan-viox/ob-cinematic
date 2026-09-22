@@ -191,11 +191,25 @@ export function skipReason(c: CampaignRecipient): SkipReason | null {
   return null
 }
 
-/** Everyone carrying a tag, with what a merge and an opt-out check both need. */
+/**
+ * The tag that marks a seed address: our own inboxes, on the list so a
+ * campaign can be proved before it reaches a real prospect.
+ */
+export const TEST_TAG = 'Internal Test'
+
+/**
+ * Everyone carrying a tag, with what a merge and an opt-out check both need.
+ *
+ * `restrictTag` narrows to recipients who ALSO carry that second tag. It is
+ * how a test send works: same audience query, same merge, same code path as
+ * the real thing, just intersected down to the seeds. A test that ran through
+ * different code would prove nothing about the send that follows it.
+ */
 export async function recipientsForTag(
   supabase: SupabaseClient,
   orgId: string,
-  tagId: string
+  tagId: string,
+  restrictTag?: string | null
 ): Promise<CampaignRecipient[]> {
   const { data: links, error: linkError } = await supabase
     .from('entity_tags')
@@ -204,8 +218,28 @@ export async function recipientsForTag(
     .eq('entity_type', 'contact')
   if (linkError) throw new Error(linkError.message)
 
-  const ids = (links ?? []).map((l) => l.entity_id as string)
+  let ids = (links ?? []).map((l) => l.entity_id as string)
   if (!ids.length) return []
+
+  if (restrictTag) {
+    const { data: restrictRow } = await supabase
+      .from('tags')
+      .select('id')
+      .eq('organization_id', orgId)
+      .eq('name', restrictTag)
+      .maybeSingle()
+    // No such tag means no seeds, which must send to nobody rather than
+    // silently falling through to the whole list.
+    if (!restrictRow?.id) return []
+    const { data: restrictLinks } = await supabase
+      .from('entity_tags')
+      .select('entity_id')
+      .eq('tag_id', restrictRow.id)
+      .eq('entity_type', 'contact')
+    const allowed = new Set((restrictLinks ?? []).map((l) => l.entity_id as string))
+    ids = ids.filter((id) => allowed.has(id))
+    if (!ids.length) return []
+  }
 
   // Scoped to the org as well as the tag: entity_tags carries no
   // organization_id of its own, so the contacts read is what enforces it.
