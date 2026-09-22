@@ -9,7 +9,7 @@ import { fetchPayPalOrder, getPayPalConfig, probePayPal } from '@/lib/paypal'
  *
  * Without an orderId: are the credentials real, are they pointed at the right
  * PayPal, and do they belong to the same app the shop checks out with? All
- * three can be settled before a single order exists, which is the point — the
+ * three can be settled before a single order exists, which is the point: the
  * alternative is discovering a wrong key by watching a real customer's payment
  * land as "Unverified".
  *
@@ -18,8 +18,8 @@ import { fetchPayPalOrder, getPayPalConfig, probePayPal } from '@/lib/paypal'
  * only proof the whole path works, because it is the only thing that exercises
  * the merchant's ownership of the order rather than just the credentials.
  *
- * Never returns the secret, and never writes anything. A client id is public —
- * it ships in the shop's page source — so it is shown in full, because the
+ * Never returns the secret, and never writes anything. A client id is public;
+ * it ships in the shop's page source, so it is shown in full, because the
  * whole diagnosis often comes down to comparing it to the shop's.
  */
 

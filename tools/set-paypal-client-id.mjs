@@ -21,7 +21,7 @@
  *
  * It rewrites every shop page, the page generator that produces them, and the
  * copy the CRM compares against, so the three cannot drift apart. A client id
- * is public — it ships in the page source — so it is safe to pass on the
+ * is public; it ships in the page source, so it is safe to pass on the
  * command line. The SECRET never appears here and never belongs in the repo.
  */
 

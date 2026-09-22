@@ -10,14 +10,14 @@ import { payPalEnv } from '@/lib/paypal'
  * The page this feeds used to be a form that saved API keys into the
  * browser's localStorage and then showed a green "Connected" badge. Nothing
  * ever read them. A key typed there went nowhere, stayed in one person's
- * browser, and the badge said the opposite — so the one screen whose job is
+ * browser, and the badge said the opposite, so the one screen whose job is
  * to tell you whether payments are connected was the least trustworthy thing
  * in the CRM, and it invited somebody to paste a live payment secret into it.
  *
  * So this reports rather than collects. Secrets live in the hosting
  * environment, where the code can actually reach them; here we only ever say
  * whether each one is present. Values are returned only where the value is
- * not a secret and seeing it is the point — which address campaigns send
+ * not a secret and seeing it is the point: which address campaigns send
  * from, which inboxes get alerted, whether PayPal is pointed at live.
  */
 
@@ -69,7 +69,7 @@ export async function GET() {
           key: 'PAYPAL_ENV',
           label: 'Environment',
           present: set(env.PAYPAL_ENV),
-          value: show(env.PAYPAL_ENV) ?? `unset — defaulting to ${payPalEnv()}`,
+          value: show(env.PAYPAL_ENV) ?? `unset, defaulting to ${payPalEnv()}`,
           required: true,
           note: 'Must be "live". Unset means sandbox, where no real order exists.',
         },

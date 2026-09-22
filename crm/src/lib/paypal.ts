@@ -23,8 +23,8 @@
 
 /**
  * The client id the shop's PayPal SDK loads with, taken from site/shop.html
- * and every site/shop/*.html. It is public by design — it ships in the page
- * source where anyone can read it — and it lives here so the settings page
+ * and every site/shop/*.html. It is public by design, since it ships in the
+ * page source where anyone can read it, and it lives here so the settings page
  * can answer the one question that decides whether verification will work at
  * all: do the credentials doing the verifying belong to the same PayPal app
  * that takes the money?
@@ -87,7 +87,7 @@ export interface PayPalProbe {
   /** Both PAYPAL_CLIENT_ID and PAYPAL_SECRET are present. */
   configured: boolean
   env: 'live' | 'sandbox'
-  /** false when PAYPAL_ENV is unset and we defaulted — the quiet failure. */
+  /** false when PAYPAL_ENV is unset and we defaulted: the quiet failure. */
   envExplicit: boolean
   host: string
   /** Safe to show: a client id is public, it ships in the shop's page source. */
@@ -105,7 +105,7 @@ export interface PayPalProbe {
  * an order or a penny.
  *
  * This exists because the three ways PayPal verification fails look identical
- * from the CRM — an order that lands "Unverified" — and cost very different
+ * from the CRM, an order that lands "Unverified", and cost very different
  * amounts of time to fix: the keys are missing, the keys are for the wrong
  * PayPal (sandbox credentials against live orders), or the keys are for the
  * right PayPal but a different app than the shop checks out with. Separating

@@ -14,7 +14,7 @@
  * environment, which is the only place the running code can read them, so the
  * page says which are present, what each one is for, and what is broken while
  * it is missing. The one thing it can do beyond reporting is ask PayPal
- * whether the credentials actually work — because "unverified order" is the
+ * whether the credentials actually work, because "unverified order" is the
  * same symptom for three very different mistakes, and guessing between them
  * over a real customer's payment is how an afternoon disappears.
  */
@@ -113,7 +113,7 @@ export default function IntegrationsPage() {
           <h1 className="text-2xl font-semibold text-[var(--text)]">Integrations</h1>
           <p className="text-sm text-[var(--muted)] mt-1">
             What the CRM is connected to right now, read from the server. Keys are set on the hosting
-            project, not typed here — this page tells you whether they arrived.
+            project, not typed here. This page tells you whether they arrived.
           </p>
         </div>
         <button
@@ -264,7 +264,7 @@ function FieldRow({ field }: { field: Field }) {
  *
  * "Do these keys work" can be answered with no order and no money. "Does
  * PayPal know this order" needs a real one, and is the only thing that proves
- * the credentials belong to the merchant who actually took the payment —
+ * the credentials belong to the merchant who actually took the payment,
  * which is the failure the credentials check cannot see.
  */
 function PayPalTester() {
@@ -325,8 +325,8 @@ function PayPalTester() {
           {probe.clientId && (
             <p className="text-[var(--muted)] break-all">
               Client ID: <code>{probe.clientId}</code>
-              {probe.matchesShop === true && ' — matches the shop'}
-              {probe.matchesShop === false && ' — does NOT match the shop'}
+              {probe.matchesShop === true && ' (matches the shop)'}
+              {probe.matchesShop === false && ' (does NOT match the shop)'}
             </p>
           )}
         </div>
