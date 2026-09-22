@@ -19,6 +19,7 @@ import {
   str,
   upsertContact,
 } from '@/lib/ingest'
+import { notifyTeam } from '@/lib/alerts'
 
 export function OPTIONS(request: Request) {
   return handleOptions(request)
@@ -107,6 +108,22 @@ export async function POST(request: Request) {
       status: 'pending',
       dueDate: date,
       metadata: { service, bookingDate: date, via: auth.via },
+    })
+
+    await notifyTeam(supabase, {
+      orgId,
+      kind: 'booking',
+      headline: `${displayName} wants ${service}`,
+      details: [
+        ['Service', service],
+        ['Requested date', date],
+        ['Email', emailValue],
+        ['Phone', phoneValue],
+      ],
+      body: notes,
+      path: '/tasks',
+      entityType: 'contact',
+      entityId: contact.id,
     })
 
     return jsonOk(request, {

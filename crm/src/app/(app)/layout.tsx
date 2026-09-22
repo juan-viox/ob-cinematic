@@ -4,6 +4,7 @@ import crmConfig from '@/crm.config'
 import Sidebar from '@/components/layout/Sidebar'
 import TopBar from '@/components/layout/TopBar'
 import CommandPalette from '@/components/shared/CommandPalette'
+import OrderAlertBanner from '@/components/shared/OrderAlertBanner'
 
 /** Build CRM accent CSS variables from config branding. */
 function buildBrandingCssVars(): Record<string, string> {
@@ -56,6 +57,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar orgName={orgName} userName={userName} userRole={userRole} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <TopBar userName={userName} orgName={orgName} />
+        {/* Above the scroll container on purpose: an unpacked order should
+            still be on screen after somebody has scrolled down a long list. */}
+        <OrderAlertBanner />
         <main className="flex-1 overflow-y-auto p-6 animate-page-enter">
           {children}
         </main>
