@@ -2,20 +2,37 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { withBasePath } from '@/lib/url'
 import Link from 'next/link'
-import { ArrowLeft, Upload, ArrowRight, CheckCircle, Loader2, FileSpreadsheet, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Upload, ArrowRight, CheckCircle, Loader2, FileSpreadsheet, AlertTriangle, Tag } from 'lucide-react'
+
+interface ImportResult {
+  imported: number
+  updated: number
+  tagged: number
+  companiesCreated: number
+  errors: number
+  failures: Array<{ row: number; reason: string }>
+}
 
 type EntityType = 'contacts' | 'companies' | 'deals'
 
 const FIELD_MAPS: Record<EntityType, { label: string; value: string; required?: boolean }[]> = {
   contacts: [
     { label: 'First Name', value: 'first_name', required: true },
-    { label: 'Last Name', value: 'last_name', required: true },
+    { label: 'Last Name', value: 'last_name' },
     { label: 'Email', value: 'email' },
     { label: 'Phone', value: 'phone' },
-    { label: 'Title', value: 'title' },
-    { label: 'Source', value: 'source' },
-    { label: 'Status', value: 'status' },
+    // job_title, not title: the column is job_title, and mapping to the
+    // wrong name used to fail every contact import outright.
+    { label: 'Job Title', value: 'job_title' },
+    // A company name here creates and links a real company row, which is
+    // what the {{company}} merge field reads when a campaign goes out.
+    { label: 'Company', value: 'company' },
+    { label: 'Address', value: 'address' },
+    { label: 'City', value: 'city' },
+    { label: 'State', value: 'state' },
+    { label: 'Zip', value: 'zip' },
     { label: 'Notes', value: 'notes' },
   ],
   companies: [
@@ -47,9 +64,11 @@ export default function ImportPage() {
   const [mapping, setMapping] = useState<Record<string, string>>({})
   const [importing, setImporting] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [result, setResult] = useState<{ imported: number; errors: number } | null>(null)
+  const [result, setResult] = useState<ImportResult | null>(null)
   const [error, setError] = useState('')
   const [dragging, setDragging] = useState(false)
+  /** Applied to every contact as it lands, so the list can be selected later. */
+  const [tagName, setTagName] = useState('')
 
   const supabase = createClient()
 
@@ -135,10 +154,17 @@ export default function ImportPage() {
     }
 
     let imported = 0
+    let updated = 0
+    let tagged = 0
+    let companiesCreated = 0
     let errors = 0
+    const failures: Array<{ row: number; reason: string }> = []
     const batchSize = 50
     const totalRows = rows.length
 
+    // The insert goes through the API, not straight from the browser: only
+    // the server knows the organization_id every row needs, and contacts
+    // also want company rows created and a tag applied as they land.
     for (let i = 0; i < totalRows; i += batchSize) {
       const batch = rows.slice(i, i + batchSize)
       const records = batch.map(row => {
@@ -149,31 +175,46 @@ export default function ImportPage() {
             record[dbField] = row[idx]
           }
         }
-        // Set defaults
-        if (entityType === 'contacts') {
-          record.status = record.status || 'lead'
-        } else if (entityType === 'deals') {
+        if (entityType === 'deals') {
           record.status = record.status || 'open'
           if (record.amount) record.amount = Number(record.amount) || 0
         }
         return record
       })
 
-      const { error: insertError } = await supabase
-        .from(entityType)
-        .insert(records as any[])
-
-      if (insertError) {
+      try {
+        const res = await fetch(withBasePath('/api/v1/import'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            entityType,
+            records,
+            tagName: entityType === 'contacts' && tagName.trim() ? tagName.trim() : undefined,
+          }),
+        })
+        const data = await res.json().catch(() => null)
+        if (!res.ok) {
+          errors += batch.length
+          failures.push({ row: i + 1, reason: data?.error ?? `HTTP ${res.status}` })
+        } else {
+          imported += data.imported ?? 0
+          updated += data.updated ?? 0
+          tagged += data.tagged ?? 0
+          companiesCreated += data.companiesCreated ?? 0
+          errors += data.errors ?? 0
+          if (Array.isArray(data.failures)) {
+            for (const f of data.failures) failures.push({ row: i + f.row, reason: f.reason })
+          }
+        }
+      } catch (err) {
         errors += batch.length
-        console.error('Import batch error:', insertError)
-      } else {
-        imported += batch.length
+        failures.push({ row: i + 1, reason: err instanceof Error ? err.message : 'request failed' })
       }
 
       setProgress(Math.round(((i + batch.length) / totalRows) * 100))
     }
 
-    setResult({ imported, errors })
+    setResult({ imported, updated, tagged, companiesCreated, errors, failures: failures.slice(0, 25) })
     setImporting(false)
     setStep(4)
   }
@@ -327,6 +368,31 @@ export default function ImportPage() {
             </table>
           </div>
 
+          {entityType === 'contacts' && (
+            <div className="mb-6 p-4 rounded-lg" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+              <label className="flex items-center gap-2 mb-1.5 font-medium">
+                <Tag className="w-4 h-4" style={{ color: 'var(--accent)' }} /> Tag this list
+              </label>
+              <p className="text-xs mb-2.5" style={{ color: 'var(--muted)' }}>
+                Every contact in this file gets this tag, which is how you select them all later to send one
+                message. Name it for where the list came from, not for what you plan to say.
+              </p>
+              <input
+                value={tagName}
+                onChange={(e) => setTagName(e.target.value)}
+                placeholder="Bergen County realtors, Sep 2026"
+                maxLength={60}
+                className="w-full"
+              />
+              {!tagName.trim() && (
+                <p className="text-xs mt-2" style={{ color: 'var(--warning)' }}>
+                  Without a tag these contacts land loose among everyone else and there is no way to pick
+                  the list out again.
+                </p>
+              )}
+            </div>
+          )}
+
           <p className="text-sm mb-4" style={{ color: 'var(--muted)' }}>
             Ready to import {rows.length} {entityType}
           </p>
@@ -364,12 +430,31 @@ export default function ImportPage() {
           </div>
           <h2 className="text-xl font-bold mb-2">Import Complete</h2>
           <p className="text-sm mb-1" style={{ color: 'var(--muted)' }}>
-            Successfully imported {result.imported} {entityType}
+            {result.imported} new {result.imported === 1 ? 'record' : 'records'}
+            {result.updated > 0 && `, ${result.updated} already here and filled in`}
+            {result.companiesCreated > 0 && `, ${result.companiesCreated} ${result.companiesCreated === 1 ? 'company' : 'companies'} created`}
           </p>
-          {result.errors > 0 && (
-            <p className="text-sm" style={{ color: 'var(--danger)' }}>
-              {result.errors} records failed
+          {result.tagged > 0 && tagName.trim() && (
+            <p className="text-sm" style={{ color: 'var(--muted)' }}>
+              {result.tagged} tagged <strong style={{ color: 'var(--text)' }}>{tagName.trim()}</strong>
             </p>
+          )}
+          {result.errors > 0 && (
+            <div className="mt-4 mx-auto text-left max-w-lg p-3 rounded-lg" style={{ background: 'rgba(225,112,85,0.08)', border: '1px solid rgba(225,112,85,0.3)' }}>
+              <p className="text-sm font-medium mb-1.5" style={{ color: 'var(--danger)' }}>
+                {result.errors} {result.errors === 1 ? 'row' : 'rows'} did not import
+              </p>
+              <ul className="text-xs space-y-0.5" style={{ color: 'var(--muted)' }}>
+                {result.failures.map((f, i) => (
+                  <li key={i}>Row {f.row}: {f.reason}</li>
+                ))}
+              </ul>
+              {result.errors > result.failures.length && (
+                <p className="text-xs mt-1.5" style={{ color: 'var(--muted)' }}>
+                  and {result.errors - result.failures.length} more
+                </p>
+              )}
+            </div>
           )}
           <div className="flex items-center justify-center gap-3 mt-6">
             <button onClick={() => { setStep(1); setResult(null); setCsvText(''); setHeaders([]); setRows([]) }} className="btn btn-secondary">
