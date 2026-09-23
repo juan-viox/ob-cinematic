@@ -88,7 +88,7 @@ export async function GET() {
           label: 'Webhook secret',
           present: set(env.STRIPE_WEBHOOK_SECRET),
           required: true,
-          note: 'Without it the webhook refuses every event, including real payments.',
+          note: 'The signing secret of the Stripe endpoint pointed at /api/v1/webhooks/stripe. Present is not the same as correct: a valid secret for a different endpoint looks identical from here. Use the test below.',
         },
       ],
     },
