@@ -41,6 +41,19 @@ interface Integration {
   fields: Field[]
 }
 
+interface BlotatoAccount {
+  id: string
+  platform: string
+  name: string | null
+}
+
+interface BlotatoProbe {
+  configured: boolean
+  keyOk: boolean | null
+  accounts: BlotatoAccount[]
+  problem: string | null
+}
+
 interface Probe {
   configured: boolean
   env: 'live' | 'sandbox'
@@ -223,6 +236,7 @@ function IntegrationCard({ integration }: { integration: Integration }) {
       </div>
 
       {integration.id === 'paypal' && <PayPalTester />}
+      {integration.id === 'blotato' && <BlotatoTester />}
     </div>
   )
 }
@@ -388,6 +402,91 @@ function PayPalTester() {
             <p className="text-[var(--muted)]">Ships to {result.order.shipToName}</p>
           )}
         </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Whether Blotato will actually publish, which is two questions.
+ *
+ * A key that works is not the same as an account that is connected: a valid
+ * key on a workspace with no Instagram attached fails at the moment a
+ * scheduled post was due, long after anyone is watching. So this reports the
+ * account list, not just a green tick.
+ */
+function BlotatoTester() {
+  const [probe, setProbe] = useState<BlotatoProbe | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function run() {
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch(withBasePath('/api/v1/blotato/check'), { cache: 'no-store' })
+      const json = (await res.json()) as { probe?: BlotatoProbe; error?: string }
+      if (!res.ok || !json.probe) throw new Error(json.error ?? `The server answered ${res.status}`)
+      setProbe(json.probe)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'The check could not run')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const good = probe?.configured && probe.keyOk === true && !probe.problem
+
+  return (
+    <div className="mt-5 pt-4 border-t border-[var(--border)] space-y-3">
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={run}
+          disabled={busy}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-[var(--accent)] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+        >
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+          Test the connection
+        </button>
+        <span className="text-xs text-[var(--muted)]">Asks Blotato directly. Posts nothing.</span>
+      </div>
+
+      {probe && (
+        <div
+          className="rounded-lg p-3 text-xs space-y-1.5"
+          style={{
+            background: good ? 'rgba(0,184,148,0.08)' : 'rgba(225,112,85,0.08)',
+            border: `1px solid ${good ? 'rgba(0,184,148,0.3)' : 'rgba(225,112,85,0.3)'}`,
+          }}
+        >
+          <p className="font-medium text-[var(--text)]">
+            {good
+              ? `Blotato accepted the key. ${probe.accounts.length} account${probe.accounts.length === 1 ? '' : 's'} connected.`
+              : probe.configured
+                ? 'Blotato is configured, but something is off.'
+                : 'Blotato is not connected.'}
+          </p>
+          {probe.problem && <p className="text-[var(--muted)] leading-relaxed">{probe.problem}</p>}
+          {probe.accounts.length > 0 && (
+            <ul className="text-[var(--muted)] space-y-0.5 pt-1">
+              {probe.accounts.map((a) => (
+                <li key={a.id}>
+                  {a.platform}
+                  {a.name ? ` · ${a.name}` : ''}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <p
+          className="text-xs rounded-lg px-3 py-2 leading-relaxed"
+          style={{ background: 'rgba(225,112,85,0.10)', color: 'var(--text)' }}
+        >
+          {error}
+        </p>
       )}
     </div>
   )

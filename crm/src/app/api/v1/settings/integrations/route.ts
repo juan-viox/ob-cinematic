@@ -190,6 +190,23 @@ export async function GET() {
       ],
     },
     {
+      id: 'blotato',
+      name: 'Social (Blotato)',
+      what: 'Publishing and scheduling posts to Instagram and the other connected social accounts.',
+      consequence:
+        'Posts cannot be written or scheduled from the CRM. Posting still works inside Blotato itself.',
+      docsUrl: 'https://help.blotato.com/settings/api-keys',
+      fields: [
+        {
+          key: 'BLOTATO_API_KEY',
+          label: 'API key',
+          present: set(env.BLOTATO_API_KEY),
+          required: true,
+          note: 'Paste it exactly as Blotato issues it, including any trailing "=". Stripping the padding makes every call fail as unauthorized.',
+        },
+      ],
+    },
+    {
       id: 'supabase',
       name: 'Database',
       what: 'Everything. Contacts, orders, invoices, the catalogue.',
