@@ -11,20 +11,46 @@
  * PAYPAL_ENV selects the API host: 'live' or 'production' → api-m.paypal.com,
  * anything else, INCLUDING UNSET → api-m.sandbox.paypal.com.
  *
- * Set it deliberately. The shop loads the PayPal SDK with a real client id
- * (site/shop.html and every site/shop/*.html use client-id=BAAxKYq3MeBz…, not
- * the `sb` sandbox placeholder), so if that id belongs to a live PayPal app,
- * leaving PAYPAL_ENV unset points verification at the sandbox and every real
- * order fails to verify and lands as "Unverified order: …". Confirm which
- * account issued that client id in the PayPal dashboard, then set this to
- * match. An earlier version of this comment claimed the site used client-id=sb;
- * it does not.
+ * Set it to live. This is confirmed, not assumed: the shop loads the PayPal
+ * SDK with client-id=BAAxKYq3MeBz…, and that id belongs to the "Occasions
+ * Box" app on the LIVE tab of PayPal's Apps & Credentials, created 17
+ * September 2026. Leaving PAYPAL_ENV unset points verification at the sandbox
+ * instead, where no real order exists, so every genuine payment fails to
+ * verify and lands as "Unverified order: …".
+ *
+ * Two earlier versions of this comment were wrong and are worth naming, since
+ * both cost time: one claimed the site used the `sb` sandbox placeholder, and
+ * one read the "BAA" prefix as a no-code button integration that would not be
+ * a REST app at all. It is a REST app, and it is the one that takes the money.
  */
+
+/**
+ * The client id the shop's PayPal SDK loads with, taken from site/shop.html
+ * and every site/shop/*.html. It is public by design, since it ships in the
+ * page source where anyone can read it, and it lives here so the settings page
+ * can answer the one question that decides whether verification will work at
+ * all: do the credentials doing the verifying belong to the same PayPal app
+ * that takes the money?
+ *
+ * They have to. GET /v2/checkout/orders/{id} only answers for the merchant
+ * that owns the order, so a secret from a different app verifies nothing and
+ * fails with a 404 that reads exactly like a mistyped order id. That is a
+ * genuinely confusing hour to lose, and comparing two strings prevents it.
+ *
+ * Confirmed matching as of 22 September 2026, against the client id shown for
+ * the "Occasions Box" REST app in PayPal's dashboard. If the shop's SDK tag
+ * ever changes, change this with it: tools/set-paypal-client-id.mjs does both
+ * at once so they cannot drift.
+ */
+export const SHOP_PAYPAL_CLIENT_ID =
+  'BAAxKYq3MeBz4sApUR0urJqOFrN8VZnJ9Oc5MUlUGlEo1Ts_fnFtZM7SixXtLZB6tSJiM_uql2IjEBA7Y0'
 
 export interface PayPalConfig {
   clientId: string
   secret: string
   baseUrl: string
+  /** Which PayPal the baseUrl points at, for saying so out loud. */
+  env: 'live' | 'sandbox'
 }
 
 export interface PayPalVerifiedOrder {
@@ -46,14 +72,101 @@ export type PayPalVerification =
 
 const FETCH_TIMEOUT_MS = 10_000
 
+/** Which PayPal PAYPAL_ENV selects. Unset means sandbox; see the file header. */
+export function payPalEnv(): 'live' | 'sandbox' {
+  const raw = (process.env.PAYPAL_ENV ?? 'sandbox').trim().toLowerCase()
+  return raw === 'live' || raw === 'production' ? 'live' : 'sandbox'
+}
+
 /** null when PayPal credentials are not configured. */
 export function getPayPalConfig(): PayPalConfig | null {
   const clientId = process.env.PAYPAL_CLIENT_ID?.trim()
   const secret = process.env.PAYPAL_SECRET?.trim()
   if (!clientId || !secret) return null
-  const env = (process.env.PAYPAL_ENV ?? 'sandbox').trim().toLowerCase()
-  const baseUrl = env === 'live' || env === 'production' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com'
-  return { clientId, secret, baseUrl }
+  const env = payPalEnv()
+  const baseUrl = env === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com'
+  return { clientId, secret, baseUrl, env }
+}
+
+/** What the settings page needs to say about PayPal, with no secret in it. */
+export interface PayPalProbe {
+  /** Both PAYPAL_CLIENT_ID and PAYPAL_SECRET are present. */
+  configured: boolean
+  env: 'live' | 'sandbox'
+  /** false when PAYPAL_ENV is unset and we defaulted: the quiet failure. */
+  envExplicit: boolean
+  host: string
+  /** Safe to show: a client id is public, it ships in the shop's page source. */
+  clientId: string | null
+  /** Whether that client id is the one the shop checks out with. */
+  matchesShop: boolean | null
+  /** null when not configured; otherwise whether PayPal accepted the pair. */
+  credentialsOk: boolean | null
+  /** Plain-English problem, or null when there is nothing to report. */
+  problem: string | null
+}
+
+/**
+ * Asks PayPal whether the configured credentials are real, without touching
+ * an order or a penny.
+ *
+ * This exists because the three ways PayPal verification fails look identical
+ * from the CRM, an order that lands "Unverified", and cost very different
+ * amounts of time to fix: the keys are missing, the keys are for the wrong
+ * PayPal (sandbox credentials against live orders), or the keys are for the
+ * right PayPal but a different app than the shop checks out with. Separating
+ * them before the first real order means nobody debugs a live sale.
+ */
+export async function probePayPal(): Promise<PayPalProbe> {
+  const env = payPalEnv()
+  const envExplicit = Boolean(process.env.PAYPAL_ENV?.trim())
+  const host = env === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com'
+  const config = getPayPalConfig()
+
+  if (!config) {
+    const hasId = Boolean(process.env.PAYPAL_CLIENT_ID?.trim())
+    const hasSecret = Boolean(process.env.PAYPAL_SECRET?.trim())
+    return {
+      configured: false,
+      env,
+      envExplicit,
+      host,
+      clientId: hasId ? (process.env.PAYPAL_CLIENT_ID as string).trim() : null,
+      matchesShop: null,
+      credentialsOk: null,
+      problem:
+        hasId && !hasSecret
+          ? 'PAYPAL_SECRET is missing. The client id is set on its own, which does nothing.'
+          : !hasId && hasSecret
+            ? 'PAYPAL_CLIENT_ID is missing. The secret is set on its own, which does nothing.'
+            : 'PayPal is not connected, so paid orders arrive marked unverified and have to be checked by hand.',
+    }
+  }
+
+  const matchesShop = config.clientId === SHOP_PAYPAL_CLIENT_ID
+  const token = await getAccessToken(config)
+
+  let problem: string | null = null
+  if (!token) {
+    problem = `PayPal rejected these credentials on ${host}. Either the client id and secret do not go together, or they belong to the other environment (${env === 'live' ? 'a sandbox app cannot be used with PAYPAL_ENV=live' : 'PAYPAL_ENV is not set to live, so live credentials are being sent to the sandbox'}).`
+  } else if (!envExplicit) {
+    problem =
+      'PAYPAL_ENV is not set, so verification is pointed at the PayPal sandbox. Real orders will not be found there. Set it to live.'
+  } else if (!matchesShop) {
+    problem =
+      'These credentials work, but they are for a different PayPal app than the shop checks out with, so order lookups are likely to come back "not found". Use the app whose client id matches the shop, or update the shop to match.'
+  }
+
+  return {
+    configured: true,
+    env,
+    envExplicit,
+    host,
+    clientId: config.clientId,
+    matchesShop,
+    credentialsOk: Boolean(token),
+    problem,
+  }
 }
 
 async function getAccessToken(config: PayPalConfig): Promise<string | null> {
