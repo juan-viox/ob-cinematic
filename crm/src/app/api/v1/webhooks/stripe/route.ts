@@ -101,6 +101,7 @@ async function recordSession(session: StripeCheckoutSession, items: StripeLineIt
     payerEmail: email(details?.email),
     payerName,
     payerPhone: phone(details?.phone),
+    smsConsent: session.metadata?.sms_consent === 'yes',
     shipToName,
     shipToAddress,
     neededBy: neededByFrom(deliveryDate),

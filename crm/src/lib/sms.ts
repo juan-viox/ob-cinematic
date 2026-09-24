@@ -66,7 +66,7 @@ export function toE164(raw: string | null | undefined): string | null {
 
 export type SmsOutcome =
   | { sent: true; sid: string }
-  | { sent: false; reason: 'not_configured' | 'no_number' | 'opted_out' | 'failed' | 'empty' }
+  | { sent: false; reason: 'not_configured' | 'no_consent' | 'no_number' | 'opted_out' | 'failed' | 'empty' }
 
 /** Has this number, or the contact behind it, asked us to stop? */
 export async function isOptedOut(
@@ -103,6 +103,10 @@ export interface SendSmsInput {
   dealId?: string | null
   /** What this text was about, for the activity title and the metadata. */
   kind: 'order_confirmed' | 'order_shipped' | 'order_delivered' | 'manual'
+  /** Whether the buyer ticked "Text me order updates" at checkout
+   *  (orders.sms_consent). Required, so no caller can forget to ask. A
+   *  phone number from PayPal or Stripe is not permission to text it. */
+  consent: boolean
   /** Extra context for the activity metadata: the order number, say. */
   metadata?: Record<string, unknown>
 }
@@ -120,6 +124,11 @@ export async function sendSms(
 ): Promise<SmsOutcome> {
   const body = input.body.trim().slice(0, MAX_SMS_CHARS)
   if (!body) return { sent: false, reason: 'empty' }
+
+  if (input.consent !== true) {
+    await logSms(supabase, input, toE164(input.to), { sent: false, reason: 'no_consent' }, body)
+    return { sent: false, reason: 'no_consent' }
+  }
 
   const to = toE164(input.to)
   if (!to) {
@@ -176,6 +185,7 @@ export async function sendSms(
 
 const OUTCOME_LABEL: Record<Exclude<SmsOutcome, { sent: true; sid: string }>['reason'], string> = {
   not_configured: 'not sent: texting is not set up yet',
+  no_consent: 'not sent: the customer did not agree to order texts at checkout',
   no_number: 'not sent: no usable mobile number',
   opted_out: 'not sent: this customer asked us to stop texting',
   failed: 'not sent: the carrier or Twilio refused it',

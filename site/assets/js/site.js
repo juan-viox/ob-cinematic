@@ -1296,7 +1296,8 @@
               unitAmount: r.price,
               quantity: r.line.qty
             };
-          })
+          }),
+          smsConsent: smsConsentGiven()
         })
       })
       .then(function(res) {
@@ -1340,6 +1341,13 @@
     } catch (e) { /* older browsers keep the parameters; nothing breaks */ }
   }
 
+  /* The "Text me order updates" box in the cart. Read at the moment of
+     payment, never assumed: an order only gets texts when this is ticked. */
+  function smsConsentGiven() {
+    var box = document.getElementById('cartSmsConsent');
+    return !!(box && box.checked);
+  }
+
   /* Payment has already succeeded by the time this runs, so a CRM failure is
      reported to us and softened for the buyer, never treated as a failed sale. */
   function recordOrder(paypalOrderId, payer, resolved, cents, feeCents, shipping) {
@@ -1370,6 +1378,7 @@
         payerEmail: payer.email_address || '',
         payerName: payerName,
         payerPhone: payerPhone,
+        smsConsent: smsConsentGiven(),
         // Where PayPal says the boxes are going, so the packing slip in the
         // CRM carries the address without anyone retyping it.
         shipping: shipping ? {

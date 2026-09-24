@@ -665,6 +665,17 @@ const PAGES = [
     },
     sections: ['terms'],
   },
+  {
+    slug: 'privacy', url: '/privacy', nav: '',
+    title: 'Privacy Policy | Occasions Box',
+    desc: 'What Occasions Box collects when you order, contact us or opt in to texts, who we share it with, and the choices you have. We never sell personal information.',
+    header: {
+      eyebrow: 'Policies',
+      h1: 'Privacy Policy',
+      p: 'What we collect, why, and what you can ask us to do with it.',
+    },
+    sections: ['privacy'],
+  },
 ];
 
 /* Photographs are not one shape: most are 5:4, several 3:2, one square. The

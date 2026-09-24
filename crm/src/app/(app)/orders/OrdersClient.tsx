@@ -107,6 +107,7 @@ export default function OrdersClient({ orders: initial }: { orders: Order[] }) {
     if (data.sms && !data.sms.sent) {
       const why =
         data.sms.reason === 'opted_out' ? 'they asked us to stop texting'
+        : data.sms.reason === 'no_consent' ? 'they did not tick "Text me order updates" at checkout, so email them instead'
         : data.sms.reason === 'no_number' ? 'there is no mobile number on the order'
         : data.sms.reason === 'not_configured' ? 'texting is not set up yet'
         : 'the message could not be sent'

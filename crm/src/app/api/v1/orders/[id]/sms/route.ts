@@ -35,7 +35,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const admin = createAdminClient()
   const { data: order } = await admin
     .from('orders')
-    .select('id, order_number, contact_id, deal_id, payer_phone')
+    .select('id, order_number, contact_id, deal_id, payer_phone, sms_consent')
     .eq('organization_id', ctx.organizationId)
     .eq('id', id)
     .maybeSingle()
@@ -48,12 +48,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     contactId: order.contact_id as string | null,
     dealId: order.deal_id as string | null,
     kind: 'manual',
+    consent: order.sms_consent === true,
     metadata: { orderId: order.id, orderNumber: order.order_number, by: ctx.email },
   })
 
   if (!sms.sent) {
     const why =
       sms.reason === 'opted_out' ? 'This customer asked us to stop texting.'
+      : sms.reason === 'no_consent' ? 'This customer did not agree to order texts at checkout. Email or call instead.'
       : sms.reason === 'no_number' ? 'There is no usable mobile number on this order.'
       : sms.reason === 'not_configured' ? 'Texting is not set up yet.'
       : 'The message could not be sent.'

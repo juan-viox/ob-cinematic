@@ -67,6 +67,9 @@ export interface PaidOrderInput {
   payerEmail: string | null
   payerName: string | null
   payerPhone: string | null
+  /** The buyer ticked "Text me order updates" at checkout. Without it the
+   *  number is kept for the packing slip and never texted. */
+  smsConsent: boolean
   shipToName: string | null
   shipToAddress: Record<string, string> | null
   /** The date the buyer asked for, when they gave one that parses. */
@@ -327,6 +330,7 @@ export async function recordPaidOrder(
     payerName: input.payerName,
     payerEmail: input.payerEmail,
     payerPhone: input.payerPhone,
+    smsConsent: input.smsConsent,
     shipToName: input.shipToName ?? input.payerName,
     shipToAddress: input.shipToAddress,
     neededBy: input.neededBy ?? null,
@@ -460,6 +464,7 @@ export async function recordPaidOrder(
       contactId,
       dealId,
       kind: 'order_confirmed',
+      consent: input.smsConsent,
       metadata: { orderId: order.id, orderNumber: order.orderNumber, provider: input.provider },
     })
   }
