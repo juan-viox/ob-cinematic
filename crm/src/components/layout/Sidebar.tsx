@@ -33,6 +33,7 @@ import {
   Receipt,
   Mail,
   Share2,
+  Target,
 } from 'lucide-react'
 import Avatar from '@/components/shared/Avatar'
 import ThemeToggle from '@/components/shared/ThemeToggle'
@@ -58,6 +59,7 @@ const navItems = [
   { href: '/social', label: 'Social', icon: Share2 },
   { href: '/automations', label: 'Automations', icon: Zap },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
+  { href: '/planner', label: 'Planner', icon: Target },
   { href: '/sites', label: 'Sites', icon: Globe },
 ]
 
