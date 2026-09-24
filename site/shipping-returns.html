@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shipping &amp; Returns | Occasions Box</title>
 <meta name="description" content="How Occasions Box ships, what local hand delivery covers, and what happens if a gift arrives damaged. All sales are final.">
-<link rel="canonical" href="https://occasionsbox.com/shipping-returns">
+<link rel="canonical" href="https://www.occasionsbox.com/shipping-returns">
 <meta property="og:title" content="Shipping &amp; Returns | Occasions Box">
 <meta property="og:description" content="How Occasions Box ships, what local hand delivery covers, and what happens if a gift arrives damaged. All sales are final.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://occasionsbox.com/shipping-returns">
+<meta property="og:url" content="https://www.occasionsbox.com/shipping-returns">
 <meta property="og:site_name" content="Occasions Box">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://occasionsbox.com/assets/og/occasionsbox.jpg">
+<meta property="og:image" content="https://www.occasionsbox.com/assets/og/occasionsbox.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="A charcoal Occasions Box gift box with a gold embossed lid and ivory ribbon">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Shipping &amp; Returns | Occasions Box">
 <meta name="twitter:description" content="How Occasions Box ships, what local hand delivery covers, and what happens if a gift arrives damaged. All sales are final.">
-<meta name="twitter:image" content="https://occasionsbox.com/assets/og/occasionsbox.jpg">
+<meta name="twitter:image" content="https://www.occasionsbox.com/assets/og/occasionsbox.jpg">
 <meta name="twitter:image:alt" content="A charcoal Occasions Box gift box with a gold embossed lid and ivory ribbon">
 <script type="application/ld+json">
 {
@@ -30,18 +30,18 @@
         "Organization",
         "LocalBusiness"
       ],
-      "@id": "https://occasionsbox.com/#organization",
+      "@id": "https://www.occasionsbox.com/#organization",
       "name": "Occasions Box",
       "legalName": "Occasions Box LLC",
       "foundingDate": "2017",
-      "url": "https://occasionsbox.com/",
+      "url": "https://www.occasionsbox.com/",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://occasionsbox.com/assets/ob-logo-gold.png",
+        "url": "https://www.occasionsbox.com/assets/ob-logo-gold.png",
         "width": 1718,
         "height": 341
       },
-      "image": "https://occasionsbox.com/assets/og/occasionsbox.jpg",
+      "image": "https://www.occasionsbox.com/assets/og/occasionsbox.jpg",
       "description": "Luxury curated gift boxes and corporate gifting, packed by hand in Fort Lee, New Jersey and shipped nationwide.",
       "email": "Hello@occasionsbox.com",
       "telephone": "+1-551-246-0028",
@@ -93,50 +93,50 @@
     },
     {
       "@type": "WebSite",
-      "@id": "https://occasionsbox.com/#website",
-      "url": "https://occasionsbox.com/",
+      "@id": "https://www.occasionsbox.com/#website",
+      "url": "https://www.occasionsbox.com/",
       "name": "Occasions Box",
       "inLanguage": "en-US",
       "publisher": {
-        "@id": "https://occasionsbox.com/#organization"
+        "@id": "https://www.occasionsbox.com/#organization"
       }
     },
     {
       "@type": "WebPage",
-      "@id": "https://occasionsbox.com/shipping-returns#webpage",
-      "url": "https://occasionsbox.com/shipping-returns",
+      "@id": "https://www.occasionsbox.com/shipping-returns#webpage",
+      "url": "https://www.occasionsbox.com/shipping-returns",
       "name": "Shipping & Returns | Occasions Box",
       "description": "How Occasions Box ships, what local hand delivery covers, and what happens if a gift arrives damaged. All sales are final.",
       "inLanguage": "en-US",
       "isPartOf": {
-        "@id": "https://occasionsbox.com/#website"
+        "@id": "https://www.occasionsbox.com/#website"
       },
       "about": {
-        "@id": "https://occasionsbox.com/#organization"
+        "@id": "https://www.occasionsbox.com/#organization"
       },
       "primaryImageOfPage": {
         "@type": "ImageObject",
-        "url": "https://occasionsbox.com/assets/og/occasionsbox.jpg"
+        "url": "https://www.occasionsbox.com/assets/og/occasionsbox.jpg"
       },
       "breadcrumb": {
-        "@id": "https://occasionsbox.com/shipping-returns#breadcrumb"
+        "@id": "https://www.occasionsbox.com/shipping-returns#breadcrumb"
       }
     },
     {
       "@type": "BreadcrumbList",
-      "@id": "https://occasionsbox.com/shipping-returns#breadcrumb",
+      "@id": "https://www.occasionsbox.com/shipping-returns#breadcrumb",
       "itemListElement": [
         {
           "@type": "ListItem",
           "position": 1,
           "name": "Home",
-          "item": "https://occasionsbox.com/"
+          "item": "https://www.occasionsbox.com/"
         },
         {
           "@type": "ListItem",
           "position": 2,
           "name": "Shipping & Returns",
-          "item": "https://occasionsbox.com/shipping-returns"
+          "item": "https://www.occasionsbox.com/shipping-returns"
         }
       ]
     }
@@ -156,15 +156,18 @@
     document.documentElement.classList.remove('anim');
   }, 2500);
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<!-- Deferred, so the page paints before the animation library arrives.
+     Deferred scripts run in document order once parsing ends, so gsap and
+     ScrollTrigger still load before site.js, which is deferred too. -->
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 </head>
 <body class="page-shipping-returns">
 
 <!-- ═══ NAVIGATION ═══ -->
 <nav class="nav scrolled" id="mainNav">
   <a href="/" class="nav-logo">
-    <img src="/assets/ob-logo-gold.png" alt="Occasions Box">
+    <img src="/assets/ob-logo-gold-640.png" width="640" height="127" alt="Occasions Box">
   </a>
   <div class="nav-links">
     <a href="/shop">Shop</a>
@@ -256,7 +259,7 @@
 <footer>
   <div class="footer-grid">
     <div class="footer-brand">
-      <img src="/assets/ob-logo-gold.png" alt="Occasions Box" style="height:28px;opacity:0.9">
+      <img src="/assets/ob-logo-gold-640.png" width="640" height="127" alt="Occasions Box" style="height:28px;width:auto;opacity:0.9">
       <p>Custom gifting, thoughtfully executed. Premium curated gift boxes for every occasion.</p>
     </div>
     <div class="footer-col">
@@ -287,6 +290,7 @@
       <h4>Policies</h4>
       <a href="/shipping-returns">Shipping &amp; Returns</a>
       <a href="/terms-and-conditions">Terms &amp; Conditions</a>
+      <a href="/privacy">Privacy Policy</a>
     </div>
   </div>
   <div class="footer-bottom">
@@ -307,7 +311,7 @@
 <elevenlabs-convai agent-id="agent_3101kn8rkd7heb0rt2p5gtfqjf3a"></elevenlabs-convai>
 <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
 
-<script src="/assets/js/site.js"></script>
+<script defer src="/assets/js/site.js"></script>
 
 </body>
 </html>

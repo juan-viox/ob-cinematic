@@ -918,6 +918,15 @@ footer {
   transition: border-color 0.2s;
 }
 .legal a:hover { border-bottom-color: var(--gold); }
+.legal ul { margin: 0 0 14px; padding-left: 20px; }
+.legal li {
+  font-size: 15.5px; line-height: 1.75; color: var(--muted);
+  margin-bottom: 6px;
+}
+.legal li::marker { color: var(--gold); }
+.legal b { color: var(--text-light); font-weight: 500; }
+/* Linked straight to from the checkout and the SMS terms; clear the fixed nav. */
+.legal h2[id] { scroll-margin-top: 110px; }
 @media (max-width: 600px) {
   .legal { padding: 40px 20px 72px; }
   .legal h2 { font-size: 21px; margin-top: 36px; }
@@ -2540,6 +2549,17 @@ body.lightbox-open { overflow: hidden; }
   border-left: 2px solid #b4472e; border-radius: 0 4px 4px 0;
 }
 .cart-card-warning[hidden] { display: none; }
+
+/* The SMS opt-in. Unticked by default and never pre-checked: carriers and the
+   TCPA both want a customer's own tick, and the CRM texts no one without it. */
+.cart-sms {
+  display: flex; gap: 10px; align-items: flex-start;
+  font-family: var(--sans); font-size: 11.5px; line-height: 1.55;
+  color: var(--muted); margin: 0 0 14px; cursor: pointer;
+}
+.cart-sms input { margin: 2px 0 0; flex: 0 0 auto; width: 15px; height: 15px; accent-color: var(--gold-dark); cursor: pointer; }
+.cart-sms b { color: var(--text-light); font-weight: 500; }
+.cart-sms a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 
 /* Dimmed and unclickable while a box still has no card. onClick refuses it
    as well, so removing this class in the inspector buys nothing. */

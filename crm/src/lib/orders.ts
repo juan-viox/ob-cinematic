@@ -30,6 +30,8 @@ export interface CreateOrderInput {
   payerName?: string | null
   payerEmail?: string | null
   payerPhone?: string | null
+  /** The buyer ticked "Text me order updates" at checkout. */
+  smsConsent?: boolean
   shipToName?: string | null
   shipToAddress?: Record<string, string> | null
   giftMessage?: string | null
@@ -132,6 +134,8 @@ export async function createOrder(
       payer_name: input.payerName ?? null,
       payer_email: input.payerEmail ?? null,
       payer_phone: input.payerPhone ?? null,
+      sms_consent: input.smsConsent === true,
+      sms_consent_at: input.smsConsent === true ? new Date().toISOString() : null,
       fulfillment_status: 'new',
       ship_to_name: input.shipToName ?? null,
       ship_to_address: input.shipToAddress ?? null,

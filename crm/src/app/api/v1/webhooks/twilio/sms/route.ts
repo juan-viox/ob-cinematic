@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getIngestClient, getOrgId } from '@/lib/ingest'
-import { HELP_WORDS, START_WORDS, STOP_WORDS, getTwilioConfig, toE164, verifyTwilioSignature } from '@/lib/sms'
+import { HELP_WORDS, SMS_BRAND, START_WORDS, STOP_WORDS, getTwilioConfig, toE164, verifyTwilioSignature } from '@/lib/sms'
 import crmConfig from '@/crm.config'
 
 /**
@@ -95,11 +95,11 @@ export async function POST(request: Request) {
       .update({ sms_opt_out: false, sms_opt_out_at: null })
       .eq('organization_id', orgId)
       .eq('phone', from)
-    return twiml(`You are subscribed to ${crmConfig.name} order updates again. Reply STOP to stop.`)
+    return twiml(`You are subscribed to ${SMS_BRAND} order updates again. Msg & data rates may apply. Reply STOP to stop.`)
   }
 
   if (HELP_WORDS.includes(text)) {
-    return twiml(`${crmConfig.name}: order updates. Call ${crmConfig.phone} or email ${crmConfig.email}. Reply STOP to stop.`)
+    return twiml(`${SMS_BRAND} order updates. Msg frequency varies. Help: ${crmConfig.email} or occasionsbox.com/contact. Msg & data rates may apply. Reply STOP to stop.`)
   }
 
   // Anything else is a real person replying about their gift. File it so

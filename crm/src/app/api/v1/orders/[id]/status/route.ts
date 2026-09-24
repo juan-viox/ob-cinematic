@@ -60,7 +60,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const admin = createAdminClient()
   const { data: order, error: readError } = await admin
     .from('orders')
-    .select('id, order_number, contact_id, deal_id, payer_name, payer_phone, ship_to_name, carrier, tracking_number, fulfillment_status')
+    .select('id, order_number, contact_id, deal_id, payer_name, payer_phone, ship_to_name, carrier, tracking_number, fulfillment_status, sms_consent')
     .eq('organization_id', ctx.organizationId)
     .eq('id', id)
     .maybeSingle()
@@ -109,6 +109,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       contactId: order.contact_id as string | null,
       dealId: order.deal_id as string | null,
       kind: status === 'confirmed' ? 'order_confirmed' : status === 'shipped' ? 'order_shipped' : 'order_delivered',
+      consent: order.sms_consent === true,
       metadata: { orderId: order.id, orderNumber: order.order_number },
     })
   }

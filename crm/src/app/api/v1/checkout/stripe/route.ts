@@ -189,6 +189,8 @@ export async function POST(request: Request) {
         processing_fee_cents: String(feeCents),
         processing_label: PROCESSING_LABEL,
         lines: String(lines.length),
+        // Read back by the webhook. Only the literal 'yes' means texts.
+        sms_consent: body.smsConsent === true ? 'yes' : 'no',
       },
       payment_intent_data: {
         description: description.slice(0, 200),

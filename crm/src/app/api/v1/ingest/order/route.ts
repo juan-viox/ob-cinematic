@@ -173,6 +173,8 @@ export async function POST(request: Request) {
     }
     let payerName = str(body.payerName ?? body.name, LIMITS.name * 2)
     const payerPhone = phone(body.payerPhone ?? body.phone)
+    // Only a literal true counts: a missing or garbled field means no texts.
+    const smsConsent = body.smsConsent === true
     const shippingRaw = (body.shipping ?? null) as { name?: unknown; address?: unknown } | null
     let shipToName = shippingRaw && typeof shippingRaw.name === 'string' ? str(shippingRaw.name, LIMITS.name * 2) : null
     let shipToAddress = normaliseAddress(shippingRaw?.address)
@@ -214,6 +216,7 @@ export async function POST(request: Request) {
       payerEmail,
       payerName,
       payerPhone,
+      smsConsent,
       shipToName,
       shipToAddress,
       verified,
