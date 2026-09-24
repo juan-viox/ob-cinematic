@@ -21,10 +21,12 @@ const read = (p) => readFileSync(join(ROOT, p), 'utf8').replace(/\s+$/, '');
 const partial = (n) => read(`tools/partials/${n}.html`);
 const section = (n) => read(`tools/sections/${n}.html`);
 
-/* The bare domain is the canonical one. www.occasionsbox.com stays
-   registered and 301s here, so a link to either still works and only one
-   of them accumulates credit with a search engine. */
-const SITE = 'https://occasionsbox.com';
+/* www is the canonical host because it is the one Vercel serves: the bare
+   domain 308s to it. Canonicals, the sitemap and the structured data must
+   name the address that answers 200, or search engines are told the real
+   page is one that only redirects. Change this only together with the
+   primary domain in Vercel. */
+const SITE = 'https://www.occasionsbox.com';
 
 /* Every fact below is stated somewhere on the site; nothing here is invented.
    It feeds the JSON-LD that search engines read, so change it here and every
@@ -305,13 +307,41 @@ function makersIn(name) {
   return seen;
 }
 
+/* The gallery strip shows 74px squares, so it loads the 160px "-thumb"
+   copy of each photo rather than the 1500px original: six full photos were
+   most of a product page's weight. site.js thumbFor() makes the same swap
+   for the strip it repaints; the build fails if a thumb is missing. */
+function thumbFor(src) {
+  const t = src.replace(/-(1500|750|500)w\.jpg$/, '-thumb.jpg');
+  if (t === src) return src;
+  try { statSync(join(ROOT, 'site', t)); } catch {
+    throw new Error(`missing thumbnail ${t}; regenerate the -thumb.jpg files`);
+  }
+  return t;
+}
+
+/* Search results cut a description at roughly 155 characters, so the longest
+   version that fits wins: every maker named, then the first few, then none.
+   The price and "New Jersey" survive every cut. */
+const DESC_MAX = 155;
+
 function productDesc(p) {
   const makers = makersIn(p.name);
-  const made = makers.length >= 2
-    ? `Inside: ${makers.slice(0, -1).join(', ')} and ${makers.at(-1)}. `
-    : '';
-  return `${p.name}, $${p.price}. ${made}Packed by hand in Fort Lee, New Jersey, `
-       + 'finished with a handwritten note and shipped nationwide.';
+  const list = (ms) => `${ms.slice(0, -1).join(', ')} and ${ms.at(-1)}`;
+  const lead = `${p.name}, $${p.price}.`;
+  const candidates = [];
+  if (makers.length >= 2) {
+    candidates.push(`${lead} Inside: ${list(makers)}. Packed by hand in Fort Lee, New Jersey, `
+                  + 'finished with a handwritten note and shipped nationwide.');
+    candidates.push(`${lead} Inside: ${list(makers)}. Packed by hand in New Jersey, shipped nationwide.`);
+    for (let n = makers.length - 1; n >= 2; n--) {
+      candidates.push(`${lead} Inside: ${makers.slice(0, n).join(', ')} and more. `
+                    + 'Packed by hand in New Jersey, shipped nationwide.');
+    }
+  }
+  candidates.push(`${lead} Packed by hand in Fort Lee, New Jersey, `
+                + 'finished with a handwritten note and shipped nationwide.');
+  return candidates.find((d) => d.length <= DESC_MAX) || candidates.at(-1);
 }
 
 /* A schema.org graph per page. One <script> holds the lot; the @id references
@@ -702,7 +732,7 @@ ${variants.map((v, n) => `        <button type="button" class="pd-variant${n ===
     variants.some((v) => (v.images || []).length > 1) || (p.images || []).length > 1;
   const thumbs = anyMultiple ? `
       <div class="pd-thumbs"${gallery.length > 1 ? '' : ' hidden'}>
-${gallery.map((g, n) => `        <button type="button" class="pd-thumb${n === 0 ? ' active' : ''}" aria-label="Show photograph ${n + 1} of ${gallery.length}"><img src="${g.src}" alt="" loading="lazy" width="74" height="74"></button>`).join('\n')}
+${gallery.map((g, n) => `        <button type="button" class="pd-thumb${n === 0 ? ' active' : ''}" aria-label="Show photograph ${n + 1} of ${gallery.length}"><img src="${thumbFor(g.src)}" alt="" loading="lazy" width="74" height="74"></button>`).join('\n')}
       </div>` : '';
 
   const contentsBlock = contents && contents.length ? `
@@ -1004,8 +1034,11 @@ ${JSON.stringify(ldGraph(page), null, 2)}
     document.documentElement.classList.remove('anim');
   }, 2500);
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<!-- Deferred, so the page paints before the animation library arrives.
+     Deferred scripts run in document order once parsing ends, so gsap and
+     ScrollTrigger still load before site.js, which is deferred too. -->
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 </head>
 <body class="${page.nav === 'home' ? 'home' : `page-${page.slug.replace('/', '-')}`}">
 
@@ -1017,7 +1050,7 @@ ${FOOTER}
 
 ${extras}
 ${paypal}
-<script src="/assets/js/site.js"></script>
+<script defer src="/assets/js/site.js"></script>
 
 </body>
 </html>

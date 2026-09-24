@@ -444,6 +444,12 @@
      because a colourway change replaces the photographs, not just the one on
      top: the product page used to swap the main shot and leave the strip
      underneath showing the other colour's box. */
+  /* Thumbnails load the 160px "-thumb" copy instead of the full photo; see
+     thumbFor() in tools/build-pages.mjs, which checks every one exists. */
+  function thumbFor(src) {
+    return String(src).replace(/-(1500|750|500)w\.jpg$/, '-thumb.jpg');
+  }
+
   function paintGallery(main, strip, cls, images, onShow) {
     if (!main || !images.length) return function() {};
 
@@ -465,11 +471,16 @@
           return '<button type="button" class="' + cls + (i === 0 ? ' active' : '') +
                  '" data-img="' + i + '" aria-label="Show photograph ' + (i + 1) + ' of ' +
                  images.length + ' of ' + escapeHtml(img.alt) + '">' +
-                 '<img src="' + escapeHtml(img.src) + '" alt="" loading="lazy"></button>';
+                 '<img src="' + escapeHtml(thumbFor(img.src)) + '" data-full="' + escapeHtml(img.src) +
+                 '" alt="" loading="lazy"></button>';
         }).join('');
         strip.hidden = false;
         strip.querySelectorAll('.' + cls).forEach(function(btn) {
           btn.addEventListener('click', function() { show(parseInt(this.dataset.img, 10)); });
+          var thumb = btn.querySelector('img');
+          if (thumb) thumb.addEventListener('error', function() {
+            if (this.dataset.full && this.src.indexOf(this.dataset.full) === -1) this.src = this.dataset.full;
+          }, { once: true });
         });
       } else {
         strip.hidden = true;

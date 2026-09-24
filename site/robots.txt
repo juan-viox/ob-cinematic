@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
-Sitemap: https://occasionsbox.com/sitemap.xml
+Sitemap: https://www.occasionsbox.com/sitemap.xml
