@@ -41,6 +41,41 @@ interface Integration {
   fields: Field[]
 }
 
+interface BlotatoAccount {
+  id: string
+  platform: string
+  name: string | null
+}
+
+interface BlotatoProbe {
+  configured: boolean
+  keyOk: boolean | null
+  accounts: BlotatoAccount[]
+  problem: string | null
+}
+
+interface StripeEndpoint {
+  id: string
+  url: string
+  enabled: boolean
+  events: string[]
+  pointsHere: boolean
+  listensForCheckout: boolean
+}
+
+interface StripeProbe {
+  configured: boolean
+  webhookSecretSet: boolean
+  mode: 'live' | 'test' | 'unknown'
+  restricted: boolean
+  keyOk: boolean | null
+  accountName: string | null
+  accountId: string | null
+  endpoints: StripeEndpoint[]
+  endpointsReadable: boolean
+  problems: string[]
+}
+
 interface Probe {
   configured: boolean
   env: 'live' | 'sandbox'
@@ -223,6 +258,8 @@ function IntegrationCard({ integration }: { integration: Integration }) {
       </div>
 
       {integration.id === 'paypal' && <PayPalTester />}
+      {integration.id === 'stripe' && <StripeTester />}
+      {integration.id === 'blotato' && <BlotatoTester />}
     </div>
   )
 }
@@ -388,6 +425,212 @@ function PayPalTester() {
             <p className="text-[var(--muted)]">Ships to {result.order.shipToName}</p>
           )}
         </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Whether a card payment would actually become an order.
+ *
+ * Both keys showing green above is a weaker claim than it looks. The signing
+ * secret can be valid and still belong to an endpoint pointing somewhere else,
+ * and nothing here can tell, because the webhook that would have complained is
+ * precisely the one that never arrives. The symptom is a customer who paid and
+ * an Orders page that stays empty, discovered days later.
+ *
+ * So this shows the endpoints Stripe actually holds, where each points and
+ * what it listens for, and says plainly when none of them is us.
+ */
+function StripeTester() {
+  const [probe, setProbe] = useState<StripeProbe | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function run() {
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch(withBasePath('/api/v1/stripe/check'), { cache: 'no-store' })
+      const json = (await res.json()) as { probe?: StripeProbe; error?: string }
+      if (!res.ok || !json.probe) throw new Error(json.error ?? `The server answered ${res.status}`)
+      setProbe(json.probe)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'The check could not run')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const good = probe?.configured && probe.keyOk === true && probe.problems.length === 0
+  const ours = (probe?.endpoints ?? []).filter((e) => e.pointsHere)
+
+  return (
+    <div className="mt-5 pt-4 border-t border-[var(--border)] space-y-3">
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={run}
+          disabled={busy}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-[var(--accent)] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+        >
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+          Test the connection
+        </button>
+        <span className="text-xs text-[var(--muted)]">Asks Stripe directly. Takes no money, changes nothing.</span>
+      </div>
+
+      {probe && (
+        <div
+          className="rounded-lg p-3 text-xs space-y-1.5"
+          style={{
+            background: good ? 'rgba(0,184,148,0.08)' : 'rgba(225,112,85,0.08)',
+            border: `1px solid ${good ? 'rgba(0,184,148,0.3)' : 'rgba(225,112,85,0.3)'}`,
+          }}
+        >
+          <p className="font-medium text-[var(--text)]">
+            {good
+              ? 'Stripe is ready to take a card payment and record it as an order.'
+              : probe.configured
+                ? 'Stripe is configured, but a card sale would not reach the CRM.'
+                : 'Stripe is not connected.'}
+          </p>
+
+          {probe.keyOk === true && (
+            <p className="text-[var(--muted)]">
+              {probe.accountName ?? 'Stripe account'}
+              {probe.accountId ? ` · ${probe.accountId}` : ''}
+              {` · ${probe.mode} mode`}
+              {probe.restricted ? ' · restricted key' : ''}
+            </p>
+          )}
+
+          {probe.problems.map((problem) => (
+            <p key={problem} className="text-[var(--muted)] leading-relaxed">
+              {problem}
+            </p>
+          ))}
+
+          {probe.endpointsReadable && probe.endpoints.length > 0 && (
+            <div className="pt-1 space-y-0.5">
+              <p className="text-[var(--muted)]">
+                {probe.endpoints.length === 1 ? 'One webhook endpoint' : `${probe.endpoints.length} webhook endpoints`} in
+                Stripe:
+              </p>
+              <ul className="text-[var(--muted)] space-y-0.5">
+                {probe.endpoints.map((endpoint) => (
+                  <li key={endpoint.id} className="break-all">
+                    {endpoint.pointsHere ? '→ ' : '· '}
+                    <code>{endpoint.url}</code>
+                    {!endpoint.enabled && ' (disabled)'}
+                    {endpoint.pointsHere && endpoint.listensForCheckout && ' (this CRM, listening)'}
+                    {endpoint.pointsHere && !endpoint.listensForCheckout && ' (this CRM, wrong events)'}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {good && ours.length === 1 && (
+            <p className="text-[var(--muted)] leading-relaxed pt-1">
+              One thing this cannot prove: that the signing secret here belongs to that endpoint. Stripe shows an
+              endpoint&apos;s secret only when it is created. A single real card payment settles it.
+            </p>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <p
+          className="text-xs rounded-lg px-3 py-2 leading-relaxed"
+          style={{ background: 'rgba(225,112,85,0.10)', color: 'var(--text)' }}
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Whether Blotato will actually publish, which is two questions.
+ *
+ * A key that works is not the same as an account that is connected: a valid
+ * key on a workspace with no Instagram attached fails at the moment a
+ * scheduled post was due, long after anyone is watching. So this reports the
+ * account list, not just a green tick.
+ */
+function BlotatoTester() {
+  const [probe, setProbe] = useState<BlotatoProbe | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function run() {
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch(withBasePath('/api/v1/blotato/check'), { cache: 'no-store' })
+      const json = (await res.json()) as { probe?: BlotatoProbe; error?: string }
+      if (!res.ok || !json.probe) throw new Error(json.error ?? `The server answered ${res.status}`)
+      setProbe(json.probe)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'The check could not run')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const good = probe?.configured && probe.keyOk === true && !probe.problem
+
+  return (
+    <div className="mt-5 pt-4 border-t border-[var(--border)] space-y-3">
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={run}
+          disabled={busy}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-[var(--accent)] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+        >
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+          Test the connection
+        </button>
+        <span className="text-xs text-[var(--muted)]">Asks Blotato directly. Posts nothing.</span>
+      </div>
+
+      {probe && (
+        <div
+          className="rounded-lg p-3 text-xs space-y-1.5"
+          style={{
+            background: good ? 'rgba(0,184,148,0.08)' : 'rgba(225,112,85,0.08)',
+            border: `1px solid ${good ? 'rgba(0,184,148,0.3)' : 'rgba(225,112,85,0.3)'}`,
+          }}
+        >
+          <p className="font-medium text-[var(--text)]">
+            {good
+              ? `Blotato accepted the key. ${probe.accounts.length} account${probe.accounts.length === 1 ? '' : 's'} connected.`
+              : probe.configured
+                ? 'Blotato is configured, but something is off.'
+                : 'Blotato is not connected.'}
+          </p>
+          {probe.problem && <p className="text-[var(--muted)] leading-relaxed">{probe.problem}</p>}
+          {probe.accounts.length > 0 && (
+            <ul className="text-[var(--muted)] space-y-0.5 pt-1">
+              {probe.accounts.map((a) => (
+                <li key={a.id}>
+                  {a.platform}
+                  {a.name ? ` · ${a.name}` : ''}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <p
+          className="text-xs rounded-lg px-3 py-2 leading-relaxed"
+          style={{ background: 'rgba(225,112,85,0.10)', color: 'var(--text)' }}
+        >
+          {error}
+        </p>
       )}
     </div>
   )

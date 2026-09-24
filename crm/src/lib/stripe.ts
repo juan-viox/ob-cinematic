@@ -54,7 +54,12 @@ export function encodeForm(body: Record<string, unknown>): string {
   return params.toString()
 }
 
-export type StripeResult<T> = { ok: true; data: T } | { ok: false; status: number; error: string }
+export type StripeResult<T> =
+  | { ok: true; data: T }
+  /** `status` is what we answer our own caller with; `httpStatus` is what
+   *  Stripe actually said, which the health check needs to tell "the key is
+   *  wrong" apart from "Stripe is having a bad morning". */
+  | { ok: false; status: number; error: string; httpStatus?: number }
 
 export async function stripeRequest<T = Record<string, unknown>>(
   config: StripeConfig,
@@ -100,7 +105,7 @@ export async function stripeRequest<T = Record<string, unknown>>(
   if (!res.ok) {
     const message = (json as { error?: { message?: unknown } } | null)?.error?.message
     console.error(`[stripe] ${method} ${path} failed:`, res.status, typeof message === 'string' ? message : '')
-    return { ok: false, status: 502, error: 'Stripe could not complete the request' }
+    return { ok: false, status: 502, error: 'Stripe could not complete the request', httpStatus: res.status }
   }
   return { ok: true, data: json as T }
 }
@@ -248,4 +253,233 @@ export function verifyStripeSignature(
     const given = Buffer.from(sig, 'hex')
     return given.length === expected.length && timingSafeEqual(given, expected)
   })
+}
+
+// ─────────────────────────────────────────────
+// Health check
+// ─────────────────────────────────────────────
+
+/**
+ * Whether a card payment would actually become an order, asked before anyone
+ * spends money finding out.
+ *
+ * Both keys being present is not the same as card checkout working, and the
+ * gap between them is expensive. STRIPE_WEBHOOK_SECRET can be a perfectly
+ * valid signing secret belonging to an endpoint that points somewhere else, or
+ * to an endpoint that is disabled, or to one that never subscribed to the
+ * event that records a sale. In all three cases the shop takes the money, the
+ * buyer gets a receipt, and the CRM never hears about it. Nothing on the
+ * server can notice: the webhook that would have told us is the thing that is
+ * missing.
+ *
+ * So this reads the endpoint list out of Stripe and says which endpoints exist,
+ * where they point, and what they listen for. The one thing it cannot confirm
+ * is that the signing secret in the environment belongs to the endpoint it
+ * found, because Stripe returns an endpoint's secret only at the moment it is
+ * created. That last inch is what a real test payment proves.
+ */
+
+/** The path Stripe must call for a card sale to be recorded. */
+export const WEBHOOK_PATH = '/api/v1/webhooks/stripe'
+
+/** The event that means money arrived and an order should exist. */
+export const CHECKOUT_EVENT = 'checkout.session.completed'
+
+export interface StripeWebhookEndpoint {
+  id: string
+  url: string
+  enabled: boolean
+  events: string[]
+  /** Does this endpoint point at this CRM's webhook route. */
+  pointsHere: boolean
+  /** Does it listen for the event that records an order. */
+  listensForCheckout: boolean
+}
+
+export interface StripeProbe {
+  configured: boolean
+  webhookSecretSet: boolean
+  /** Read from the key prefix alone. No network call, and it explains a lot. */
+  mode: 'live' | 'test' | 'unknown'
+  /** A restricted key (rk_) may be denied the endpoint list even though it works. */
+  restricted: boolean
+  keyOk: boolean | null
+  accountName: string | null
+  accountId: string | null
+  endpoints: StripeWebhookEndpoint[]
+  /** False when the endpoint list could not be read at all. */
+  endpointsReadable: boolean
+  /** Plain English, worst first. Empty means nothing is wrong. */
+  problems: string[]
+}
+
+function keyMode(secretKey: string): 'live' | 'test' | 'unknown' {
+  if (/^[sr]k_live_/.test(secretKey)) return 'live'
+  if (/^[sr]k_test_/.test(secretKey)) return 'test'
+  return 'unknown'
+}
+
+interface StripeAccount {
+  id?: string | null
+  business_profile?: { name?: string | null } | null
+  settings?: { dashboard?: { display_name?: string | null } | null } | null
+}
+
+interface StripeEndpointRow {
+  id?: string | null
+  url?: string | null
+  status?: string | null
+  enabled_events?: string[] | null
+}
+
+/** True when a registered endpoint URL is this CRM's webhook route. */
+function pointsAtUs(url: string): boolean {
+  try {
+    return new URL(url).pathname.endsWith(WEBHOOK_PATH)
+  } catch {
+    return false
+  }
+}
+
+function readEndpoints(rows: StripeEndpointRow[]): StripeWebhookEndpoint[] {
+  const endpoints: StripeWebhookEndpoint[] = []
+  for (const row of rows) {
+    const url = typeof row.url === 'string' ? row.url : ''
+    if (!url) continue
+    const events = Array.isArray(row.enabled_events) ? row.enabled_events.filter((e) => typeof e === 'string') : []
+    endpoints.push({
+      id: typeof row.id === 'string' ? row.id : url,
+      url,
+      enabled: row.status !== 'disabled',
+      events,
+      pointsHere: pointsAtUs(url),
+      // '*' is Stripe's "send me everything", which does include this one.
+      listensForCheckout: events.includes(CHECKOUT_EVENT) || events.includes('*'),
+    })
+  }
+  return endpoints
+}
+
+export async function probeStripe(): Promise<StripeProbe> {
+  const config = getStripeConfig()
+  if (!config) {
+    return {
+      configured: false,
+      webhookSecretSet: false,
+      mode: 'unknown',
+      restricted: false,
+      keyOk: null,
+      accountName: null,
+      accountId: null,
+      endpoints: [],
+      endpointsReadable: false,
+      problems: ['STRIPE_SECRET_KEY is not set, so card checkout is switched off and the shop offers PayPal only.'],
+    }
+  }
+
+  const mode = keyMode(config.secretKey)
+  const restricted = config.secretKey.startsWith('rk_')
+  const webhookSecretSet = Boolean(config.webhookSecret)
+
+  // Collected separately so the finished list reads worst first rather than in
+  // the order the checks happened to run.
+  const keyProblems: string[] = []
+  const endpointProblems: string[] = []
+  const secretProblems: string[] = []
+
+  if (mode === 'test') {
+    keyProblems.push('This is a Stripe test key. Real cards are declined, so no customer can pay by card today.')
+  } else if (mode === 'unknown') {
+    keyProblems.push('STRIPE_SECRET_KEY does not look like a Stripe secret key. It should begin with sk_live_ or sk_test_.')
+  }
+
+  if (!webhookSecretSet) {
+    secretProblems.push(
+      'STRIPE_WEBHOOK_SECRET is not set. Card checkout refuses to start rather than take a payment it could not record, so the shop currently offers PayPal only.'
+    )
+  } else if (!config.webhookSecret?.startsWith('whsec_')) {
+    secretProblems.push(
+      'STRIPE_WEBHOOK_SECRET does not begin with whsec_, so it is probably not a signing secret. Every webhook would fail its signature check and no card sale would reach the CRM.'
+    )
+  }
+
+  const account = await stripeRequest<StripeAccount>(config, 'GET', '/account')
+  if (!account.ok) {
+    const rejected = account.httpStatus === 401
+    return {
+      configured: true,
+      webhookSecretSet,
+      mode,
+      restricted,
+      keyOk: rejected ? false : null,
+      accountName: null,
+      accountId: null,
+      endpoints: [],
+      endpointsReadable: false,
+      problems: [
+        rejected
+          ? 'Stripe rejected the secret key. Card checkout cannot work until it is replaced.'
+          : 'Stripe could not be reached, so the key could not be checked. Try again in a moment.',
+        ...keyProblems,
+        ...secretProblems,
+      ],
+    }
+  }
+
+  const accountName =
+    account.data.settings?.dashboard?.display_name ?? account.data.business_profile?.name ?? null
+  const accountId = typeof account.data.id === 'string' ? account.data.id : null
+
+  // Stripe scopes this list to the key's own mode, so a live key never sees
+  // test endpoints and the absence of one here is the real absence.
+  const list = await stripeRequest<{ data?: StripeEndpointRow[] }>(config, 'GET', '/webhook_endpoints', { limit: 100 })
+  let endpoints: StripeWebhookEndpoint[] = []
+  let endpointsReadable = true
+
+  if (!list.ok) {
+    endpointsReadable = false
+    endpointProblems.push(
+      restricted
+        ? 'The webhook endpoint list could not be read. This is a restricted key, so it may simply lack that permission, which does not stop payments working. Check Developers then Webhooks in the Stripe dashboard by hand.'
+        : 'The webhook endpoint list could not be read, so whether Stripe is pointed at this CRM is still unknown.'
+    )
+  } else {
+    endpoints = readEndpoints(Array.isArray(list.data.data) ? list.data.data : [])
+    const ours = endpoints.filter((e) => e.pointsHere)
+
+    if (ours.length === 0) {
+      endpointProblems.push(
+        `Stripe has no webhook endpoint pointing at this CRM. Card payments would be taken and no order would ever appear here. Add an endpoint ending in ${WEBHOOK_PATH} in the Stripe dashboard under Developers then Webhooks, subscribe it to ${CHECKOUT_EVENT}, and put its signing secret in STRIPE_WEBHOOK_SECRET.`
+      )
+    } else {
+      for (const endpoint of ours) {
+        if (!endpoint.enabled) {
+          endpointProblems.push(`The endpoint at ${endpoint.url} is disabled in Stripe, so it receives nothing.`)
+        }
+        if (!endpoint.listensForCheckout) {
+          endpointProblems.push(
+            `The endpoint at ${endpoint.url} is not subscribed to ${CHECKOUT_EVENT}, which is the only event that records a sale.`
+          )
+        }
+      }
+      if (ours.length > 1) {
+        endpointProblems.push(
+          `Stripe has ${ours.length} endpoints pointing at this CRM. Only one signing secret can be in STRIPE_WEBHOOK_SECRET, so the others would fail their signature check. Delete the ones you do not use.`
+        )
+      }
+    }
+  }
+
+  return {
+    configured: true,
+    webhookSecretSet,
+    mode,
+    restricted,
+    keyOk: true,
+    accountName,
+    accountId,
+    endpoints,
+    endpointsReadable,
+    problems: [...keyProblems, ...endpointProblems, ...secretProblems],
+  }
 }

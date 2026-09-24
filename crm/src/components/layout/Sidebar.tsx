@@ -32,6 +32,8 @@ import {
   Package,
   Receipt,
   Mail,
+  Share2,
+  Target,
 } from 'lucide-react'
 import Avatar from '@/components/shared/Avatar'
 import ThemeToggle from '@/components/shared/ThemeToggle'
@@ -54,8 +56,10 @@ const navItems = [
   { href: '/calendar', label: 'Calendar', icon: CalendarDays },
   { href: '/emails', label: 'Emails', icon: Mail },
   { href: '/campaigns', label: 'Campaigns', icon: Send },
+  { href: '/social', label: 'Social', icon: Share2 },
   { href: '/automations', label: 'Automations', icon: Zap },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
+  { href: '/planner', label: 'Planner', icon: Target },
   { href: '/sites', label: 'Sites', icon: Globe },
 ]
 

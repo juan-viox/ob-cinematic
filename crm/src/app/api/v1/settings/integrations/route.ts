@@ -88,7 +88,7 @@ export async function GET() {
           label: 'Webhook secret',
           present: set(env.STRIPE_WEBHOOK_SECRET),
           required: true,
-          note: 'Without it the webhook refuses every event, including real payments.',
+          note: 'The signing secret of the Stripe endpoint pointed at /api/v1/webhooks/stripe. Present is not the same as correct: a valid secret for a different endpoint looks identical from here. Use the test below.',
         },
       ],
     },
@@ -186,6 +186,23 @@ export async function GET() {
           label: 'Messaging service',
           present: set(env.TWILIO_MESSAGING_SERVICE_SID),
           required: true,
+        },
+      ],
+    },
+    {
+      id: 'blotato',
+      name: 'Social (Blotato)',
+      what: 'Publishing and scheduling posts to Instagram and the other connected social accounts.',
+      consequence:
+        'Posts cannot be written or scheduled from the CRM. Posting still works inside Blotato itself.',
+      docsUrl: 'https://help.blotato.com/settings/api-keys',
+      fields: [
+        {
+          key: 'BLOTATO_API_KEY',
+          label: 'API key',
+          present: set(env.BLOTATO_API_KEY),
+          required: true,
+          note: 'Paste it exactly as Blotato issues it, including any trailing "=". Stripping the padding makes every call fail as unauthorized.',
         },
       ],
     },
