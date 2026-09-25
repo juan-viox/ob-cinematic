@@ -18,9 +18,14 @@ import { AlertTriangle, Check, Clock, Image as ImageIcon, Loader2, Send } from '
 import { withBasePath } from '@/lib/url'
 
 interface Account {
+  /** Unique per choice; a Facebook Page is account id and page id together. */
   id: string
+  accountId: string
+  pageId: string | null
   platform: string
   name: string | null
+  /** Why the CRM cannot post here yet, or null. */
+  unavailable: string | null
 }
 
 interface Probe {
@@ -80,7 +85,8 @@ export default function SocialPage() {
       if (!res.ok) throw new Error(`The server answered ${res.status}`)
       const json = (await res.json()) as { probe: Probe }
       setProbe(json.probe)
-      if (json.probe.accounts.length === 1) setAccountId(json.probe.accounts[0].id)
+      const postable = json.probe.accounts.filter((a) => !a.unavailable)
+      if (postable.length === 1) setAccountId(postable[0].id)
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : 'Could not reach Blotato')
     }
@@ -125,7 +131,8 @@ export default function SocialPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          accountId: account.id,
+          accountId: account.accountId,
+          pageId: account.pageId,
           platform: account.platform,
           text,
           mediaUrls,
@@ -189,9 +196,10 @@ export default function SocialPage() {
             >
               <option value="">Choose an account…</option>
               {probe.accounts.map((a) => (
-                <option key={a.id} value={a.id}>
+                <option key={a.id} value={a.id} disabled={Boolean(a.unavailable)}>
                   {titleCase(a.platform)}
                   {a.name ? ` · ${a.name}` : ''}
+                  {a.unavailable ? ' (post from Blotato for now)' : ''}
                 </option>
               ))}
             </select>

@@ -12,6 +12,7 @@
  *
  * Endpoints used, all under https://backend.blotato.com:
  *   GET  /v2/users/me/accounts   which accounts are connected
+ *   GET  /v2/users/me/accounts/:id/subaccounts   Facebook and LinkedIn pages
  *   POST /v2/media               hand it a public URL, get back a hosted one
  *   POST /v2/posts               publish now, or schedule for later
  *
@@ -21,13 +22,13 @@
  * removes surrounding whitespace only, which is what a copy and paste adds;
  * '=' is not whitespace, so padding survives.
  *
- * ONE THING NOT VERIFIED AGAINST A LIVE ACCOUNT: the exact field names Blotato
- * returns when listing accounts. The paths, the auth header and the publish
- * body below are from Blotato's published API reference. The account list is
- * parsed leniently for that reason, and the check route returns Blotato's raw
- * response alongside the parsed version, so the first real call tells us the
- * shape instead of us guessing at it. Tighten readAccounts() once we have seen
- * one.
+ * Seen against the live account on 25 September 2026: the list comes back as
+ * items[] of { id, platform, fullname, username }. A Facebook connection is a
+ * person's profile; posting needs one of that profile's Pages as
+ * target.pageId, which the subaccounts endpoint lists as items[] of
+ * { id, accountId, name }. So each Facebook or LinkedIn connection is expanded
+ * into one choice per Page, and a Facebook connection with no Page is offered
+ * with an explanation rather than a publish that would fail.
  */
 
 const BASE_URL = 'https://backend.blotato.com'
@@ -35,6 +36,17 @@ const FETCH_TIMEOUT_MS = 15_000
 
 /** Platforms whose posts must carry at least one image or video. */
 const MEDIA_REQUIRED = new Set(['instagram', 'tiktok', 'pinterest', 'youtube'])
+
+/** Platforms whose connections are profiles that own Pages (subaccounts). */
+const HAS_PAGES = new Set(['facebook', 'linkedin'])
+
+/** Platforms Blotato accepts only with settings this CRM cannot collect yet:
+ *  Pinterest needs a board, TikTok a privacy level and several disclosures.
+ *  Offered in the list, refused before any call, with the reason. */
+const NOT_POSTABLE_HERE: Record<string, string> = {
+  pinterest: 'Pinterest posts need a board chosen, which the CRM cannot do yet. Post it from Blotato.',
+  tiktok: 'TikTok posts need privacy and disclosure settings the CRM cannot set yet. Post it from Blotato.',
+}
 
 export interface BlotatoConfig {
   apiKey: string
@@ -49,10 +61,17 @@ export function getBlotatoConfig(): BlotatoConfig | null {
 }
 
 export interface BlotatoAccount {
+  /** Unique per choice: the account id, or account id and page id for a Page. */
   id: string
+  /** Blotato's account id, sent as post.accountId. */
+  accountId: string
+  /** Facebook or LinkedIn Page, sent as target.pageId. */
+  pageId: string | null
   platform: string
-  /** Display name or handle, whichever Blotato gave us. */
+  /** The Page name, else the handle or display name. */
   name: string | null
+  /** Why this choice cannot be posted to from the CRM, or null when it can. */
+  unavailable: string | null
 }
 
 export interface BlotatoProbe {
@@ -169,12 +188,63 @@ function readAccounts(payload: unknown): BlotatoAccount[] {
     const name =
       readString(row.username) ??
       readString(row.handle) ??
+      readString(row.fullname) ??
       readString(row.name) ??
       readString(row.displayName) ??
       null
-    accounts.push({ id, platform: platform.toLowerCase(), name })
+    const key = platform.toLowerCase()
+    accounts.push({ id, accountId: id, pageId: null, platform: key, name, unavailable: NOT_POSTABLE_HERE[key] ?? null })
   }
   return accounts
+}
+
+/** The Pages under a Facebook or LinkedIn connection, as { id, name }. */
+function readSubaccounts(payload: unknown): { id: string; name: string | null }[] {
+  const obj = payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : {}
+  const list = Array.isArray(payload) ? payload : Array.isArray(obj.items) ? obj.items : []
+  const pages: { id: string; name: string | null }[] = []
+  for (const entry of list as unknown[]) {
+    if (!entry || typeof entry !== 'object') continue
+    const row = entry as Record<string, unknown>
+    const id = readString(row.id) ?? (typeof row.id === 'number' ? String(row.id) : null)
+    if (id) pages.push({ id, name: readString(row.name) })
+  }
+  return pages
+}
+
+/**
+ * Replaces each Facebook or LinkedIn connection with one choice per Page.
+ * A LinkedIn profile stays a choice of its own (posting to it is allowed);
+ * a Facebook profile does not, because Facebook only publishes to Pages.
+ */
+async function expandPages(config: BlotatoConfig, accounts: BlotatoAccount[]): Promise<BlotatoAccount[]> {
+  const out: BlotatoAccount[] = []
+  for (const account of accounts) {
+    if (!HAS_PAGES.has(account.platform)) {
+      out.push(account)
+      continue
+    }
+    const result = await call<unknown>(config, `/v2/users/me/accounts/${encodeURIComponent(account.accountId)}/subaccounts`)
+    const pages = result.ok ? readSubaccounts(result.data) : []
+    for (const page of pages) {
+      out.push({
+        ...account,
+        id: `${account.accountId}:${page.id}`,
+        pageId: page.id,
+        name: page.name ?? account.name,
+      })
+    }
+    if (account.platform === 'linkedin') out.push(account)
+    else if (pages.length === 0) {
+      out.push({
+        ...account,
+        unavailable: result.ok
+          ? 'Facebook only publishes to a Page, and this connection has none. Connect the Occasions Box Page in Blotato.'
+          : 'Could not read the Pages on this Facebook connection. Try again, or reconnect it in Blotato.',
+      })
+    }
+  }
+  return out
 }
 
 /**
@@ -202,7 +272,7 @@ export async function probeBlotato(): Promise<BlotatoProbe> {
     return { configured: true, keyOk: false, accounts: [], raw: null, problem: result.error }
   }
 
-  const accounts = readAccounts(result.data)
+  const accounts = await expandPages(config, readAccounts(result.data))
   return {
     configured: true,
     keyOk: true,
@@ -235,6 +305,8 @@ export async function uploadMedia(config: BlotatoConfig, url: string): Promise<B
 
 export interface PublishRequest {
   accountId: string
+  /** Facebook or LinkedIn Page. Required for Facebook. */
+  pageId?: string | null
   /** Blotato's platform key, e.g. 'instagram'. Also used as the target type. */
   platform: string
   text: string
@@ -253,6 +325,8 @@ export interface PublishedPost {
 export function validatePublishRequest(req: PublishRequest): string | null {
   if (!req.accountId) return 'Choose which account to post to.'
   if (!req.platform) return 'Choose a platform.'
+  if (NOT_POSTABLE_HERE[req.platform]) return NOT_POSTABLE_HERE[req.platform]
+  if (req.platform === 'facebook' && !req.pageId) return 'Choose which Facebook Page to post to.'
   if (!req.text.trim() && req.mediaUrls.length === 0) return 'A post needs text, an image, or both.'
   if (MEDIA_REQUIRED.has(req.platform) && req.mediaUrls.length === 0) {
     return `${req.platform[0].toUpperCase()}${req.platform.slice(1)} will not accept a post without an image or video.`
@@ -287,7 +361,10 @@ export async function publishPost(
         mediaUrls: req.mediaUrls,
         platform: req.platform,
       },
-      target: { targetType: req.platform },
+      target: {
+        targetType: req.platform,
+        ...(req.pageId && HAS_PAGES.has(req.platform) ? { pageId: req.pageId } : {}),
+      },
     },
   }
   if (req.scheduledTime) body.scheduledTime = req.scheduledTime
