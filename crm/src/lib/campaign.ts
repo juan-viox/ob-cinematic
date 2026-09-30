@@ -159,15 +159,65 @@ export const CAMPAIGN_SENDER_HELP =
   'that sends order confirmations. Verify a subdomain such as hello.occasionsbox.com in Resend, ' +
   'then set RESEND_CAMPAIGN_FROM_EMAIL on the ob-crm project in Vercel. Nothing was sent.'
 
-/** Plain text to the minimal HTML Resend sends, with the opt-out footer. */
-export function campaignHtml(body: string, unsubUrl: string): string {
-  const escaped = body
+/**
+ * A photo in a campaign: a line of its own that reads
+ * [photo: /assets/email/followup-collage.jpg | Three of our gift boxes]
+ *
+ * Only images on our own site are allowed. The body is typed by a person and
+ * merged per recipient, so accepting any URL would let one careless paste put
+ * a stranger's tracking pixel, or a broken hotlink, into two hundred inboxes.
+ * A line that does not qualify is left as plain text, where the preview shows
+ * it and somebody notices.
+ */
+const PHOTO_ORIGIN = 'https://www.occasionsbox.com'
+const PHOTO_LINE = /^\s*\[photo:\s*([^\]|]+?)\s*(?:\|\s*([^\]]*?)\s*)?\]\s*$/i
+const PHOTO_PATH = /^\/[A-Za-z0-9/_.-]+\.(?:jpe?g|png|gif|webp)$/i
+
+export function campaignPhoto(line: string): { src: string; alt: string } | null {
+  const m = line.match(PHOTO_LINE)
+  if (!m) return null
+  const path = m[1].replace(/^https:\/\/(?:www\.)?occasionsbox\.com(?=\/)/i, '')
+  if (!PHOTO_PATH.test(path) || path.includes('..')) return null
+  return { src: PHOTO_ORIGIN + path, alt: (m[2] ?? '').trim() || 'Occasions Box gifts' }
+}
+
+function escapeHtml(s: string): string {
+  return s
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+/**
+ * The plain-text part. A photo line has no text equivalent, so it goes,
+ * along with the blank line it leaves behind.
+ */
+export function campaignText(body: string, unsubUrl: string): string {
+  const text = body
+    .split('\n')
+    .filter((line) => !campaignPhoto(line))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+  return `${text}\n\n---\nOccasions Box, Fort Lee, New Jersey\nUnsubscribe: ${unsubUrl}`
+}
+
+/** Plain text to the minimal HTML Resend sends, with the opt-out footer. */
+export function campaignHtml(body: string, unsubUrl: string): string {
+  // Width 600 is what every mail client lays out to; the file is twice that
+  // so it stays sharp on a phone. Inline, not block, so the <br/> after it
+  // ends the line instead of adding an empty one.
+  const lines = body.split('\n').map((line) => {
+    const photo = campaignPhoto(line)
+    return photo
+      ? `<img src="${photo.src}" alt="${escapeHtml(photo.alt)}" width="600" ` +
+          `style="width:100%;max-width:600px;height:auto;border:0;border-radius:4px;vertical-align:top;"/>`
+      : escapeHtml(line)
+  })
   return (
-    `<div style="font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.6;color:#211c14;">` +
-    escaped.replace(/\n/g, '<br/>') +
+    `<div style="font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.6;color:#211c14;max-width:600px;">` +
+    lines.join('<br/>') +
     `</div>` +
     `<hr style="border:0;border-top:1px solid #ddd;margin:28px 0 12px;"/>` +
     `<div style="font-family:Arial,sans-serif;font-size:12px;color:#777;line-height:1.5;">` +
