@@ -45,6 +45,7 @@ interface BlotatoAccount {
   id: string
   platform: string
   name: string | null
+  unavailable: string | null
 }
 
 interface BlotatoProbe {
@@ -617,6 +618,7 @@ function BlotatoTester() {
                 <li key={a.id}>
                   {a.platform}
                   {a.name ? ` · ${a.name}` : ''}
+                  {a.unavailable && <span className="block text-xs italic pl-3">{a.unavailable}</span>}
                 </li>
               ))}
             </ul>

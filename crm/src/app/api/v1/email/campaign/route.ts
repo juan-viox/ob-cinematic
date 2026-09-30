@@ -6,6 +6,7 @@ import {
   campaignFrom,
   campaignHtml,
   campaignReplyTo,
+  campaignText,
   missingMergeFields,
   recipientsForTag,
   renderMerge,
@@ -261,7 +262,7 @@ export async function POST(request: Request) {
           to: [contact.email],
           subject: mergedSubject,
           html: campaignHtml(mergedBody, unsubUrl),
-          text: `${mergedBody}\n\n---\nOccasions Box, Fort Lee, New Jersey\nUnsubscribe: ${unsubUrl}`,
+          text: campaignText(mergedBody, unsubUrl),
           // RFC 8058: lets Gmail and Outlook show their own unsubscribe
           // button, which recipients use instead of the spam button.
           headers: {

@@ -5,7 +5,7 @@ import {
   AlertTriangle, CheckCircle, Loader2, Mail, Send, Tag as TagIcon, Users, Eye, Ban,
 } from 'lucide-react'
 import { withBasePath } from '@/lib/url'
-import { missingMergeFields, renderMerge, TEST_TAG } from '@/lib/campaign'
+import { campaignPhoto, missingMergeFields, renderMerge, TEST_TAG } from '@/lib/campaign'
 
 interface TagRow { id: string; name: string; color: string | null; count: number }
 interface TemplateRow { id: string; name: string; subject: string | null; body: string | null }
@@ -338,10 +338,16 @@ export default function CampaignsClient({
               </div>
               <p className="text-xs mb-1" style={{ color: 'var(--muted)' }}>To: {previewOf.email}</p>
               <p className="text-sm font-semibold mb-2">{renderMerge(subject, asMergeContact(previewOf))}</p>
-              <pre className="text-xs whitespace-pre-wrap font-sans p-3 rounded-lg"
+              <div className="text-xs whitespace-pre-wrap font-sans p-3 rounded-lg"
                    style={{ background: 'var(--surface-2)', color: 'var(--muted)' }}>
-                {renderMerge(body, asMergeContact(previewOf))}
-              </pre>
+                {renderMerge(body, asMergeContact(previewOf)).split('\n').map((line, i) => {
+                  const photo = campaignPhoto(line)
+                  return photo
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img key={i} src={photo.src} alt={photo.alt} className="block w-full max-w-[600px] h-auto rounded my-1" />
+                    : <div key={i}>{line || ' '}</div>
+                })}
+              </div>
 
               {perContact.length > 0 && (
                 <p className="text-xs mt-2" style={{ color: 'var(--muted)' }}>

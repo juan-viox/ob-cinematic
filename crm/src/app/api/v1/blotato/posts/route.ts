@@ -28,6 +28,7 @@ export const dynamic = 'force-dynamic'
 
 interface Body {
   accountId?: unknown
+  pageId?: unknown
   platform?: unknown
   text?: unknown
   mediaUrls?: unknown
@@ -61,6 +62,7 @@ export async function POST(request: Request) {
 
   const draft: PublishRequest = {
     accountId: str(body.accountId),
+    pageId: str(body.pageId) || null,
     platform: str(body.platform).toLowerCase(),
     text: typeof body.text === 'string' ? body.text : '',
     mediaUrls: sourceUrls,
