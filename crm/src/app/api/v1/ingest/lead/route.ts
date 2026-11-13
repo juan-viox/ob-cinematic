@@ -13,6 +13,7 @@ import {
   isSpam,
   jsonError,
   jsonOk,
+  looksLikeSalesPitch,
   phone,
   readJsonBody,
   splitName,
@@ -67,6 +68,13 @@ export async function POST(request: Request) {
     const message = str(body.description ?? body.message, LIMITS.message)
     const company = str(body.company, LIMITS.company)
     const source = leadSource(body.source)
+
+    // Same quiet success as the honeypot, so the sender learns nothing. Logged
+    // so a real lead caught by mistake can still be found in the server logs.
+    if (looksLikeSalesPitch(message)) {
+      console.warn('[ingest:lead] dropped as a sales pitch:', emailValue ?? phoneValue ?? 'no contact')
+      return jsonOk(request, { success: true })
+    }
 
     if (!source) {
       return jsonError(request, `source must be one of: ${LEAD_SOURCES.join(', ')}`, 400)

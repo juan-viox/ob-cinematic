@@ -1733,6 +1733,16 @@
       }
       return;
     }
+    /* The CRM treats a quantity with no number in it as a bot (they type
+       "traffic" here), so a person who writes "a few" is asked for a number
+       now rather than having the inquiry dropped without a word. */
+    if (!/\d/.test(qty)) {
+      if (err) {
+        err.textContent = 'Please enter a number for how many gifts, even a rough one (for example 20).';
+        err.hidden = false;
+      }
+      return;
+    }
     if (err) err.hidden = true;
 
     /* The CRM's lead endpoint takes a single free-text description, so the
