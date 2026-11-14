@@ -278,6 +278,63 @@ export function isSpam(body: JsonBody): boolean {
   return typeof honeypot === 'string' && honeypot.trim().length > 0
 }
 
+/**
+ * Pitch phrases from the ad-traffic and SEO sellers who fill in the gift
+ * inquiry form. Kept to whole phrases a gift buyer would not write, so a
+ * real order that mentions, say, "website" or "campaign" is never caught.
+ */
+const PITCH_PHRASES = [
+  'targeted visitors',
+  'targeted traffic',
+  'traffic estimates',
+  'advertising platform',
+  'in front of people searching',
+  'campaign can go live',
+  'campaigns usually go live',
+  'go live by tomorrow',
+  'seo services',
+  'first page of google',
+  'rank your website',
+  'backlinks',
+  'more leads for your business',
+]
+
+/** The answers the site's contact form folds into the description as labelled lines. */
+function formLine(text: string, label: string): string | null {
+  const re = new RegExp(`^${label}:\\s*(.*)$`, 'im')
+  const m = text.match(re)
+  return m ? m[1].trim() : null
+}
+
+/**
+ * Bots that slip past the honeypot fill the gift inquiry form the same way:
+ * every occasion box ticked, a word instead of a number in "how many gifts"
+ * and "budget per gift", and a sales pitch for website traffic as the
+ * message. Each sign is scored, and a lead is only dropped when several
+ * agree, so a real buyer who ticks every box or writes "flexible" for the
+ * budget still gets through. Leads without the form's labelled lines (voice
+ * agent, API callers) are judged on the pitch phrases alone.
+ */
+export function looksLikeSalesPitch(description: string | null): boolean {
+  if (!description) return false
+  const text = description.toLowerCase()
+  let score = 0
+
+  const occasions = formLine(description, 'Occasion')
+  if (occasions && occasions.split(',').filter((o) => o.trim()).length >= 6) score += 1
+
+  // The form asks for a number of gifts; the site will not send it without a digit.
+  const quantity = formLine(description, 'Quantity')
+  if (quantity !== null && !/\d/.test(quantity)) score += 2
+
+  const budget = formLine(description, 'Budget per gift')
+  if (budget !== null && !/\d/.test(budget)) score += 1
+
+  if (PITCH_PHRASES.some((p) => text.includes(p))) score += 2
+
+  return score >= 3
+}
+
 /** Trims and caps a string; returns null for non-strings or empty strings. */
 export function str(v: unknown, max: number): string | null {
   if (typeof v !== 'string') return null
